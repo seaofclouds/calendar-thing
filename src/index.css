@@ -181,6 +181,9 @@ body {
   display: grid;
   grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
   grid-auto-rows: 1fr; /* Make rows equal height */
+  gap: 1em; /* Base gap between months */
+  padding: 1em; /* Base padding around calendar */
+  box-sizing: border-box;
 }
 
 .calendar.print .month {
@@ -190,7 +193,7 @@ body {
   grid-template-rows: auto auto 1fr; /* Header, weekdays, month grid */
   min-width: 0;
   min-height: 0;
-  padding: 0.3em;
+  padding: 0.4em; /* Base padding inside months */
   box-sizing: border-box;
 }
 
@@ -259,23 +262,39 @@ body {
 }
 
 .size-a6 .calendar.print { 
-  font-size: 0.3rem;
+  font-size: 0.45rem;
+  gap: 1em; /* Tighter spacing for small format */
+  padding: .3em;
 }
+
 .size-a5 .calendar.print { 
   font-size: 0.6rem;
+  gap: 0.5em;
+  padding: 0.5em;
 }
+
 .size-letter .calendar.print,
 .size-a4 .calendar.print { 
   font-size: 0.8rem;
+  gap: 0.8em;
+  padding: 0.8em;
 }
+
 .size-legal .calendar.print { 
   font-size: 0.9rem;
+  gap: 1em;
+  padding: 1em;
 }
+
 .size-tabloid .calendar.print { 
   font-size: 1.2rem;
+  gap: 1.2em;
+  padding: 1.2em;
 }
 
 .orientation-landscape .calendar.print {
+  gap: 1em; /* Slightly more spacing in landscape */
+  padding: 1em;
 }
 
 @media (min-width: 600px) {
