@@ -302,15 +302,16 @@ body {
 
 .size-a4 .print,
 .size-letter .print {
-  font-size: 0.8rem;
-  padding: 6em;
+  font-size: 0.7rem;
+  padding: 7em;
 }
-.size-a4 .print .calendar-header h1 {
+.size-a4 .print .calendar-header h1,
+.size-letter .print .calendar-header h1 {
   padding-bottom: .8em;
 }
 .size-a4 .print .calendar-grid, 
 .size-letter .print .calendar-grid {
-  gap: 1.5em;
+  gap: 1em 3em;
 }
 .size-a4.orientation-landscape .print .calendar-grid,
 .size-letter.orientation-landscape .print .calendar-grid {

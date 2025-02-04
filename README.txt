@@ -21,7 +21,6 @@ A responsive calendar application that generates high-quality calendar images fo
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - [astronomy-engine](https://github.com/cosinekitty/astronomy) - Astronomical calculations
 - [html-to-image](https://github.com/bubkoo/html-to-image) - High-quality image generation
-- [React Router](https://reactrouter.com/) - Client-side routing
 
 The application is built with Astro for optimal static site generation while leveraging React for interactive components. TypeScript ensures type safety across the codebase. The astronomy-engine provides precise celestial calculations, and html-to-image enables high-quality calendar exports.
 
@@ -49,22 +48,53 @@ The application supports the following URL parameters for customizing the calend
   - Options: portrait, landscape
   - Example: `?orientation=landscape`
 
-- `columns`: Number of months per row (default: 3)
-  - Range: 1-5
-  - Example: `?columns=4`
-
-- `rows`: Number of months per column
-  - Range: 1-5
+- `rows`: Number of rows in the grid
+  - Default values:
+    - Portrait: 5 rows for letter/a4/legal/tabloid, 4 rows for other sizes
+    - Landscape: 3 rows for all sizes
   - Example: `?rows=4`
 
-- `dpi`: Resolution in dots per inch (default: 300)
-  - Range: 72-600
-  - Example: `?dpi=300`
+- `columns`: Number of columns in the grid
+  - Default values:
+    - Portrait: 3 columns for all sizes
+    - Landscape: 4 columns for all sizes
+  - Example: `?columns=3`
 
-- `testing`: Enable layout testing mode (default: false)
-  - Options: true, false
-  - Example: `?testing=true`
-  - Adds visual indicators for container boundaries
+- `dpi`: Resolution for image export (default: 300)
+  - Example: `?dpi=600`
+
+- `testing`: Enable test mode to show layout debug info (default: off)
+  - Options: on, off
+  - Example: `?testing=on`
+
+### Layout Defaults
+
+The calendar layout automatically adjusts based on orientation and paper size:
+
+1. Portrait Orientation:
+   - Letter/A4/Legal/Tabloid: 3 columns × 5 rows
+   - A5/A6: 3 columns × 4 rows
+
+2. Landscape Orientation:
+   - All sizes: 4 columns × 3 rows
+
+These defaults can be overridden using the `rows` and `columns` URL parameters.
+
+### Example URLs
+
+```
+# Portrait Letter (3×5)
+/2025/png?size=letter
+
+# Portrait A6 (3×4)
+/2025/png?size=a6
+
+# Landscape Letter (4×3)
+/2025/png?size=letter&orientation=landscape
+
+# Custom Layout
+/2025/png?size=a4&rows=6&columns=2&dpi=600
+```
 
 ## Astronomical Features
 

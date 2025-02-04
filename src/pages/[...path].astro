@@ -15,12 +15,29 @@ if (!year) {
   return Astro.redirect(`/${new Date().getFullYear()}`);
 }
 
+// Get orientation and size first to determine other defaults
+const orientation = searchParams.orientation || 'portrait';
+const size = searchParams.size || 'letter';
+
+// Determine default rows and columns based on orientation and size
+const defaultColumns = orientation === 'landscape' ? 4 : 3;
+const defaultRows = (() => {
+  if (orientation === 'landscape') {
+    return 3;
+  }
+  // For portrait orientation
+  if (['letter', 'a4', 'legal', 'tabloid'].includes(size)) {
+    return 5;
+  }
+  return 4;
+})();
+
 // Parse params with defaults
 const params = {
-  size: searchParams.size || 'letter',
-  orientation: searchParams.orientation || 'portrait',
-  rows: parseInt(searchParams.rows || '4'),
-  columns: parseInt(searchParams.columns || '3'),
+  size,
+  orientation,
+  rows: parseInt(searchParams.rows || String(defaultRows)),
+  columns: parseInt(searchParams.columns || String(defaultColumns)),
   dpi: parseInt(searchParams.dpi || '300'),
   header: searchParams.header !== 'off',
   testing: searchParams.testing === 'on'
