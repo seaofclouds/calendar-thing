@@ -35,6 +35,13 @@ body {
   text-align: center;
 }
 
+.calendar-header h1 {
+  font-size: 2em;
+  font-weight: 300;
+  margin-bottom: .5em;
+  text-align: center;
+}
+
 .calendar-grid {
   display: grid;
   gap: 3em;
@@ -56,9 +63,24 @@ body {
   padding: 0 0 .5em 0;
 }
 
+.month-header h2 {
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: 300;
+  color: #000;
+  padding: 0 0 .5em 0;
+}
+
 .week-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #000;
+}
+
+.week-days h3 {
   text-align: center;
   font-size: 0.8em;
   font-weight: 600;
@@ -204,6 +226,12 @@ body {
   margin-bottom: 0em;
 }
 
+.print .calendar-header h1 {
+  font-size: 2.4em;
+  font-weight: 200;
+  margin-bottom: 0em;
+}
+
 .print .calendar-grid {
   width: 100%;
   height: 100%;
@@ -339,6 +367,17 @@ body {
 .orientation-portrait.size-tabloid .print {
   gap: 2em;
   padding: 4em;
+}
+
+/* Reset headings */
+.calendar h1,
+.calendar h2,
+.calendar h3 {
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 @media (min-width: 600px) {

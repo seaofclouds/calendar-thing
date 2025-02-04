@@ -157,18 +157,20 @@ export const Calendar: React.FC<{
     <div className={`calendar ${forPrint ? 'print' : ''}`} style={calendarStyle}>
       {showYearHeader && (
         <div className="calendar-header">
-          {months[0].year}
+          <h1>{months[0].year}</h1>
         </div>
       )}
       <div className="calendar-grid">
         {months.slice(0, visibleMonths).map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
-              {new Date(year, month).toLocaleString('default', { month: 'long' })}
+              <h2>
+                {new Date(year, month).toLocaleString('default', { month: 'long' })}
+              </h2>
             </div>
             <div className="week-days">
               {weekDays.map((day, index) => (
-                <div key={index} className="week-day">{day}</div>
+                <h3 key={index} className="week-day">{day}</h3>
               ))}
             </div>
             <div className="month-grid">
