@@ -19,7 +19,7 @@ export const Calendar: React.FC<{
   const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
   const [searchParams] = useSearchParams();
-  const showYearHeader = searchParams.get('yearheader') === 'true';
+  const showYearHeader = searchParams.get('header') !== 'off';
 
   useEffect(() => {
     const handleResize = () => {

@@ -11,9 +11,21 @@ A responsive calendar application that generates high-quality calendar images fo
 - Multiple paper size support
 - Portrait and landscape orientations
 
+## URL Structure
+
+The application supports the following URL patterns:
+
+- `/:year` - View calendar for specified year (e.g., `/2025`)
+- `/:year/png` - Export calendar as PNG (e.g., `/2025/png`)
+- `/:year/jpg` - Export calendar as JPG (e.g., `/2025/jpg`)
+
 ## URL Parameters
 
 The application supports the following URL parameters for customizing the calendar layout:
+
+- `header`: Control year header visibility (default: on)
+  - Options: on, off
+  - Example: `?header=off`
 
 - `size`: Paper size (default: letter)
   - Options: a6, a5, a4, letter, legal, tabloid
@@ -72,14 +84,19 @@ The application can generate high-quality PNG and JPG images of the calendar. Th
 
 ## Examples
 
+View calendar for 2025 without the year header:
+```
+/2025?header=off
+```
+
 Generate a 4-column landscape A4 calendar at 300 DPI:
 ```
-/calendar?size=a4&orientation=landscape&columns=4&dpi=300
+/2025/png?size=a4&orientation=landscape&columns=4&dpi=300
 ```
 
 Create a high-resolution tabloid calendar for printing:
 ```
-/calendar?size=tabloid&orientation=portrait&dpi=600
+/2025/png?size=tabloid&orientation=portrait&dpi=600
 ```
 
 ## Development
