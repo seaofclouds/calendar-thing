@@ -36,7 +36,6 @@ export const Calendar: React.FC<CalendarProps> = ({
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
-  const [searchParams] = useState({ header: 'on' });
   const showYearHeader = header;
 
   // Parse year parameter or default to current year

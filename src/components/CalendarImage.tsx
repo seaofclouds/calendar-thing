@@ -167,6 +167,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
           printColumns={columns} 
           totalMonths={rows * columns} 
           year={year}
+          header={header}
         />
       </div>
     </>
