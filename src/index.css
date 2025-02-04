@@ -24,6 +24,7 @@ html {
   padding: 0;
   line-height: inherit;
   font-weight: normal;
+  line-height: 1em;
 }
 
 /* ===================
@@ -72,19 +73,20 @@ body {
 
 .calendar-header h1 {
   /* Scale relative to calendar container */
-  font-size: 2em;
-  font-weight: 300;
+  font-size: 3em;
+  font-weight: 100;
   text-align: center;
+  padding-bottom: .2em;
 }
 
 .calendar-grid {
   width: 100%;
-  flex: 1;
+  flex: 1; /* Allow grid to grow but not take full height */
   display: grid;
   gap: 3em;
   justify-content: center;
   grid-template-columns: repeat(1, minmax(200px, 1fr));
-  grid-auto-rows: min-content; /* Allow rows to size to content */
+  grid-auto-rows: 1fr; /* Make all grid rows equal height */
   max-width: 1600px;
   box-sizing: border-box;
 }
@@ -98,7 +100,7 @@ body {
   display: grid;
   grid-template-rows: auto auto 1fr; /* Header, weekdays, month grid */
   width: 100%;
-  min-height: 0; /* Allow shrinking */
+  height: 100%;
   gap: 0.5em;
 }
 
@@ -111,6 +113,7 @@ body {
   font-size: 1.8em;
   font-weight: 200;
   color: #000;
+  padding-bottom: .2em;
 }
 
 .week-days {
@@ -118,15 +121,18 @@ body {
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
   /* Scale relative to month container */
-  font-size: 0.8em;
-  font-weight: 600;
+  font-size: 0.6em;
   color: #000;
+}
+.week-days h3 {
+  font-weight: 600;
 }
 
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
+  height: 100%;
   min-height: 0; /* Allow shrinking */
 }
 
@@ -140,9 +146,12 @@ body {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  min-height: 2em; /* Minimum height for days */
   /* Use CSS clamp to ensure text scales with container but stays readable */
   font-size: clamp(0.6em, 4vmin, 1em);
+}
+
+.calendar-day.other-month {
+  color: #fff;
 }
 
 /* Day markers - base styles */
@@ -185,7 +194,6 @@ body {
   background: white;
   /* Set base font size for print container using rem */
   font-size: 1rem;
-  overflow: hidden; /* Prevent overflow in print container */
 }
 
 .calendar.print {
@@ -196,14 +204,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  /* Inherit font size from print container */
+  font-size: inherit;
 }
 
 .calendar.print .calendar-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
-  grid-auto-rows: min-content;
-  gap: 1.8em;
+  grid-auto-rows: 1fr;
   box-sizing: border-box;
 }
 
@@ -241,10 +250,6 @@ body {
   box-sizing: border-box;
 }
 
-.calendar.print .calendar-day.other-month {
-  color: #fff;
-}
-
 .calendar.print .day-marker {
   position: absolute;
 }
@@ -268,64 +273,131 @@ body {
    =================== */
 
 /* Use rem for the base scaling of different paper sizes */
+
+/* A6 ================ */
 .size-a6 .print { 
   font-size: 0.5rem;
   padding: 1.5em;
 }
+.size-a6 .print .calendar-grid {
+  gap: 1em 2em;
+}
 
+/* A5 ================ */
 .size-a5 .print {
   font-size: 0.6rem;
-  padding: 2em;
+  padding: 3em;
 }
+.size-a5 .print .calendar-header h1 {
+  padding-bottom: .6em;
+}
+.size-a5 .print .calendar-grid {
+  gap: 1.5em 3em;
+}
+.size-a5.orientation-landscape .print .calendar-grid {
+  gap: 2em 2.6em;
+}
+
+/* A4/LETTER ========= */
 
 .size-a4 .print,
 .size-letter .print {
   font-size: 0.8rem;
-  padding: 3em;
+  padding: 6em;
 }
-
+.size-a4 .print .calendar-header h1 {
+  padding-bottom: .8em;
+}
 .size-a4 .print .calendar-grid, 
 .size-letter .print .calendar-grid {
   gap: 1.5em;
 }
+.size-a4.orientation-landscape .print .calendar-grid,
+.size-letter.orientation-landscape .print .calendar-grid {
+  gap: 3em 4em;
+}
+
+/* legal ========= */
+
+.size-legal .print {
+  font-size: .8rem;
+  padding: 4em;
+}
+.size-legal.orientation-landscape .print .calendar-header h1 {
+  padding-bottom: .8em;
+}
+.size-legal.orientation-portrait .print .calendar-header h1 {
+  font-size: 4em;
+  font-weight: 25;
+  padding-bottom: 1em;
+}
+.size-legal .print .calendar-grid{
+  gap: 1.5em;
+}
+.size-legal .print .calendar-grid{
+  gap: 3em 4em;
+}
+.size-legal .print .month .month-header h2 {
+  padding-bottom: .5em;
+  font-size: 1.5em;
+  font-weight: 200;
+}
+
+/* tabloid ========= */
+
+.size-tabloid .print {
+  font-size: 1rem;
+  padding: 6em;
+}
+.size-tabloid.orientation-landscape .print .calendar-header h1 {
+  padding-bottom: .8em;
+}
+.size-tabloid.orientation-portrait .print .calendar-header h1 {
+  font-size: 4em;
+  font-weight: 25;
+}
+.size-tabloid .print .calendar-grid {
+  gap: 1.5em;
+}
+.size-tabloid .print .calendar-grid {
+  gap: 3em 4em;
+}
+.size-tabloid .print .month .month-header h2 {
+  padding-bottom: .5em;
+}
+
 
 /* ===================
-   Responsive Styles
+   Responsive Styles (Non-print only)
    =================== */
 
-
-@media (min-width: 600px) {
-  .calendar {
+@media screen and (min-width: 600px) {
+  .calendar:not(.print) {
     padding: 1.5em;
   }
   
-  .calendar-grid {
+  .calendar:not(.print) .calendar-grid {
     gap: 2rem;
     grid-template-columns: repeat(2, minmax(200px, 1fr));
   }
 }
 
-@media (min-width: 900px) {
-  .calendar-grid {
+@media screen and (min-width: 900px) {
+  .calendar:not(.print) .calendar-grid {
     gap: 2.5em;
     grid-template-columns: repeat(3, minmax(200px, 1fr));
   }
 }
 
-@media (min-width: 1200px) {
-  .calendar {
+@media screen and (min-width: 1200px) {
+  .calendar:not(.print) {
     padding: 2em;
   }
   
-  .calendar-grid {
+  .calendar:not(.print) .calendar-grid {
     gap: 2em;
     grid-template-columns: repeat(4, minmax(200px, 1fr));
   }
-}
-
-/* Print-specific styles */
-@media print {
-  
 }
 
 /* ===================
@@ -333,4 +405,17 @@ body {
    =================== */
 
 .testing {
-  border: 1px dashed #999;
+  border-width: .1em;
+  border-style: dashed;
+  border-color: #999;
+}
+
+/* .testing .month {
+  border-width: .1em;
+  border-style:double;
+  border-color: aqua;
+} */
+
+/* ===================
+   Testing Styles
+   =================== */
