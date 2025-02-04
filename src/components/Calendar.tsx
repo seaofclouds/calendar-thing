@@ -153,13 +153,13 @@ export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> =
     pdf.save('15-month-calendar.pdf');
   };
 
+  const calendarStyle = {
+    '--print-columns': forPrint ? printColumns : columnCount
+  } as React.CSSProperties;
+
   return (
     <div className="calendar-container">
-      <div className={`calendar ${forPrint ? 'print' : ''}`} style={forPrint ? {
-        gridTemplateColumns: `repeat(${printColumns}, 1fr)`,
-        width: '100%',
-        height: '100%'
-      } : undefined}>
+      <div className={`calendar ${forPrint ? 'print' : ''}`} style={calendarStyle}>
         {months.slice(0, visibleMonths).map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
