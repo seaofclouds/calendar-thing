@@ -8,13 +8,20 @@ interface DayData {
   isSpecialDay?: 'solstice' | 'equinox';
 }
 
-export const Calendar: React.FC = () => {
+export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> = ({ forPrint = false, printColumns = 3 }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [visibleMonths, setVisibleMonths] = useState(14); // Default to mobile view
+  const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
 
   useEffect(() => {
     const handleResize = () => {
+      if (forPrint) {
+        const months = printColumns * Math.ceil(14 / printColumns);
+        setColumnCount(printColumns);
+        setVisibleMonths(months);
+        return;
+      }
+
       const width = window.innerWidth;
       let columns = 1;
       let months = 14;
@@ -35,12 +42,13 @@ export const Calendar: React.FC = () => {
       setVisibleMonths(months);
     };
     
-    handleResize(); // Initial call
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    handleResize(); 
+    if (!forPrint) {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [forPrint, printColumns]);
 
-  // Full moon dates for 2025-2026 (UTC)
   const fullMoonDates = [
     '2025-01-13', '2025-02-12', '2025-03-14', '2025-04-12',
     '2025-05-12', '2025-06-11', '2025-07-10', '2025-08-09',
@@ -48,7 +56,6 @@ export const Calendar: React.FC = () => {
     '2026-01-03', '2026-02-01', '2026-03-03', '2026-04-01'
   ];
 
-  // Solstice and Equinox dates
   const specialDates = {
     '2025-03-20': 'equinox',
     '2025-06-21': 'solstice',
@@ -93,7 +100,6 @@ export const Calendar: React.FC = () => {
     const monthData: DayData[][] = [];
     let currentWeek: DayData[] = [];
 
-    // Previous month days
     for (let i = 0; i < startingDay; i++) {
       currentWeek.push({
         date: previousMonthDays - startingDay + i + 1,
@@ -102,7 +108,6 @@ export const Calendar: React.FC = () => {
       });
     }
 
-    // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isFullMoon = fullMoonDates.includes(dateString);
@@ -121,7 +126,6 @@ export const Calendar: React.FC = () => {
       }
     }
 
-    // Next month days
     let nextMonthDay = 1;
     while (currentWeek.length < 7) {
       currentWeek.push({
@@ -144,16 +148,18 @@ export const Calendar: React.FC = () => {
       format: 'a4'
     });
 
-    // PDF generation logic will be implemented here
     pdf.text('15 Month Calendar (2025-2026)', 10, 10);
     
-    // Save the PDF
     pdf.save('15-month-calendar.pdf');
   };
 
   return (
     <div className="calendar-container">
-      <div className="calendar">
+      <div className={`calendar ${forPrint ? 'print' : ''}`} style={forPrint ? {
+        gridTemplateColumns: `repeat(${printColumns}, 1fr)`,
+        width: '100%',
+        height: '100%'
+      } : undefined}>
         {months.slice(0, visibleMonths).map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
