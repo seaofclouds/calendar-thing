@@ -11,10 +11,12 @@ interface DayData {
 
 export const Calendar: React.FC<{ 
   forPrint?: boolean, 
-  printColumns?: number
+  printColumns?: number,
+  totalMonths?: number
 }> = ({ 
   forPrint = false, 
-  printColumns = 3
+  printColumns = 3,
+  totalMonths
 }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [visibleMonths, setVisibleMonths] = useState(14); 
@@ -66,7 +68,10 @@ export const Calendar: React.FC<{
   useEffect(() => {
     const handleResize = () => {
       if (forPrint) {
-        const months = printColumns * Math.ceil(14 / printColumns);
+        // If totalMonths is provided, use it (ensuring minimum of 12)
+        // Otherwise calculate based on columns to show 15 or 16 months
+        const defaultMonths = printColumns === 4 ? 16 : 15;
+        const months = totalMonths ? Math.max(12, totalMonths) : defaultMonths;
         setColumnCount(printColumns);
         setVisibleMonths(months);
         return;
@@ -97,7 +102,7 @@ export const Calendar: React.FC<{
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }
-  }, [forPrint, printColumns]);
+  }, [forPrint, printColumns, totalMonths]);
 
   const months = Array.from({ length: 18 }, (_, i) => {
     const monthIndex = i % 12;

@@ -24,34 +24,6 @@ const PAPER_SIZES = {
 
 type PaperSize = keyof typeof PAPER_SIZES;
 
-// Print layout configurations
-const PRINT_LAYOUTS = {
-  letter: {
-    portrait: { columns: 3, rows: 5 },  // 3x5 grid (15 months)
-    landscape: { columns: 4, rows: 4 }  // 4x4 grid (16 months)
-  },
-  legal: {
-    portrait: { columns: 3, rows: 5 },  // 3x5 grid (15 months)
-    landscape: { columns: 4, rows: 4 }  // 4x4 grid (16 months)
-  },
-  tabloid: {
-    portrait: { columns: 3, rows: 5 },  // 3x5 grid (15 months)
-    landscape: { columns: 4, rows: 4 }  // 4x4 grid (16 months)
-  },
-  a6: {
-    portrait: { columns: 3, rows: 5 },  // 3x5 grid (15 months)
-    landscape: { columns: 4, rows: 4 }  // 4x4 grid (16 months)
-  },
-  a5: {
-    portrait: { columns: 3, rows: 5 },  // 3x5 grid (15 months)
-    landscape: { columns: 4, rows: 4 }  // 4x4 grid (16 months)
-  },
-  a4: {
-    portrait: { columns: 3, rows: 5 },  // 3x5 grid (15 months)
-    landscape: { columns: 4, rows: 4 }  // 4x4 grid (16 months)
-  }
-} as const;
-
 export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasGeneratedRef = useRef(false);
@@ -62,6 +34,11 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
   const orientation = searchParams.get('orientation') || 'portrait';
   const columns = parseInt(searchParams.get('columns') || '0') || 
     (orientation === 'landscape' ? 4 : 3);
+  const rows = parseInt(searchParams.get('rows') || '0') || 
+    (columns === 4 ? 4 : 
+     columns === 3 ? 5 :
+     columns === 2 ? 7 : 12); // Default rows based on column count
+  const months = rows * columns; // Calculate total months from rows × columns
   const dpi = parseInt(searchParams.get('dpi') || '600');
   const testing = searchParams.get('testing') === 'on';
   
@@ -98,6 +75,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
           Size: ${size} (${orientation})
           DPI: ${dpi}
           Columns: ${columns}
+          Rows: ${rows}
           Dimensions: ${dimensions.width}"x${dimensions.height}"
           Target Size: ${targetWidthPx}x${targetHeightPx}px
           Pixel Ratio: ${pixelRatio}
@@ -139,7 +117,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
     // Small delay to ensure component is fully rendered
     const timeoutId = setTimeout(generateImage, 100);
     return () => clearTimeout(timeoutId);
-  }, [format, size, orientation, columns, dpi, dimensions, testing]);
+  }, [format, size, orientation, columns, rows, months, dpi, dimensions, testing]);
 
   // Calculate base size to match paper aspect ratio
   const baseStyle: React.CSSProperties = {
@@ -173,6 +151,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
           <div>Size: {size}</div>
           <div>Orientation: {orientation}</div>
           <div>Columns: {columns}</div>
+          <div>Rows: {rows}</div>
           <div>Dimensions: {dimensions.width}"x{dimensions.height}"</div>
           <div>Pixels: {Math.round(dimensions.width * SCREEN_DPI)}x{Math.round(dimensions.height * SCREEN_DPI)}</div>
         </div>
@@ -182,7 +161,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
         className={`calendar-print-container size-${size} orientation-${orientation} ${testing ? 'testing' : ''}`} 
         style={baseStyle}
       >
-        <Calendar forPrint={true} printColumns={columns} />
+        <Calendar forPrint={true} printColumns={columns} totalMonths={months} />
       </div>
     </>
   );
