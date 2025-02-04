@@ -28,13 +28,6 @@ body {
   width: 100%;
 }
 
-.calendar-header {
-  font-size: 2em;
-  font-weight: 300;
-  margin-bottom: .5em;
-  text-align: center;
-}
-
 .calendar-header h1 {
   font-size: 2em;
   font-weight: 300;
@@ -227,8 +220,8 @@ body {
 }
 
 .print .calendar-header h1 {
-  font-size: 2.4em;
-  font-weight: 200;
+  font-size: 1.5em;
+  font-weight: 100;
   margin-bottom: 0em;
 }
 
@@ -318,18 +311,6 @@ body {
   background: black;
 }
 
-.calendar-year-header {
-  font-size: 2em;
-  font-weight: 300;
-  color: #000;
-  margin-bottom: 1em;
-  text-align: center;
-}
-
-.print .calendar-year-header {
-  font-size: 1.6em;
-  margin-bottom: 0.8em;
-}
 
 .size-a6 .print { 
   font-size: 0.45rem;
