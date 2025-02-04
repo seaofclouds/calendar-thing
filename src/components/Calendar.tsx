@@ -154,13 +154,13 @@ export const Calendar: React.FC<{
   } as React.CSSProperties;
 
   return (
-    <div className="calendar-container">
-      <div className={`calendar ${forPrint ? 'print' : ''}`} style={calendarStyle}>
-        {showYearHeader && (
-          <div className="calendar-year-header">
-            {months[0].year}
-          </div>
-        )}
+    <div className={`calendar ${forPrint ? 'print' : ''}`} style={calendarStyle}>
+      {showYearHeader && (
+        <div className="calendar-header">
+          {months[0].year}
+        </div>
+      )}
+      <div className="calendar-grid">
         {months.slice(0, visibleMonths).map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
