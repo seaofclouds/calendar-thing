@@ -179,7 +179,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
       )}
       <div 
         ref={containerRef} 
-        className={`calendar-print-container size-${size} orientation-${orientation}`} 
+        className={`calendar-print-container size-${size} orientation-${orientation} ${testing ? 'testing' : ''}`} 
         style={baseStyle}
       >
         <Calendar forPrint={true} printColumns={columns} />
