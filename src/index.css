@@ -20,10 +20,12 @@ body {
   text-align: center;
 }
 
+.calendar-container {
+  width: 100%;
+}
 .calendar {
   display: grid;
   gap: 20px;
-  padding: 20px;
   justify-content: center;
   grid-template-columns: repeat(1, minmax(200px, 1fr));
   max-width: 1600px;
@@ -70,8 +72,59 @@ body {
 .calendar-day .date {
 }
 
-.full-moon {
+/* Day markers - base styles */
+.day-marker {
   position: absolute;
+  width: 1em;
+  height: 1em;
+  transform-origin: center;
+}
+
+/* Full moon marker */
+.day-marker-moon-full {
+  width: 1.2em;
+  height: 1.2em;
+  top:50%;
+  left: 50%;
+  background: black;
+  border-radius: 50%;
+}
+
+/* Solstice and equinox marker */
+.day-marker-solstice,
+.day-marker-equinox {
+  width: 1em;
+  height: 1em;
+  top: 50%;
+  left: 50%;
+  transform: rotate(45deg);
+  background: black;
+}
+
+
+/* Print-specific marker adjustments */
+.calendar.print .day-marker {
+  position: absolute;
+}
+
+.calendar.print .day-marker-moon-full {
+  width: 1em;
+  height: 1em;
+  top: 0.15em;
+  right: 0.15em;
+}
+
+.calendar.print .day-marker-solstice,
+.calendar.print .day-marker-equinox {
+  width: 0.9em;
+  height: 0.9em;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Remove old class names - can be deleted once component is updated */
+.full-moon { 
   width: 20px;
   height: 20px;
   background-color: #000;
@@ -83,7 +136,18 @@ body {
   z-index: 1;
 }
 
-.solstice-marker,
+.solstice-marker {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: black;
+  transform: rotate(45deg);
+  top: 50%;
+  left: 50%;
+  margin-top: -10px;
+  margin-left: -10px;
+}
+
 .equinox-marker {
   position: absolute;
   width: 20px;
@@ -96,15 +160,6 @@ body {
   margin-left: -10px;
 }
 
-.solstice-marker {
-  background: #000;
-}
-
-.equinox-marker {
-  background: #000;
-  border: 1px solid white;
-}
-
 /* Print-specific styles */
 .calendar-print-container {
   width: 100%;
@@ -115,6 +170,7 @@ body {
   overflow: hidden;
   margin-top: 20px;
   margin-left: 20px;
+  display: flex; /* Add flex to ensure child fills height */
 }
 
 .calendar-print-container.testing {
@@ -125,61 +181,49 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  gap: 0.5em;
-  padding: 0.5em;
-  grid-template-columns: repeat(var(--print-columns, 3), 1fr);
-  grid-auto-rows: minmax(0, 1fr);
-  min-height: 0;
-  box-sizing: border-box; /* Ensure padding is included in size */
+  grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
+  grid-auto-rows: 1fr; /* Make rows equal height */
 }
 
 .calendar.print .month {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto 1fr; /* Header, weekdays, month grid */
   min-width: 0;
+  min-height: 0;
+  padding: 0.3em;
+  box-sizing: border-box;
 }
 
 .calendar.print .month-header {
-  font-size: 1.2em;
-  padding: 0.1em 0;
+  font-size: 1.4em;
+  padding: 0 0 .5em 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.calendar.print .week-days,
-.calendar.print .month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0;
+  text-align: center;
 }
 
 .calendar.print .week-days {
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  width: 100%;
 }
 
 .calendar.print .week-day {
   text-align: center;
-  font-size: 0.8em;
+  font-size: 1rem;
+  min-height: 1em;
+  padding: 0.2em 0;
 }
 
 .calendar.print .month-grid {
-  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(6, 1fr);
+  width: 100%;
   min-height: 0;
-}
-
-/* .calendar.print .month-grid::before {
-  content: '';
-  width: 0;
-  padding-bottom: 100%;
-  grid-row: 1 / 1;
-  grid-column: 1 / 1;
-} */
-
-.calendar.print .month-grid > *:first-child {
-  grid-row: 1 / 1;
-  grid-column: 1 / 1;
 }
 
 .calendar.print .calendar-day {
@@ -187,41 +231,55 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 1em;
+  width: 100%;
+  height: 100%;
 }
 
-.calendar-print-container.testing .month div {
-  /* border: 1px solid red; */
+.calendar.print .calendar-day.other-month {
+  color: #999;
+}
+
+.calendar.print .full-moon {
+  position: absolute;
+  width: 1.2em;
+  height: 1.2em;
+  top: 0.2em;
+  right: 0.2em;
+  background: white;
+  border: 0.1em solid black;
+  border-radius: 50%;
+}
+
+.calendar.print .solstice-marker,
+.calendar.print .equinox-marker {
+  position: absolute;
+  width: 1.2em;
+  height: 1.2em;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: black;
 }
 
 .size-a6 .calendar.print { 
   font-size: 0.3rem;
-  padding: 0.3em;
-  gap: 0.3em;
 }
 .size-a5 .calendar.print { 
   font-size: 0.6rem;
-  padding: 0.4em;
-  gap: 0.4em;
 }
 .size-letter .calendar.print,
 .size-a4 .calendar.print { 
   font-size: 0.8rem;
-  padding: 0.5em;
-  gap: 0.5em;
 }
 .size-legal .calendar.print { 
   font-size: 0.9rem;
-  padding: 0.6em;
-  gap: 0.6em;
 }
 .size-tabloid .calendar.print { 
-  font-size: 1rem;
-  padding: 0.7em;
-  gap: 0.7em;
+  font-size: 1.2rem;
 }
 
 .orientation-landscape .calendar.print {
-  font-size: 0.9em;
 }
 
 @media (min-width: 600px) {

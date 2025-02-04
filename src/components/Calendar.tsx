@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { jsPDF } from 'jspdf';
 
 interface DayData {
   date: number;
@@ -141,18 +140,6 @@ export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> =
     return monthData;
   };
 
-  const generatePDF = () => {
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4'
-    });
-
-    pdf.text('15 Month Calendar (2025-2026)', 10, 10);
-    
-    pdf.save('15-month-calendar.pdf');
-  };
-
   const calendarStyle = {
     '--print-columns': forPrint ? printColumns : columnCount
   } as React.CSSProperties;
@@ -179,9 +166,9 @@ export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> =
                   key={dayIndex}
                   className={`calendar-day${!day.currentMonth ? ' other-month' : ''}`}
                 >
-                  {day.fullMoon && <div className="full-moon" />}
+                  {day.fullMoon && <div className="day-marker-moon-full" />}
                   {day.isSpecialDay && (
-                    <div className={`${day.isSpecialDay}-marker`} />
+                    <div className={`day-marker-${day.isSpecialDay}`} />
                   )}
                   {!day.fullMoon && !day.isSpecialDay && (
                     <span className="date">{day.date}</span>
