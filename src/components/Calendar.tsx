@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
+import { getFullMoonDates, getSolarEvents, AstronomicalEvent } from '../utils/astronomy';
 
 interface DayData {
   date: number;
@@ -19,7 +20,35 @@ export const Calendar: React.FC<{
   const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
   const [searchParams] = useSearchParams();
+  const { year: yearParam } = useParams();
   const showYearHeader = searchParams.get('header') !== 'off';
+
+  // Parse year parameter or default to current year
+  const baseYear = parseInt(yearParam || '2025', 10);
+  const nextYear = baseYear + 1;
+
+  // Calculate astronomical events
+  const [fullMoonDates, setFullMoonDates] = useState<string[]>([]);
+  const [solarEvents, setSolarEvents] = useState<Record<string, 'solstice' | 'equinox'>>({});
+
+  useEffect(() => {
+    console.log('Calculating astronomical events for year:', baseYear);
+    try {
+      const moons = getFullMoonDates(baseYear, nextYear);
+      console.log('Full moon dates:', moons);
+      setFullMoonDates(moons);
+
+      const events = getSolarEvents(baseYear, nextYear);
+      console.log('Solar events:', events);
+      const eventMap: Record<string, 'solstice' | 'equinox'> = {};
+      events.forEach(event => {
+        eventMap[event.date] = event.type;
+      });
+      setSolarEvents(eventMap);
+    } catch (error) {
+      console.error('Error calculating astronomical events:', error);
+    }
+  }, [baseYear, nextYear]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -57,46 +86,21 @@ export const Calendar: React.FC<{
     }
   }, [forPrint, printColumns]);
 
-  const fullMoonDates = [
-    '2025-01-13', '2025-02-12', '2025-03-14', '2025-04-12',
-    '2025-05-12', '2025-06-11', '2025-07-10', '2025-08-09',
-    '2025-09-07', '2025-10-06', '2025-11-05', '2025-12-04',
-    '2026-01-03', '2026-02-01', '2026-03-03', '2026-04-01'
-  ];
-
-  const specialDates = {
-    '2025-03-20': 'equinox',
-    '2025-06-21': 'solstice',
-    '2025-09-22': 'equinox',
-    '2025-12-21': 'solstice',
-    '2026-03-20': 'equinox',
-    '2026-06-21': 'solstice'
-  } as const;
-
-  const months = [
-    { month: 0, year: 2025 },
-    { month: 1, year: 2025 },
-    { month: 2, year: 2025 },
-    { month: 3, year: 2025 },
-    { month: 4, year: 2025 },
-    { month: 5, year: 2025 },
-    { month: 6, year: 2025 },
-    { month: 7, year: 2025 },
-    { month: 8, year: 2025 },
-    { month: 9, year: 2025 },
-    { month: 10, year: 2025 },
-    { month: 11, year: 2025 },
-    { month: 0, year: 2026 },
-    { month: 1, year: 2026 },
-    { month: 2, year: 2026 },
-    { month: 3, year: 2026 },
-    { month: 4, year: 2026 },
-    { month: 5, year: 2026 }
-  ];
+  const months = Array.from({ length: 18 }, (_, i) => {
+    const monthIndex = i % 12;
+    const yearOffset = Math.floor(i / 12);
+    const year = baseYear + yearOffset;
+    console.log(`Generating month ${monthIndex + 1} for year ${year}`);
+    return {
+      month: monthIndex,
+      year
+    };
+  });
 
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const getMonthData = (month: number, year: number): DayData[][] => {
+    console.log(`Getting data for month ${month + 1}, year ${year}`);
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const previousMonthLastDay = new Date(year, month, 0);
@@ -119,7 +123,11 @@ export const Calendar: React.FC<{
     for (let day = 1; day <= daysInMonth; day++) {
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isFullMoon = fullMoonDates.includes(dateString);
-      const specialDay = specialDates[dateString as keyof typeof specialDates];
+      const specialDay = solarEvents[dateString];
+
+      if (isFullMoon || specialDay) {
+        console.log(`Found event on ${dateString}:`, { isFullMoon, specialDay });
+      }
 
       currentWeek.push({
         date: day,
@@ -157,7 +165,7 @@ export const Calendar: React.FC<{
     <div className={`calendar ${forPrint ? 'print' : ''}`} style={calendarStyle}>
       {showYearHeader && (
         <div className="calendar-header">
-          <h1>{months[0].year}</h1>
+          <h1>{baseYear}</h1>
         </div>
       )}
       <div className="calendar-grid">
