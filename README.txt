@@ -14,10 +14,6 @@ Features
 Planned Features
 ---------------
 
-0. Style improvements
-   - more responsive - more than 3 columns possible.
-   - possibly nicer typeface
-
 1. PDF Generation via URL Parameters
    - Support multiple paper sizes:
      * A6
@@ -41,6 +37,9 @@ Planned Features
 
 4. Cloudflare Deployment
    - Deploy application to Cloudflare Pages
+
+5. Style improvements
+   - possibly nicer typeface
 
 Technical Notes
 --------------

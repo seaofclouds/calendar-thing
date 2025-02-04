@@ -10,9 +10,32 @@ interface DayData {
 
 export const Calendar: React.FC = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [visibleMonths, setVisibleMonths] = useState(14); // Default to mobile view
+  const [columnCount, setColumnCount] = useState(1);
 
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      let columns = 1;
+      let months = 14;
+
+      if (width >= 1200) {
+        columns = 4;
+        months = 16;
+      } else if (width >= 900) {
+        columns = 3;
+        months = 15;
+      } else if (width >= 600) {
+        columns = 2;
+        months = 14;
+      }
+
+      setWindowWidth(width);
+      setColumnCount(columns);
+      setVisibleMonths(months);
+    };
+    
+    handleResize(); // Initial call
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -22,7 +45,7 @@ export const Calendar: React.FC = () => {
     '2025-01-13', '2025-02-12', '2025-03-14', '2025-04-12',
     '2025-05-12', '2025-06-11', '2025-07-10', '2025-08-09',
     '2025-09-07', '2025-10-06', '2025-11-05', '2025-12-04',
-    '2026-01-03', '2026-02-01', '2026-03-03'
+    '2026-01-03', '2026-02-01', '2026-03-03', '2026-04-01'
   ];
 
   // Solstice and Equinox dates
@@ -50,7 +73,10 @@ export const Calendar: React.FC = () => {
     { month: 11, year: 2025 },
     { month: 0, year: 2026 },
     { month: 1, year: 2026 },
-    { month: 2, year: 2026 }
+    { month: 2, year: 2026 },
+    { month: 3, year: 2026 },
+    { month: 4, year: 2026 },
+    { month: 5, year: 2026 }
   ];
 
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -125,21 +151,16 @@ export const Calendar: React.FC = () => {
     pdf.save('15-month-calendar.pdf');
   };
 
-  // Determine number of columns based on window width
-  const getColumnCount = () => {
-    if (windowWidth < 768) return 1;
-    if (windowWidth < 1024) return 2;
-    if (windowWidth < 1440) return 3;
-    return 4;
-  };
-
   return (
     <div className="calendar-container">
-      <div className="calendar" style={{ gridTemplateColumns: `repeat(${getColumnCount()}, 1fr)` }}>
-        {months.map(({ month, year }) => (
+      <div className="calendar">
+        {months.slice(0, visibleMonths).map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
-              {new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' })}
+              {new Date(year, month).toLocaleString('default', { 
+                month: 'long',
+                ...(year === 2026 && { year: 'numeric' })
+              })}
             </div>
             <div className="week-days">
               {weekDays.map((day, index) => (

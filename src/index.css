@@ -21,11 +21,13 @@ body {
 }
 
 .calendar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 20px;
-  justify-content: center;
   padding: 20px;
+  justify-content: center;
+  grid-template-columns: repeat(1, minmax(200px, 1fr));
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .month {
@@ -119,4 +121,22 @@ body {
 
 .generate-button:hover {
   background: #0056b3;
+}
+
+@media (min-width: 600px) {
+  .calendar {
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .calendar {
+    grid-template-columns: repeat(3, minmax(200px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .calendar {
+    grid-template-columns: repeat(4, minmax(200px, 1fr));
+  }
 }
