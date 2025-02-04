@@ -1,10 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { toPng, toJpeg } from 'html-to-image';
 import { Calendar } from './Calendar';
-import { useSearchParams } from 'react-router-dom';
 
 interface CalendarImageProps {
   format: 'png' | 'jpg';
+  size?: string;
+  orientation?: 'portrait' | 'landscape';
+  rows?: number;
+  columns?: number;
+  dpi?: number;
+  header?: boolean;
+  testing?: boolean;
+  year?: number;
 }
 
 // Standard print DPI
@@ -19,30 +26,24 @@ const PAPER_SIZES = {
   tabloid: { width: 11, height: 17 },
   a6: { width: 4.125, height: 5.875},
   a5: { width: 5.8, height: 8.27 },
-  a4: { width: 8.27, height: 11.69 },
-} as const;
+  a4: { width: 8.27, height: 11.69 }
+};
 
-type PaperSize = keyof typeof PAPER_SIZES;
-
-export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
+export const CalendarImage: React.FC<CalendarImageProps> = ({
+  format,
+  size = 'letter',
+  orientation = 'portrait',
+  rows = 4,
+  columns = 3,
+  dpi = 300,
+  header = true,
+  testing = false,
+  year = new Date().getFullYear()
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasGeneratedRef = useRef(false);
-  const [searchParams] = useSearchParams();
 
   // Parse URL parameters with defaults
-  const size = (searchParams.get('size') as PaperSize) || 'letter';
-  const orientation = searchParams.get('orientation') || 'portrait';
-  const columns = parseInt(searchParams.get('columns') || '0') || 
-    (orientation === 'landscape' ? 4 : 3);
-  const rows = parseInt(searchParams.get('rows') || '0') || 
-    (columns === 4 ? 4 : 
-     columns === 3 ? 5 :
-     columns === 2 ? 7 : 12); // Default rows based on column count
-  const months = rows * columns; // Calculate total months from rows × columns
-  const dpi = parseInt(searchParams.get('dpi') || '600');
-  const testing = searchParams.get('testing') === 'on';
-  
-  // Validate and get paper size
   const paperSize = PAPER_SIZES[size] || PAPER_SIZES.letter;
   
   // Adjust dimensions for orientation
@@ -97,7 +98,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
           : await toJpeg(containerRef.current, options);
         
         const link = document.createElement('a');
-        link.download = `calendar-2025-${dpi}dpi-${size}-${orientation}.${format}`;
+        link.download = `calendar-${year}-${dpi}dpi-${size}-${orientation}.${format}`;
         link.href = dataUrl;
         link.click();
 
@@ -117,7 +118,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
     // Small delay to ensure component is fully rendered
     const timeoutId = setTimeout(generateImage, 100);
     return () => clearTimeout(timeoutId);
-  }, [format, size, orientation, columns, rows, months, dpi, dimensions, testing]);
+  }, [format, size, orientation, columns, rows, dpi, dimensions, testing]);
 
   // Calculate base size to match paper aspect ratio
   const baseStyle: React.CSSProperties = {
@@ -161,7 +162,12 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
         className={`calendar-print-container size-${size} orientation-${orientation} ${testing ? 'testing' : ''}`} 
         style={baseStyle}
       >
-        <Calendar forPrint={true} printColumns={columns} totalMonths={months} />
+        <Calendar 
+          forPrint={true} 
+          printColumns={columns} 
+          totalMonths={rows * columns} 
+          year={year}
+        />
       </div>
     </>
   );

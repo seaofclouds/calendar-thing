@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useParams } from 'react-router-dom';
 import { getFullMoonDates, getSolarEvents, AstronomicalEvent } from '../utils/astronomy';
+
+interface CalendarProps {
+  year?: number;
+  forPrint?: boolean;
+  printColumns?: number;
+  totalMonths?: number;
+  size?: string;
+  orientation?: 'portrait' | 'landscape';
+  rows?: number;
+  columns?: number;
+  header?: boolean;
+  testing?: boolean;
+}
 
 interface DayData {
   date: number;
@@ -9,24 +21,26 @@ interface DayData {
   isSpecialDay?: 'solstice' | 'equinox';
 }
 
-export const Calendar: React.FC<{ 
-  forPrint?: boolean, 
-  printColumns?: number,
-  totalMonths?: number
-}> = ({ 
+export const Calendar: React.FC<CalendarProps> = ({ 
+  year = new Date().getFullYear(),
   forPrint = false, 
   printColumns = 3,
-  totalMonths
+  totalMonths = 15,
+  size = 'letter',
+  orientation = 'portrait',
+  rows = 4,
+  columns = 3,
+  header = true,
+  testing = false
 }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
-  const [searchParams] = useSearchParams();
-  const { year: yearParam } = useParams();
-  const showYearHeader = searchParams.get('header') !== 'off';
+  const [searchParams] = useState({ header: 'on' });
+  const showYearHeader = header;
 
   // Parse year parameter or default to current year
-  const baseYear = parseInt(yearParam || '2025', 10);
+  const baseYear = year;
   const nextYear = baseYear + 1;
 
   // Calculate astronomical events

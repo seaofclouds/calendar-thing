@@ -1,0 +1,62 @@
+---
+import { Calendar } from '../components/Calendar';
+import { CalendarImage } from '../components/CalendarImage';
+import '../index.css';
+
+// Get path segments and search params
+const { path } = Astro.params;
+const segments = path?.split('/') || [];
+const [year, format] = segments;
+const url = new URL(Astro.request.url);
+const searchParams = Object.fromEntries(url.searchParams);
+
+// Handle root redirect
+if (!year) {
+  return Astro.redirect(`/${new Date().getFullYear()}`);
+}
+
+// Parse params with defaults
+const params = {
+  size: searchParams.size || 'letter',
+  orientation: searchParams.orientation || 'portrait',
+  rows: parseInt(searchParams.rows || '4'),
+  columns: parseInt(searchParams.columns || '3'),
+  dpi: parseInt(searchParams.dpi || '300'),
+  header: searchParams.header !== 'off',
+  testing: searchParams.testing === 'on'
+};
+
+// Set title based on route
+const title = format 
+  ? `Calendar ${year} - ${format.toUpperCase()}`
+  : `Calendar ${year}`;
+
+const yearNum = parseInt(year);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div id="root">
+      {format ? (
+        <CalendarImage 
+          client:only="react"
+          format={format as 'png' | 'jpg'}
+          year={yearNum}
+          {...params}
+        />
+      ) : (
+        <Calendar 
+          client:only="react"
+          year={yearNum}
+          {...params}
+        />
+      )}
+    </div>
+  </body>
+</html>
