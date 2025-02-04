@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="20" height="20">
+  <!-- Base circle with black fill -->
+  <circle cx="50" cy="50" r="40" fill="black" stroke="black" stroke-width="2"/>
+  
+  <!-- Bottom right wedge (white) - 90 degrees from 45° to 135° -->
+  <path d="M 50 50 
+           L 78.28 78.28 
+           A 40 40 0 0 1 21.72 78.28 
+           Z" 
+        fill="white" stroke="black" stroke-width="2"/>
+</svg>

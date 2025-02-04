@@ -1,0 +1,67 @@
+<style>
+.icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid black;
+  margin: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Summer Solstice - black wedge in top left, rotated -45° from vertical */
+.solstice-summer {
+  background: conic-gradient(
+    from 315deg, /* 360° - 45° */
+    white 0deg,
+    white 90deg,
+    black 90deg,
+    black 180deg,
+    white 180deg
+  );
+}
+
+/* Winter Solstice - white wedge in bottom right, rotated +45° from vertical */
+.solstice-winter {
+  background: conic-gradient(
+    from 135deg,
+    black 0deg,
+    black 90deg,
+    white 90deg,
+    white 180deg,
+    black 180deg
+  );
+}
+
+/* Spring Equinox - white wedge on right side */
+.equinox-spring {
+  background: conic-gradient(
+    from 90deg,
+    black 0deg,
+    black 105deg,
+    white 105deg,
+    white 255deg,
+    black 255deg
+  );
+}
+
+/* Autumn Equinox - black wedge on left side */
+.equinox-autumn {
+  background: conic-gradient(
+    from 270deg,
+    white 0deg,
+    white 105deg,
+    black 105deg,
+    black 255deg,
+    white 255deg
+  );
+}
+</style>
+
+<div style="display: flex; gap: 20px;">
+  <div class="icon solstice-summer" title="Summer Solstice"></div>
+  <div class="icon solstice-winter" title="Winter Solstice"></div>
+  <div class="icon equinox-spring" title="Spring Equinox"></div>
+  <div class="icon equinox-autumn" title="Autumn Equinox"></div>
+</div>
