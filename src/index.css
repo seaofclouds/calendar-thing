@@ -16,7 +16,7 @@ body {
 #root {
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2em;
   text-align: center;
 }
 
@@ -26,22 +26,40 @@ body {
 
 .calendar {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+.calendar-header {
+  width: 100%;
+}
+
+.calendar-grid {
+  width: 100%;
+  display: grid;
+  gap: 1.5em;
+  justify-content: center;
+  grid-template-columns: repeat(1, minmax(200px, 1fr));
+  max-width: 1600px;
+  box-sizing: border-box;
 }
 
 .calendar-header h1 {
   font-size: 2em;
   font-weight: 300;
-  margin-bottom: .5em;
   text-align: center;
 }
 
 .calendar-grid {
+  width: 100%;
   display: grid;
   gap: 3em;
   justify-content: center;
   grid-template-columns: repeat(1, minmax(200px, 1fr));
   max-width: 1600px;
-  margin: 0 auto;
 }
 
 .month {
@@ -150,10 +168,10 @@ body {
 
 /* Remove old class names - can be deleted once component is updated */
 .full-moon { 
-  width: 20px;
-  height: 20px;
+  width: 2em;
+  height: 2em;
   background-color: #000;
-  border: 2px solid #000;
+  border: 0.2em solid #000;
   border-radius: 50%;
   top: 50%;
   left: 50%;
@@ -163,26 +181,26 @@ body {
 
 .solstice-marker {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 2em;
+  height: 2em;
   background: black;
   transform: rotate(45deg);
   top: 50%;
   left: 50%;
-  margin-top: -10px;
-  margin-left: -10px;
+  margin-top: -1em;
+  margin-left: -1em;
 }
 
 .equinox-marker {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 2em;
+  height: 2em;
   background: black;
   transform: rotate(45deg);
   top: 50%;
   left: 50%;
-  margin-top: -10px;
-  margin-left: -10px;
+  margin-top: -1em;
+  margin-left: -1em;
 }
 
 /* Print-specific styles */
@@ -193,13 +211,13 @@ body {
   background: white;
   position: relative; /* For absolute positioning of children */
   overflow: hidden;
-  margin-top: 20px;
-  margin-left: 20px;
+  margin-top: 2em;
+  margin-left: 2em;
   display: flex; /* Add flex to ensure child fills height */
 }
 
 .calendar-print-container.testing {
-  border: 1px dashed #999;
+  border: 0.1em dashed #999;
 }
 
 .print .calendar {
@@ -214,15 +232,13 @@ body {
 }
 
 .print .calendar-header {
-  font-size: 2.4em;
   font-weight: 200;
-  margin-bottom: 0em;
+  margin-bottom: -2em;
 }
 
 .print .calendar-header h1 {
-  font-size: 1.5em;
+  font-size: 3em;
   font-weight: 100;
-  margin-bottom: 0em;
 }
 
 .print .calendar-grid {
@@ -313,7 +329,7 @@ body {
 
 
 .size-a6 .print { 
-  font-size: 0.45rem;
+  font-size: 0.45em;
   gap: 2em; /* Tighter spacing for small format */
   padding: 2em;
 }
@@ -321,26 +337,26 @@ body {
   min-height: 1.5em;
 }
 .size-a5 .print { 
-  font-size: 0.6rem;
+  font-size: 0.6em;
   gap: 1em;
   padding: 2em;
 }
 
 .size-letter .print,
 .size-a4 .print { 
-  font-size: 0.8rem;
+  font-size: 0.8em;
   gap: 1em;
   padding: 2.4em;
 }
 
 .size-legal .print { 
-  font-size: 0.9rem;
+  font-size: 0.9em;
   gap: 1em;
   padding: 2em;
 }
 
 .size-tabloid .print { 
-  font-size: 1rem;
+  font-size: 1em;
   gap: 5em;
   padding: 5em;
 }
@@ -361,20 +377,43 @@ body {
   line-height: inherit;
 }
 
+/* Responsive adjustments */
 @media (min-width: 600px) {
+  .calendar {
+    padding: 1.5em;
+  }
+  
   .calendar-grid {
+    gap: 2rem;
     grid-template-columns: repeat(2, minmax(200px, 1fr));
   }
 }
 
 @media (min-width: 900px) {
   .calendar-grid {
+    gap: 2.5em;
     grid-template-columns: repeat(3, minmax(200px, 1fr));
   }
 }
 
 @media (min-width: 1200px) {
+  .calendar {
+    padding: 2em;
+  }
+  
   .calendar-grid {
+    gap: 2em;
     grid-template-columns: repeat(4, minmax(200px, 1fr));
+  }
+}
+
+/* Print-specific styles */
+@media print {
+  .calendar {
+    padding: 0;
+  }
+  
+  .calendar-grid {
+    gap: 1em;
   }
 }
