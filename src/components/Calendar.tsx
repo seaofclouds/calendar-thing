@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 interface DayData {
   date: number;
@@ -7,10 +8,18 @@ interface DayData {
   isSpecialDay?: 'solstice' | 'equinox';
 }
 
-export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> = ({ forPrint = false, printColumns = 3 }) => {
+export const Calendar: React.FC<{ 
+  forPrint?: boolean, 
+  printColumns?: number
+}> = ({ 
+  forPrint = false, 
+  printColumns = 3
+}) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
+  const [searchParams] = useSearchParams();
+  const showYearHeader = searchParams.get('yearheader') === 'true';
 
   useEffect(() => {
     const handleResize = () => {
@@ -147,13 +156,15 @@ export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> =
   return (
     <div className="calendar-container">
       <div className={`calendar ${forPrint ? 'print' : ''}`} style={calendarStyle}>
+        {showYearHeader && (
+          <div className="calendar-year-header">
+            {months[0].year}
+          </div>
+        )}
         {months.slice(0, visibleMonths).map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
-              {new Date(year, month).toLocaleString('default', { 
-                month: 'long',
-                ...(month === 0 && { year: 'numeric' })
-              })}
+              {new Date(year, month).toLocaleString('default', { month: 'long' })}
             </div>
             <div className="week-days">
               {weekDays.map((day, index) => (

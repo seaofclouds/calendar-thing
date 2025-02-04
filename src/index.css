@@ -261,6 +261,19 @@ body {
   background: black;
 }
 
+.calendar-year-header {
+  font-size: 2em;
+  font-weight: 300;
+  color: #000;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+.calendar.print .calendar-year-header {
+  font-size: 1.6em;
+  margin-bottom: 0.8em;
+}
+
 .size-a6 .calendar.print { 
   font-size: 0.45rem;
   gap: 2em; /* Tighter spacing for small format */

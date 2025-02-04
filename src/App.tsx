@@ -7,10 +7,10 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/2025" replace />} />
-        <Route path="/2025" element={<Calendar />} />
-        <Route path="/2025/png" element={<CalendarImage format="png" />} />
-        <Route path="/2025/jpg" element={<CalendarImage format="jpg" />} />
+        <Route path="/" element={<Navigate to="/2025/view" replace />} />
+        <Route path="/:year/view" element={<Calendar />} />
+        <Route path="/:year/png" element={<CalendarImage format="png" />} />
+        <Route path="/:year/jpg" element={<CalendarImage format="jpg" />} />
       </Routes>
     </BrowserRouter>
   );
