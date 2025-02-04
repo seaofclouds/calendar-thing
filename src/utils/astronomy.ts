@@ -1,9 +1,8 @@
 import {
   SearchMoonQuarter,
-  SearchSunLongitude,
-  MoonQuarter,
+  NextMoonQuarter,
   MakeTime,
-  SunLongitude,
+  Seasons,
 } from 'astronomy-engine';
 
 export interface AstronomicalEvent {
@@ -11,49 +10,75 @@ export interface AstronomicalEvent {
   type: 'fullMoon' | 'equinox' | 'solstice';
 }
 
-export function getFullMoonDates(startYear: number, endYear: number): string[] {
-  const dates: string[] = [];
-  let time = MakeTime(startYear, 1, 1, 0, 0, 0);
-  const endTime = MakeTime(endYear, 12, 31, 23, 59, 59);
+function formatDate(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
-  while (time.tt < endTime.tt) {
-    const result = SearchMoonQuarter(time);
-    if (result.quarter === MoonQuarter.Full) {
-      const date = result.time.toString().split('T')[0];
-      dates.push(date);
+export async function getFullMoonDates(startYear: number, endYear: number): Promise<string[]> {
+  const dates: string[] = [];
+  console.log(`Calculating full moons from ${startYear} to ${endYear}`);
+
+  // Start searching from beginning of start year
+  let searchTime = MakeTime(startYear, 1, 1, 0, 0, 0);
+  
+  // Get the first quarter after our start date
+  let moonQuarter = SearchMoonQuarter(searchTime);
+  
+  while (moonQuarter) {
+    const date = new Date(moonQuarter.time.toString());
+    const year = date.getUTCFullYear();
+    
+    // Stop if we've gone past our end year
+    if (year > endYear) {
+      break;
     }
-    // Move forward by 20 days to avoid finding the same full moon
-    time = MakeTime(time.ut + 20);
+    
+    // Only add full moons (quarter = 2)
+    if (moonQuarter.quarter === 2) {
+      const formattedDate = formatDate(date);
+      console.log(`Found full moon on: ${formattedDate}`);
+      dates.push(formattedDate);
+    }
+    
+    // Get the next quarter
+    moonQuarter = NextMoonQuarter(moonQuarter);
   }
 
   return dates;
 }
 
-export function getSolarEvents(startYear: number, endYear: number): AstronomicalEvent[] {
-  const events: AstronomicalEvent[] = [];
-  let time = MakeTime(startYear, 1, 1, 0, 0, 0);
-  const endTime = MakeTime(endYear, 12, 31, 23, 59, 59);
+export async function getSolarEvents(startYear: number, endYear: number): Promise<string[]> {
+  const dates: string[] = [];
+  console.log(`Calculating solar events from ${startYear} to ${endYear}`);
 
-  // Search for equinoxes (0° and 180°) and solstices (90° and 270°)
-  const angles = [0, 90, 180, 270];
-  
-  while (time.tt < endTime.tt) {
-    for (const angle of angles) {
-      const result = SearchSunLongitude(angle, time);
-      const date = result.time.toString().split('T')[0];
+  for (let year = startYear; year <= endYear; year++) {
+    try {
+      // Get all seasons for the year at once
+      const seasons = Seasons(year);
       
-      let type: 'equinox' | 'solstice';
-      if (angle === 0 || angle === 180) {
-        type = 'equinox';
-      } else {
-        type = 'solstice';
-      }
-      
-      events.push({ date, type });
+      // Add each season with proper logging
+      const march = new Date(seasons.mar_equinox.toString());
+      console.log(`Spring equinox found: ${march}`);
+      dates.push(formatDate(march));
+
+      const june = new Date(seasons.jun_solstice.toString());
+      console.log(`Summer solstice found: ${june}`);
+      dates.push(formatDate(june));
+
+      const sept = new Date(seasons.sep_equinox.toString());
+      console.log(`Fall equinox found: ${sept}`);
+      dates.push(formatDate(sept));
+
+      const dec = new Date(seasons.dec_solstice.toString());
+      console.log(`Winter solstice found: ${dec}`);
+      dates.push(formatDate(dec));
+    } catch (error) {
+      console.error(`Error calculating solar events for ${year}:`, error);
     }
-    // Move forward by 80 days to avoid finding the same events
-    time = MakeTime(time.ut + 80);
   }
 
-  return events.sort((a, b) => a.date.localeCompare(b.date));
+  return dates;
 }

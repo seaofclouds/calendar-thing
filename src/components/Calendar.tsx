@@ -32,22 +32,35 @@ export const Calendar: React.FC<{
   const [solarEvents, setSolarEvents] = useState<Record<string, 'solstice' | 'equinox'>>({});
 
   useEffect(() => {
-    console.log('Calculating astronomical events for year:', baseYear);
-    try {
-      const moons = getFullMoonDates(baseYear, nextYear);
-      console.log('Full moon dates:', moons);
-      setFullMoonDates(moons);
+    console.log('Calendar: Starting astronomical calculations for year:', baseYear);
+    
+    async function fetchAstronomicalData() {
+      try {
+        const moons = await getFullMoonDates(baseYear, nextYear);
+        console.log('Calendar: Received full moon dates:', moons);
+        setFullMoonDates(moons);
 
-      const events = getSolarEvents(baseYear, nextYear);
-      console.log('Solar events:', events);
-      const eventMap: Record<string, 'solstice' | 'equinox'> = {};
-      events.forEach(event => {
-        eventMap[event.date] = event.type;
-      });
-      setSolarEvents(eventMap);
-    } catch (error) {
-      console.error('Error calculating astronomical events:', error);
+        const events = await getSolarEvents(baseYear, nextYear);
+        console.log('Calendar: Received solar events:', events);
+        
+        // Create a map of date -> event type based on the month
+        const eventMap: Record<string, 'solstice' | 'equinox'> = {};
+        events.forEach(date => {
+          // Determine event type based on month
+          const month = parseInt(date.split('-')[1]);
+          const type = (month === 3 || month === 9) ? 'equinox' : 'solstice';
+          console.log(`Calendar: Adding ${type} event for ${date}`);
+          eventMap[date] = type;
+        });
+        
+        console.log('Calendar: Final solar events map:', eventMap);
+        setSolarEvents(eventMap);
+      } catch (error) {
+        console.error('Error fetching astronomical data:', error);
+      }
     }
+
+    fetchAstronomicalData();
   }, [baseYear, nextYear]);
 
   useEffect(() => {
@@ -125,8 +138,11 @@ export const Calendar: React.FC<{
       const isFullMoon = fullMoonDates.includes(dateString);
       const specialDay = solarEvents[dateString];
 
-      if (isFullMoon || specialDay) {
-        console.log(`Found event on ${dateString}:`, { isFullMoon, specialDay });
+      if (isFullMoon) {
+        console.log(`Calendar: Found full moon on ${dateString}`);
+      }
+      if (specialDay) {
+        console.log(`Calendar: Found ${specialDay} on ${dateString}`);
       }
 
       currentWeek.push({
@@ -187,12 +203,12 @@ export const Calendar: React.FC<{
                   key={dayIndex}
                   className={`calendar-day${!day.currentMonth ? ' other-month' : ''}`}
                 >
+                  {!day.fullMoon && !day.isSpecialDay && (
+                    <span className="date">{day.date}</span>
+                  )}
                   {day.fullMoon && <div className="day-marker-moon-full" />}
                   {day.isSpecialDay && (
                     <div className={`day-marker-${day.isSpecialDay}`} />
-                  )}
-                  {!day.fullMoon && !day.isSpecialDay && (
-                    <span className="date">{day.date}</span>
                   )}
                 </div>
               ))}
