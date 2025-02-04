@@ -99,6 +99,11 @@ Create a high-resolution tabloid calendar for printing:
 /2025/png?size=tabloid&orientation=portrait&dpi=600
 ```
 
+## Roadmap
+- Parameterize year and calendar generation
+- use astronomical data for full moon, solstice, and equinox indicators
+- consider font options for fun rendering.
+
 ## Development
 
 Built with:
