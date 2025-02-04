@@ -14,6 +14,17 @@ A responsive calendar application that generates high-quality calendar images fo
 - Multiple paper size support
 - Portrait and landscape orientations
 
+## Tech Stack
+
+- [Astro](https://astro.build/) - Web framework for content-focused websites
+- [React](https://reactjs.org/) - UI components and interactivity
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [astronomy-engine](https://github.com/cosinekitty/astronomy) - Astronomical calculations
+- [html-to-image](https://github.com/bubkoo/html-to-image) - High-quality image generation
+- [React Router](https://reactrouter.com/) - Client-side routing
+
+The application is built with Astro for optimal static site generation while leveraging React for interactive components. TypeScript ensures type safety across the codebase. The astronomy-engine provides precise celestial calculations, and html-to-image enables high-quality calendar exports.
+
 ## URL Structure
 
 The application supports the following URL patterns:
