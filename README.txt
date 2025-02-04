@@ -1,61 +1,91 @@
-Calendar Thing
-=============
+# Calendar Thing
 
-A minimalist calendar application that displays a full year view with astronomical events. Built with React and TypeScript, the app shows full moons, solstices, and equinoxes as visual markers on their respective dates.
+A responsive calendar application that generates high-quality calendar images for various paper sizes and orientations.
 
-Features
---------
-- Clean, minimal calendar display
-- Multiple months visible in a responsive grid layout
-- Full moon indicators displayed as black circles
-- Solstice and equinox markers shown as rotated squares (diamonds)
-- Responsive design that adjusts columns based on viewport width
+## Features
 
-Planned Features
----------------
+- 15-month calendar view (2025-2026)
+- Full moon, solstice, and equinox indicators
+- Responsive layout that adapts to different screen sizes
+- High-resolution image export (PNG/JPG)
+- Multiple paper size support
+- Portrait and landscape orientations
 
-1. PDF Generation via URL Parameters
-   - Support multiple paper sizes:
-     * A6
-     * A5
-     * Letter
-     * Legal
-     * Tabloid
-   - Both portrait and landscape orientations
-   - Custom page sizes (begin with ?size=letter&orientation=landscape&width=half)
-   - Custom margins (top, bottom, left, right)
-   - Alternative: High-resolution (600dpi) canvas export for print
+## URL Parameters
 
-2. URL Parameter Controls
-   - Generate calendar for specific years
-   - Toggle visibility of astronomical events (full moons, solstices/equinoxes)
-   - Control calendar layout and display options
+The application supports the following URL parameters for customizing the calendar layout:
 
-3. Static Asset Generation
-   - Pre-generate PDFs for common configurations
-   - Host generated PDFs statically for improved performance
+- `size`: Paper size (default: letter)
+  - Options: a6, a5, a4, letter, legal, tabloid
+  - Example: `?size=a4`
 
-4. Cloudflare Deployment
-   - Deploy application to Cloudflare Pages
+- `orientation`: Page orientation (default: portrait)
+  - Options: portrait, landscape
+  - Example: `?orientation=landscape`
 
-5. Style improvements
-   - possibly nicer typeface
+- `columns`: Number of months per row (default: 3)
+  - Range: 1-5
+  - Example: `?columns=4`
 
-Technical Notes
---------------
-- Built with React + TypeScript + Vite
-- Minimal dependencies for fast loading
-- CSS-based astronomical markers for crisp rendering
-- Mobile-responsive design
+- `dpi`: Resolution in dots per inch (default: 300)
+  - Range: 72-600
+  - Example: `?dpi=300`
 
-Astronomical Events (2025-2026)
------------------------------
-Equinoxes:
-- March 20, 2025
-- September 22, 2025
-- March 20, 2026
+- `testing`: Enable layout testing mode (default: false)
+  - Options: true, false
+  - Example: `?testing=true`
+  - Adds visual indicators for container boundaries
 
-Solstices:
-- June 21, 2025
-- December 21, 2025
-- June 21, 2026
+## Image Export
+
+The application can generate high-quality PNG and JPG images of the calendar. The export resolution is controlled by the `dpi` parameter.
+
+### Resolution Guidelines
+- Screen viewing: 72-150 DPI
+- Standard printing: 300 DPI
+- High-quality printing: 600 DPI
+
+### Paper Size Dimensions (in pixels at 300 DPI)
+- A6: 1240 × 1748 pixels
+- A5: 1748 × 2480 pixels
+- A4: 2480 × 3508 pixels
+- Letter: 2550 × 3300 pixels
+- Legal: 2550 × 4200 pixels
+- Tabloid: 3300 × 5100 pixels
+
+## Layout Features
+
+### Responsive Design
+- Automatically adjusts font sizes for different paper formats
+- Maintains proper spacing ratios across all sizes
+- Uses relative units (em) for consistent scaling
+
+### Grid System
+- Flexible month grid with configurable columns
+- Proportional day cells that maintain aspect ratio
+- Consistent spacing between months and elements
+
+### Visual Indicators
+- Day markers (full moon, solstice, equinox) scale with text size
+- Clear visual hierarchy with proportional header sizes
+- Optional testing mode for layout visualization
+
+## Examples
+
+Generate a 4-column landscape A4 calendar at 300 DPI:
+```
+/calendar?size=a4&orientation=landscape&columns=4&dpi=300
+```
+
+Create a high-resolution tabloid calendar for printing:
+```
+/calendar?size=tabloid&orientation=portrait&dpi=600
+```
+
+## Development
+
+Built with:
+- React
+- TypeScript
+- CSS Grid/Flexbox
+- html-to-image for export functionality
