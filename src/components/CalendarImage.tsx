@@ -149,7 +149,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({ format }) => {
     width: `${Math.round(dimensions.width * SCREEN_DPI)}px`,
     height: `${Math.round(dimensions.height * SCREEN_DPI)}px`,
     boxSizing: 'border-box',
-    padding: '20px',
+    padding: '0em',
     overflow: 'hidden'
   };
 
