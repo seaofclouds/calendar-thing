@@ -1,0 +1,26 @@
+---
+import App from '../../App';
+import '../../index.css';
+
+const { year, format } = Astro.params;
+const validFormats = ['png', 'jpg'];
+
+// Validate format
+if (!validFormats.includes(format?.toLowerCase() || '')) {
+  return Astro.redirect('/');
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar {year} - {format?.toUpperCase()}</title>
+  </head>
+  <body>
+    <div id="root">
+      <App client:only="react" />
+    </div>
+  </body>
+</html>
