@@ -1,7 +1,17 @@
 /* ===================
    Root / Global Styles 
    =================== */
+
+/* Ensure full height cascade starts from the root */
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
+  /* Base font size for the document - all rems will reference this */
+  font-size: 16px;
   font-family: system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -13,26 +23,31 @@
   margin: 0;
   padding: 0;
   line-height: inherit;
-  font-weight:normal
+  font-weight: normal;
 }
 
 /* ===================
    Layout Containers 
    =================== */
 body {
+  height: 100%; /* Inherit full height from html */
   margin: 0;
+  padding: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background: white
+  background: white;
 }
 
 #root {
   width: 100%;
-  margin: 0 auto;
-  padding: 2em;
+  height: 100%; /* Inherit full height from body */
+  margin: 0;
+  padding: 0;
   text-align: center;
+  display: flex; /* Add flex to ensure child fills height */
+  flex-direction: column;
 }
 
 /* ===================
@@ -41,11 +56,14 @@ body {
 
 .calendar {
   width: 100%;
+  height: 100%; /* Inherit full height from #root */
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1em;
   box-sizing: border-box;
+  /* Base font size for calendar, using rem to reference root */
+  font-size: 1rem;
 }
 
 .calendar-header {
@@ -53,6 +71,7 @@ body {
 }
 
 .calendar-header h1 {
+  /* Scale relative to calendar container */
   font-size: 2em;
   font-weight: 300;
   text-align: center;
@@ -60,10 +79,12 @@ body {
 
 .calendar-grid {
   width: 100%;
+  flex: 1;
   display: grid;
-  gap: 1.5em;
+  gap: 3em;
   justify-content: center;
   grid-template-columns: repeat(1, minmax(200px, 1fr));
+  grid-auto-rows: min-content; /* Allow rows to size to content */
   max-width: 1600px;
   box-sizing: border-box;
 }
@@ -72,34 +93,41 @@ body {
    Month Components
    =================== */
 .month {
+  /* Set as a new scaling context */
+  font-size: 1em;
+  display: grid;
+  grid-template-rows: auto auto 1fr; /* Header, weekdays, month grid */
+  width: 100%;
+  min-height: 0; /* Allow shrinking */
+  gap: 0.5em;
 }
 
 .month-header {
   text-align: center;
-  padding: 0 0 .5em 0;
 }
-/* should i delete this? */
+
 .month-header h2 {
+  /* Scale relative to month container */
   font-size: 1.8em;
   font-weight: 200;
   color: #000;
-
-}
-
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(6, 1fr); /* Explicitly set 6 equal rows */
-  height: 100%; /* Ensure grid takes full height */
 }
 
 .week-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
+  /* Scale relative to month container */
   font-size: 0.8em;
   font-weight: 600;
   color: #000;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  min-height: 0; /* Allow shrinking */
 }
 
 /* ===================
@@ -111,13 +139,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* aspect-ratio: 1; Make days square */
-  height: 100%; /* Fill the grid cell height */
   box-sizing: border-box;
-}
-
-.calendar-day .date {
-  padding: 0;
+  min-height: 2em; /* Minimum height for days */
+  /* Use CSS clamp to ensure text scales with container but stays readable */
+  font-size: clamp(0.6em, 4vmin, 1em);
 }
 
 /* Day markers - base styles */
@@ -158,10 +183,13 @@ body {
   position: relative;
   box-sizing: border-box;
   background: white;
+  /* Set base font size for print container using rem */
+  font-size: 1rem;
+  overflow: hidden; /* Prevent overflow in print container */
 }
 
 .calendar.print {
-  padding: 0;
+  padding: 2em;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -170,15 +198,11 @@ body {
   gap: 0;
 }
 
-.calendar.print .calendar-header {
-  margin-bottom: 2em;
-}
-
 .calendar.print .calendar-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: min-content;
   gap: 1.8em;
   box-sizing: border-box;
 }
@@ -212,7 +236,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1; /* Make days square */
+  /* aspect-ratio: 1; Make days square */
   height: 100%;
   box-sizing: border-box;
 }
@@ -242,58 +266,26 @@ body {
 /* ===================
    Size-specific Styles
    =================== */
+
+/* Use rem for the base scaling of different paper sizes */
 .size-a6 .print { 
-  font-size: 0.45em;
+  font-size: 0.5rem;
   padding: 1.5em;
-}
-
-.size-a6 .print:has(.calendar-header) {
-  gap: 0;
-  padding: 1.5em;
-}
-
-.size-a6 .print .calendar-header {
-  margin-bottom: 1em;
-}
-
-.size-a6 .print .calendar-header h1 {
-  font-size: 3em;
-  padding-bottom: .3em;
-}
-
-.size-a6 .print:has(.calendar-header) .calendar-grid {
-  gap: 2em;
-  padding: 2em
-}
-
-.size-a6 .print:not(:has(.calendar-header)) {
-  gap: 1.5em;
-  padding: 2em;
-}
-
-.size-a6 .print:not(:has(.calendar-header)) .calendar-grid {
-  gap: 1.5em;
-}
-
-.size-a6 .calendar-day {
-  min-height: 1.5em;
 }
 
 .size-a5 .print {
-  font-size: 0.6em;
+  font-size: 0.6rem;
   padding: 2em;
 }
 
-.size-a5 .print .calendar-grid {
-  gap: 1em;
-}
-
-.size-a4 .print {
-  font-size: 0.8em;
+.size-a4 .print,
+.size-letter .print {
+  font-size: 0.8rem;
   padding: 3em;
 }
 
-.size-a4 .print .calendar-grid {
+.size-a4 .print .calendar-grid, 
+.size-letter .print .calendar-grid {
   gap: 1.5em;
 }
 
@@ -335,3 +327,10 @@ body {
 @media print {
   
 }
+
+/* ===================
+   Testing Styles
+   =================== */
+
+.testing {
+  border: 1px dashed #999;
