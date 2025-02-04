@@ -152,7 +152,7 @@ export const Calendar: React.FC<{ forPrint?: boolean, printColumns?: number }> =
             <div className="month-header">
               {new Date(year, month).toLocaleString('default', { 
                 month: 'long',
-                ...(year === 2026 && { year: 'numeric' })
+                ...(month === 0 && { year: 'numeric' })
               })}
             </div>
             <div className="week-days">
