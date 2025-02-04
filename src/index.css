@@ -278,24 +278,25 @@ body {
 .size-letter .calendar.print,
 .size-a4 .calendar.print { 
   font-size: 0.8rem;
-  gap: 0.8em;
-  padding: 0.8em;
+  gap: 1em;
+  padding: 2.4em;
 }
 
 .size-legal .calendar.print { 
   font-size: 0.9rem;
   gap: 1em;
-  padding: 1em;
+  padding: 2em;
 }
 
 .size-tabloid .calendar.print { 
-  font-size: 1.2rem;
-  gap: 1.2em;
-  padding: 1.2em;
+  font-size: 1rem;
+  gap: 5em;
+  padding: 5em;
 }
 
-.orientation-landscape .calendar.print {
-  gap: 1em; /* Slightly more spacing in landscape *
+.orientation-portrait.size-tabloid .calendar.print {
+  gap: 2em;
+  padding: 4em;
 }
 
 @media (min-width: 600px) {
