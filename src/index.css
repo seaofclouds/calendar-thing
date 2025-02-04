@@ -63,7 +63,6 @@ body {
 }
 
 .month {
-  padding: .5em;
 }
 
 .month-header {
@@ -223,22 +222,9 @@ body {
 .print .calendar {
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
-  grid-auto-rows: 1fr; /* Make rows equal height */
-  gap: 1em; /* Base gap between months */
-  padding: 1em; /* Base padding around calendar */
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
-}
-
-.print .calendar-header {
-  font-weight: 200;
-  margin-bottom: -2em;
-}
-
-.print .calendar-header h1 {
-  font-size: 3em;
-  font-weight: 100;
 }
 
 .print .calendar-grid {
@@ -247,8 +233,7 @@ body {
   display: grid;
   grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
   grid-auto-rows: 1fr;
-  gap: 1em;
-  padding: 1em;
+  gap:1.8em; /* spacing of months */
   box-sizing: border-box;
 }
 
@@ -259,8 +244,17 @@ body {
   grid-template-rows: auto auto 1fr; /* Header, weekdays, month grid */
   min-width: 0;
   min-height: 0;
-  padding: 0.4em; /* Base padding inside months */
   box-sizing: border-box;
+  /* border: 1px solid red; */
+}
+
+.print .calendar-header {
+  font-weight: 200;
+}
+
+.print .calendar-header h1 {
+  font-size: 3em;
+  font-weight: 100;
 }
 
 .print .month-header {
@@ -327,15 +321,44 @@ body {
   background: black;
 }
 
-
+/* Base A6 styles */
 .size-a6 .print { 
   font-size: 0.45em;
-  gap: 2em; /* Tighter spacing for small format */
+  padding: 1.5em;
+}
+
+/* A6 with header */
+.size-a6 .print:has(.calendar-header) {
+  gap: 0;
+  padding: 1.5em;
+}
+
+.size-a6 .print .calendar-header {
+}
+
+.size-a6 .print .calendar-header h1 {
+  font-size: 3em;
+  padding-bottom: .3em;
+}
+
+.size-a6 .print:has(.calendar-header) .calendar-grid {
+  gap: .5em;
+}
+
+/* A6 without header */
+.size-a6 .print:not(:has(.calendar-header)) {
+  gap: 1.5em;
   padding: 2em;
 }
-.size-a6 .print .calendar-day {
+
+.size-a6 .print:not(:has(.calendar-header)) .calendar-grid {
+  gap: 1.5em;
+}
+
+.size-a6 .calendar-day {
   min-height: 1.5em;
 }
+
 .size-a5 .print { 
   font-size: 0.6em;
   gap: 1em;
