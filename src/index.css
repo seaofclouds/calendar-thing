@@ -7,6 +7,15 @@
   font-weight: 400;
 }
 
+.calendar h1,
+.calendar h2,
+.calendar h3 {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+  font-weight:normal
+}
+
 /* ===================
    Layout Containers 
    =================== */
@@ -67,23 +76,21 @@ body {
 
 .month-header {
   text-align: center;
-  font-size: 1.5em;
-  font-weight: 300;
-  color: #000;
   padding: 0 0 .5em 0;
 }
-
+/* should i delete this? */
 .month-header h2 {
-  text-align: center;
-  font-size: 1.5em;
-  font-weight: 300;
+  font-size: 1.8em;
+  font-weight: 200;
   color: #000;
-  padding: 0 0 .5em 0;
+
 }
 
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr); /* Explicitly set 6 equal rows */
+  height: 100%; /* Ensure grid takes full height */
 }
 
 .week-days {
@@ -95,21 +102,18 @@ body {
   color: #000;
 }
 
-.week-days h3 {
-  text-align: center;
-  font-size: 0.8em;
-  font-weight: 600;
-  color: #000;
-}
-
 /* ===================
    Day Components & Markers
    =================== */
+   
 .calendar-day {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* aspect-ratio: 1; Make days square */
+  height: 100%; /* Fill the grid cell height */
+  box-sizing: border-box;
 }
 
 .calendar-day .date {
@@ -145,7 +149,78 @@ body {
   background: black;
 }
 
-/* Print-specific marker adjustments */
+/* ===================
+   Print Styles
+   =================== */
+.calendar-print-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+  background: white;
+}
+
+.calendar.print {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.calendar.print .calendar-header {
+  margin-bottom: 2em;
+}
+
+.calendar.print .calendar-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 1.8em;
+  box-sizing: border-box;
+}
+
+.calendar.print .month {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.calendar.print .month-header {
+  padding: 0;
+}
+
+.calendar.print .month-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr); /* Explicitly set 6 equal rows */
+  height: 100%; /* Take full height */
+}
+
+.calendar.print .week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 0.8em;
+}
+
+.calendar.print .calendar-day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1; /* Make days square */
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.calendar.print .calendar-day.other-month {
+  color: #fff;
+}
+
 .calendar.print .day-marker {
   position: absolute;
 }
@@ -165,167 +240,6 @@ body {
 }
 
 /* ===================
-   Print Styles
-   =================== */
-.calendar-print-container {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  background: white;
-  position: relative; /* For absolute positioning of children */
-  overflow: hidden;
-  margin-top: 2em;
-  margin-left: 2em;
-  display: flex; /* Add flex to ensure child fills height */
-}
-
-.calendar-print-container.testing {
-  border: 0.1em dashed #999;
-}
-
-.print .calendar {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-.print .calendar-grid {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 1.8em; /* spacing of months */
-  box-sizing: border-box;
-}
-
-.print .month {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto 1fr; /* Header, weekdays, month grid */
-  min-width: 0;
-  min-height: 0;
-  box-sizing: border-box;
-  /* border: 1px solid red; */
-}
-
-.print .calendar-header {
-  font-weight: 200;
-}
-
-.print .calendar-header h1 {
-  font-size: 3em;
-  font-weight: 100;
-}
-
-.print .month-header {
-  padding: 0 0 .2em 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-}
-
-.print .week-days {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  width: 100%;
-}
-
-.print .week-day {
-  text-align: center;
-  min-height: 1em;
-  padding: 0;
-}
-
-.print .month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-template-rows: repeat(6, 1fr);
-  width: 100%;
-  min-height: 0;
-}
-
-.print .calendar-day {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 1em;
-  width: 100%;
-  height: 100%;
-}
-
-.print .calendar-day.other-month {
-  color: #fff;
-}
-
-.print .full-moon {
-  position: absolute;
-  width: 1.2em;
-  height: 1.2em;
-  top: 0.2em;
-  right: 0.2em;
-  background: white;
-  border: 0.1em solid black;
-  border-radius: 50%;
-}
-
-.print .solstice-marker,
-.print .equinox-marker {
-  position: absolute;
-  width: 1.2em;
-  height: 1.2em;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: black;
-}
-
-/* ===================
-   Legacy / Possibly Unused Styles
-   =================== */
-/* POSSIBLY UNUSED - Old marker classes */
-.full-moon { 
-  width: 2em;
-  height: 2em;
-  background-color: #000;
-  border: 0.2em solid #000;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-}
-
-.solstice-marker {
-  position: absolute;
-  width: 2em;
-  height: 2em;
-  background: black;
-  transform: rotate(45deg);
-  top: 50%;
-  left: 50%;
-  margin-top: -1em;
-  margin-left: -1em;
-}
-
-.equinox-marker {
-  position: absolute;
-  width: 2em;
-  height: 2em;
-  background: black;
-  transform: rotate(45deg);
-  top: 50%;
-  left: 50%;
-  margin-top: -1em;
-  margin-left: -1em;
-}
-
-/* ===================
    Size-specific Styles
    =================== */
 .size-a6 .print { 
@@ -339,6 +253,7 @@ body {
 }
 
 .size-a6 .print .calendar-header {
+  margin-bottom: 1em;
 }
 
 .size-a6 .print .calendar-header h1 {
@@ -347,7 +262,8 @@ body {
 }
 
 .size-a6 .print:has(.calendar-header) .calendar-grid {
-  gap: .5em;
+  gap: 2em;
+  padding: 2em
 }
 
 .size-a6 .print:not(:has(.calendar-header)) {
@@ -363,48 +279,28 @@ body {
   min-height: 1.5em;
 }
 
-.size-a5 .print { 
+.size-a5 .print {
   font-size: 0.6em;
-  gap: 1em;
   padding: 2em;
 }
 
-.size-letter .print,
-.size-a4 .print { 
+.size-a5 .print .calendar-grid {
+  gap: 1em;
+}
+
+.size-a4 .print {
   font-size: 0.8em;
-  gap: 1em;
-  padding: 2.4em;
+  padding: 3em;
 }
 
-.size-legal .print { 
-  font-size: 0.9em;
-  gap: 1em;
-  padding: 2em;
-}
-
-.size-tabloid .print { 
-  font-size: 1em;
-  gap: 5em;
-  padding: 5em;
-}
-
-.orientation-portrait.size-tabloid .print {
-  gap: 2em;
-  padding: 4em;
+.size-a4 .print .calendar-grid {
+  gap: 1.5em;
 }
 
 /* ===================
    Responsive Styles
    =================== */
-.calendar h1,
-.calendar h2,
-.calendar h3 {
-  margin: 0;
-  padding: 0;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-}
+
 
 @media (min-width: 600px) {
   .calendar {
@@ -437,11 +333,5 @@ body {
 
 /* Print-specific styles */
 @media print {
-  .calendar {
-    padding: 0;
-  }
   
-  .calendar-grid {
-    gap: 1em;
-  }
 }
