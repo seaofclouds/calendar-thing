@@ -32,16 +32,14 @@ Optional:
 
 1. View Calendar:
 ```
-/2025                           # Full year
-/2025/letter/portrait          # Specific size/orientation
-/2025/01/letter/portrait      # Single month
+/2025                               # Full year
+/2025/letter/portrait               # Specific size/orientation
 ```
 
 2. Download Calendar:
 ```
-/2025/letter/portrait.png              # PNG at 300dpi
-/2025/letter/portrait/600dpi.jpg       # JPG at 600dpi
-/2025/01/a4/landscape/300dpi.png      # Single month
+/2025/letter/portrait.png            # PNG at 300dpi
+/2025/letter/portrait/600dpi.jpg     # JPG at 600dpi
 ```
 
 ### Query Parameters
@@ -55,11 +53,11 @@ Optional:
 
 When downloading, files are named using this format:
 ```
-YYYY--[MM]--calendar--SIZE--ORIENTATION--DDDdpi.FORMAT
+YYYY--calendar--SIZE--ORIENTATION--DDDdpi.FORMAT
 
 Examples:
 2025--calendar--letter--portrait--300dpi.png
-2025--01--calendar--a4--landscape--600dpi.jpg
+2025--calendar--a4--landscape--600dpi.jpg
 ```
 
 ### Default Layouts
@@ -100,3 +98,39 @@ The calendar displays automatically calculated celestial events:
 - [TypeScript](https://www.typescriptlang.org/) - Type safety
 - [astronomy-engine](https://github.com/cosinekitty/astronomy) - Celestial calculations
 - [html-to-image](https://github.com/bubkoo/html-to-image) - Image generation
+
+## Deployment
+
+This project is deployed on Cloudflare Pages with server-side rendering (SSR) enabled.
+
+### Local Development
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+### Deployment Process
+The project uses Git-based deployments through Cloudflare Pages with the following configuration:
+
+- Framework preset: Astro
+- Build command: `npm run build`
+- Build output directory: `dist`
+
+To deploy:
+1. Push changes to the repository
+2. Cloudflare Pages will automatically build and deploy the site
+3. Monitor the deployment in the Cloudflare Pages dashboard
+
+Note: While the project includes a `deploy` script, it's recommended to use Git-based deployment through Cloudflare Pages instead of manual deployments.
+
+## Upcoming Features
+
+- Monthly view: /2025/01/letter/portrait
+- Download Month:2025/01/a4/landscape/300dpi.png
+- load event dates into monthly view.

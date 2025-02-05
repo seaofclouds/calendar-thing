@@ -6,7 +6,8 @@ export default defineConfig({
   integrations: [react()],
   output: 'server',
   adapter: cloudflare({
-    mode: 'directory'
+    mode: 'directory',
+    imageService: 'compile'
   }),
   trailingSlash: 'never'
 });

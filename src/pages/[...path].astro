@@ -35,12 +35,12 @@ if (segments.length === 1) {
   </head>
   <body>
     <div id="root">
-      ${Calendar({
-        client: 'only="react"',
-        year: yearNum,
-        header: searchParams.header !== 'false',
-        testing: searchParams.test === 'true'
-      })}
+      <Calendar 
+        client:only="react"
+        year={yearNum}
+        header={searchParams.header !== 'false'}
+        testing={searchParams.test === 'true'}
+      />
     </div>
   </body>
 </html>
@@ -88,14 +88,14 @@ if (!outputFormat) {
   </head>
   <body>
     <div id="root">
-      ${Calendar({
-        client: 'only="react"',
-        year: yearNum,
-        size: size,
-        orientation: orientation,
-        header: searchParams.header !== 'false',
-        testing: searchParams.test === 'true'
-      })}
+      <Calendar 
+        client:only="react"
+        year={yearNum}
+        size={size}
+        orientation={orientation}
+        header={searchParams.header !== 'false'}
+        testing={searchParams.test === 'true'}
+      />
     </div>
   </body>
 </html>

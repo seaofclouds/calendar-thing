@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toPng, toJpeg } from 'html-to-image';
 import { Calendar } from './Calendar';
+
+const isBrowser = typeof window !== 'undefined';
 
 interface CalendarImageProps {
   format: 'png' | 'jpg';
@@ -44,6 +46,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasGeneratedRef = useRef(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Parse URL parameters with defaults
   const paperSize = PAPER_SIZES[size] || PAPER_SIZES.letter;
@@ -54,6 +57,8 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
     : paperSize;
 
   useEffect(() => {
+    if (!isBrowser) return; // Skip if not in browser environment
+    
     const generateImage = async () => {
       if (!containerRef.current || hasGeneratedRef.current || testing) return;
       
@@ -114,6 +119,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
 
       } catch (error) {
         console.error('Error generating image:', error);
+        setError('Failed to generate image');
       }
     };
 
@@ -147,9 +153,17 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
     zIndex: 1000
   } : {};
 
+  if (error) {
+    return (
+      <div style={{ color: 'red', padding: '1em' }}>
+        Error: {error}
+      </div>
+    );
+  }
+
   return (
     <>
-      {testing && (
+      {isBrowser && testing && (
         <div className="debug" style={debugStyle}>
           <div>Size: {size}</div>
           <div>Orientation: {orientation}</div>
