@@ -8,8 +8,5 @@ bucket = "./dist"
 command = "npm run build"
 output_dir = "dist"
 
-[env.production]
-workers_dev = true
-
 [build.upload]
-format = "service-worker"
+format = "module"
