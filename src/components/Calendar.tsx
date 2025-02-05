@@ -5,11 +5,9 @@ interface CalendarProps {
   year?: number;
   forPrint?: boolean;
   printColumns?: number;
-  totalMonths?: number;
+  rows?: number;
   size?: string;
   orientation?: 'portrait' | 'landscape';
-  rows?: number;
-  columns?: number;
   header?: boolean;
   testing?: boolean;
 }
@@ -21,22 +19,66 @@ interface DayData {
   isSpecialDay?: 'solstice' | 'equinox';
 }
 
+// Default rows by paper size
+const DEFAULT_ROWS = {
+  a6: 4,
+  legal: 5,
+  tabloid: 5
+};
+
 export const Calendar: React.FC<CalendarProps> = ({ 
   year = new Date().getFullYear(),
   forPrint = false, 
   printColumns = 3,
-  totalMonths = 15,
+  rows,
   size = 'letter',
   orientation = 'portrait',
-  rows = 4,
-  columns = 3,
   header = true,
   testing = false
 }) => {
   const [windowWidth, setWindowWidth] = useState<number>(0);
-  const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
   const showYearHeader = header;
+
+  // Use size-specific default rows if not provided
+  const actualRows = rows ?? DEFAULT_ROWS[size.toLowerCase()] ?? 4;
+  
+  // Calculate total months based on rows and columns
+  const totalMonths = actualRows * (orientation === 'landscape' ? 4 : 3);
+
+  useEffect(() => {
+    // Initialize window width after component mounts
+    setWindowWidth(window.innerWidth);
+
+    // Add window resize listener
+    const handleResize = () => {
+      const width = window.innerWidth;
+      let cols = 1;
+
+      if (testing || forPrint) {
+        // In testing or print mode, use the specified columns and orientation
+        cols = orientation === 'landscape' ? 4 : 3;
+      } else {
+        // Responsive layout for normal viewing
+        if (width >= 1200) {
+          cols = 4;
+        } else if (width >= 900) {
+          cols = 3;
+        } else if (width >= 600) {
+          cols = 2;
+        }
+      }
+
+      setWindowWidth(width);
+      setColumnCount(cols);
+    };
+    
+    handleResize();
+    if (!forPrint) {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [forPrint, orientation, testing]);
 
   // Parse year parameter or default to current year
   const baseYear = year;
@@ -47,8 +89,6 @@ export const Calendar: React.FC<CalendarProps> = ({
   const [solarEvents, setSolarEvents] = useState<Record<string, 'solstice' | 'equinox'>>({});
 
   useEffect(() => {
-    console.log('Calendar: Starting astronomical calculations for year:', baseYear);
-    
     async function fetchAstronomicalData() {
       try {
         const moons = await getFullMoonDates(baseYear, nextYear);
@@ -71,54 +111,12 @@ export const Calendar: React.FC<CalendarProps> = ({
     fetchAstronomicalData();
   }, [baseYear, nextYear]);
 
-  useEffect(() => {
-    // Initialize window width after component mounts
-    setWindowWidth(window.innerWidth);
-
-    // Add window resize listener
-    const handleResize = () => {
-      const width = window.innerWidth;
-      let cols = 1;
-      let months = 14;
-
-      if (testing || forPrint) {
-        // In testing or print mode, use the specified columns and orientation
-        cols = orientation === 'landscape' ? 4 : 3;
-        months = cols === 4 ? 16 : 15;
-      } else {
-        // Responsive layout for normal viewing
-        if (width >= 1200) {
-          cols = 4;
-          months = 16;
-        } else if (width >= 900) {
-          cols = 3;
-          months = 15;
-        } else if (width >= 600) {
-          cols = 2;
-          months = 14;
-        }
-      }
-
-      setWindowWidth(width);
-      setColumnCount(cols);
-      setVisibleMonths(months);
-    };
-    
-    handleResize();
-    if (!forPrint) {
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, [forPrint, orientation, testing]);
-
-  const months = Array.from({ length: 18 }, (_, i) => {
+  const months = Array.from({ length: totalMonths }, (_, i) => {
     const monthIndex = i % 12;
     const yearOffset = Math.floor(i / 12);
-    const year = baseYear + yearOffset;
-    console.log(`Generating month ${monthIndex + 1} for year ${year}`);
     return {
       month: monthIndex,
-      year
+      year: baseYear + yearOffset
     };
   });
 
@@ -197,7 +195,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         </div>
       )}
       <div className="calendar-grid">
-        {months.slice(0, visibleMonths).map(({ month, year }) => (
+        {months.map(({ month, year }) => (
           <div key={`${year}-${month}`} className="month">
             <div className="month-header">
               <h2>

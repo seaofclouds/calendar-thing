@@ -27,7 +27,8 @@ if (isNaN(yearNum)) {
   throw new Error(`Invalid year: ${year}`);
 }
 
-// Set default values
+// Get rows from URL params (if provided)
+const rows = searchParams.rows ? parseInt(searchParams.rows) : undefined;
 const showHeader = searchParams.header !== 'false';
 const isTesting = searchParams.test === 'true';
 
@@ -71,17 +72,19 @@ const wrapperClasses = [
           size={size}
           orientation={orientation}
           forPrint={isPreviewMode}
+          rows={rows}
         />
       ) : (
         <CalendarImage
           client:visible
           year={yearNum}
           header={showHeader}
-          testing={false}
+          testing={isTesting}
           size={size}
           orientation={orientation}
           format={format}
           dpi={dpi}
+          rows={rows}
         />
       )}
     </div>
@@ -95,6 +98,7 @@ const wrapperClasses = [
         orientation,
         format,
         dpi,
+        rows,
         isPreviewMode
       });
       

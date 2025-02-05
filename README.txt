@@ -9,6 +9,8 @@ A responsive calendar application that generates high-quality calendar images wi
 - High-resolution image export (PNG/JPG)
 - Multiple paper sizes and orientations
 - Responsive layout with configurable grid system
+- Size-specific default layouts
+- Test mode for layout preview
 
 ## Usage Guide
 
@@ -28,6 +30,36 @@ Optional:
 - `dpi`: Resolution for export (default: 300)
 - `format`: File format (png, jpg)
 
+### Query Parameters
+
+- `header=false`: Hide the year header
+- `test=true`: Enable layout debug mode
+- `rows=N`: Override default row count
+
+### Generated Filenames
+
+When downloading, files are named using this format:
+```
+calendar-YYYY-DDDdpi-SIZE-ORIENTATION.FORMAT
+
+Examples:
+calendar-2025-300dpi-letter-portrait.png
+calendar-2025-600dpi-a4-landscape.jpg
+```
+
+### Default Layouts
+
+Each size and orientation has a specific default grid layout:
+
+| Size    | Portrait    | Landscape   |
+|---------|-------------|-------------|
+| A6      | 4 × 3      | 3 × 4      |
+| A5      | 4 × 3      | 3 × 4      |
+| A4      | 4 × 3      | 3 × 4      |
+| Letter  | 4 × 3      | 3 × 4      |
+| Legal   | 5 × 3      | 3 × 5      |
+| Tabloid | 5 × 3      | 3 × 5      |
+
 ### Examples
 
 1. View Calendar:
@@ -38,44 +70,16 @@ Optional:
 
 2. Download Calendar:
 ```
-/2025/letter/portrait.png            # PNG at 300dpi
-/2025/letter/portrait/600dpi.jpg     # JPG at 600dpi
+/2025/letter/portrait/300dpi.png    # PNG at 300dpi
+/2025/a6/landscape/600dpi.png       # A6 landscape at 600dpi
 ```
 
-### Query Parameters
-
-- `header=false`: Hide the year header
-- `test=true`: Enable layout debug mode
-- `rows=N`: Override default row count
-- `columns=N`: Override default column count
-
-### Generated Filenames
-
-When downloading, files are named using this format:
+3. Test and Customize:
 ```
-YYYY--calendar--SIZE--ORIENTATION--DDDdpi.FORMAT
-
-Examples:
-2025--calendar--letter--portrait--300dpi.png
-2025--calendar--a4--landscape--600dpi.jpg
+/2025/a6/portrait/300dpi.png?test=true      # Preview layout
+/2025/legal/portrait/600dpi.png?rows=4      # Custom rows
+/2025/a4/landscape/300dpi.png?header=false  # No header
 ```
-
-### Default Layouts
-
-1. Portrait Orientation:
-   - Letter/A4/Legal/Tabloid: 3 columns × 5 rows
-   - A5/A6: 3 columns × 4 rows
-
-2. Landscape Orientation:
-   - All sizes: 4 columns × 3 rows
-
-### Paper Sizes (at 300 DPI)
-- A6: 1240 × 1748 px
-- A5: 1748 × 2480 px
-- A4: 2480 × 3508 px
-- Letter: 2550 × 3300 px
-- Legal: 2550 × 4200 px
-- Tabloid: 3300 × 5100 px
 
 ## Astronomical Features
 

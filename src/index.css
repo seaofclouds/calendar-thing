@@ -195,14 +195,12 @@ body {
 }
 
 .calendar.print {
-  padding: 2em;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 0;
-  /* Inherit font size from print container */
   font-size: inherit;
 }
 
@@ -210,7 +208,8 @@ body {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
-  grid-auto-rows: 1fr;
+  grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
+  gap: 1em;
   box-sizing: border-box;
 }
 
@@ -243,7 +242,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* aspect-ratio: 1; Make days square */
   height: 100%;
   box-sizing: border-box;
 }
@@ -319,6 +317,14 @@ body {
 
 .size-a6 .calendar.print .calendar-grid {
   gap: 1em 2em;
+}
+
+.size-a6 .calendar.print .calendar-header {
+  margin-bottom: 1em;
+}
+
+.size-a6 .calendar.print .calendar-header h1 {
+  font-size: 2.5em;
 }
 
 /* A5 styles */
