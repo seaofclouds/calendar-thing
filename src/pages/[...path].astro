@@ -30,6 +30,27 @@ if (isNaN(yearNum)) {
 // Set default values
 const showHeader = searchParams.header !== 'false';
 const isTesting = searchParams.test === 'true';
+
+// Parse image format and DPI if present
+let format: 'png' | 'jpg' | null = null;
+let dpi = 300;
+
+if (lastSegment) {
+  const [dpiPart, formatPart] = lastSegment.split('.');
+  if (formatPart === 'png' || formatPart === 'jpg') {
+    format = formatPart;
+    dpi = parseInt(dpiPart.replace('dpi', '')) || 300;
+  }
+}
+
+// Determine if we're in preview/export mode
+const isPreviewMode = Boolean(size && orientation);
+
+// Build wrapper classes for proper CSS hierarchy
+const wrapperClasses = [
+  size ? `size-${size.toLowerCase()}` : '',
+  orientation ? `orientation-${orientation.toLowerCase()}` : ''
+].filter(Boolean).join(' ');
 ---
 
 <html lang="en">
@@ -39,24 +60,42 @@ const isTesting = searchParams.test === 'true';
     <title>Calendar {year}</title>
   </head>
   <body>
-    <div style="padding: 20px;">
-      <h1>Calendar {year}</h1>
-      <div id="error-display" style="display: none; color: red; padding: 1em; margin: 1em; border: 1px solid red;"></div>
-      <div id="root">
+    <div id="error-display" style="display: none; color: red; padding: 1em; margin: 1em; border: 1px solid red;"></div>
+    <div id="root" class={wrapperClasses}>
+      {!format ? (
         <Calendar 
           client:visible
           year={yearNum}
           header={showHeader}
           testing={isTesting}
+          size={size}
+          orientation={orientation}
+          forPrint={isPreviewMode}
         />
-      </div>
+      ) : (
+        <CalendarImage
+          client:visible
+          year={yearNum}
+          header={showHeader}
+          testing={false}
+          size={size}
+          orientation={orientation}
+          format={format}
+          dpi={dpi}
+        />
+      )}
     </div>
 
     <script>
       console.log('Calendar props:', {
         year: yearNum,
         header: showHeader,
-        testing: isTesting
+        testing: isTesting,
+        size,
+        orientation,
+        format,
+        dpi,
+        isPreviewMode
       });
       
       window.addEventListener('error', (e) => {

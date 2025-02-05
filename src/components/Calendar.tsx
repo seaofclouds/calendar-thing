@@ -52,23 +52,16 @@ export const Calendar: React.FC<CalendarProps> = ({
     async function fetchAstronomicalData() {
       try {
         const moons = await getFullMoonDates(baseYear, nextYear);
-        console.log('Calendar: Received full moon dates:', moons);
         setFullMoonDates(moons);
-
-        const events = await getSolarEvents(baseYear, nextYear);
-        console.log('Calendar: Received solar events:', events);
         
-        // Create a map of date -> event type based on the month
+        const events = await getSolarEvents(baseYear, nextYear);
         const eventMap: Record<string, 'solstice' | 'equinox'> = {};
         events.forEach(date => {
-          // Determine event type based on month
           const month = parseInt(date.split('-')[1]);
           const type = (month === 3 || month === 9) ? 'equinox' : 'solstice';
-          console.log(`Calendar: Adding ${type} event for ${date}`);
           eventMap[date] = type;
         });
         
-        console.log('Calendar: Final solar events map:', eventMap);
         setSolarEvents(eventMap);
       } catch (error) {
         console.error('Error fetching astronomical data:', error);
@@ -84,42 +77,39 @@ export const Calendar: React.FC<CalendarProps> = ({
 
     // Add window resize listener
     const handleResize = () => {
-      if (forPrint) {
-        // If totalMonths is provided, use it (ensuring minimum of 12)
-        // Otherwise calculate based on columns to show 15 or 16 months
-        const defaultMonths = printColumns === 4 ? 16 : 15;
-        const months = totalMonths ? Math.max(12, totalMonths) : defaultMonths;
-        setColumnCount(printColumns);
-        setVisibleMonths(months);
-        return;
-      }
-
       const width = window.innerWidth;
-      let columns = 1;
+      let cols = 1;
       let months = 14;
 
-      if (width >= 1200) {
-        columns = 4;
-        months = 16;
-      } else if (width >= 900) {
-        columns = 3;
-        months = 15;
-      } else if (width >= 600) {
-        columns = 2;
-        months = 14;
+      if (testing || forPrint) {
+        // In testing or print mode, use the specified columns and orientation
+        cols = orientation === 'landscape' ? 4 : 3;
+        months = cols === 4 ? 16 : 15;
+      } else {
+        // Responsive layout for normal viewing
+        if (width >= 1200) {
+          cols = 4;
+          months = 16;
+        } else if (width >= 900) {
+          cols = 3;
+          months = 15;
+        } else if (width >= 600) {
+          cols = 2;
+          months = 14;
+        }
       }
 
       setWindowWidth(width);
-      setColumnCount(columns);
+      setColumnCount(cols);
       setVisibleMonths(months);
     };
     
-    handleResize(); 
+    handleResize();
     if (!forPrint) {
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }
-  }, [forPrint, printColumns, totalMonths]);
+  }, [forPrint, orientation, testing]);
 
   const months = Array.from({ length: 18 }, (_, i) => {
     const monthIndex = i % 12;
@@ -196,7 +186,7 @@ export const Calendar: React.FC<CalendarProps> = ({
   };
 
   const calendarStyle = {
-    '--print-columns': forPrint ? printColumns : columnCount
+    '--print-columns': testing || forPrint ? (orientation === 'landscape' ? 4 : 3) : columnCount
   } as React.CSSProperties;
 
   return (

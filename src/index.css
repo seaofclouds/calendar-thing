@@ -31,11 +31,10 @@ html {
    Layout Containers 
    =================== */
 body {
-  height: 100%; /* Inherit full height from html */
+  height: 100%;
   margin: 0;
   padding: 0;
   display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
   background: white;
@@ -43,11 +42,10 @@ body {
 
 #root {
   width: 100%;
-  height: 100%; /* Inherit full height from body */
   margin: 0;
   padding: 0;
   text-align: center;
-  display: flex; /* Add flex to ensure child fills height */
+  display: flex;
   flex-direction: column;
 }
 
@@ -272,50 +270,108 @@ body {
    Size-specific Styles
    =================== */
 
-/* Use rem for the base scaling of different paper sizes */
+/* Paper dimensions and orientations */
+#root.size-a6 {
+  width: 105mm;
+  height: 148mm;
+}
 
-/* A6 ================ */
-.size-a6 .print { 
+#root.size-a6.orientation-landscape {
+  width: 148mm;
+  height: 105mm;
+}
+
+#root.size-a5 {
+  width: 148mm;
+  height: 210mm;
+}
+
+#root.size-a5.orientation-landscape {
+  width: 210mm;
+  height: 148mm;
+}
+
+#root.size-a4 {
+  width: 210mm;
+  height: 297mm;
+}
+
+#root.size-a4.orientation-landscape {
+  width: 297mm;
+  height: 210mm;
+}
+
+#root.size-letter {
+  width: 215.9mm;
+  height: 279.4mm;
+}
+
+#root.size-letter.orientation-landscape {
+  width: 279.4mm;
+  height: 215.9mm;
+}
+
+/* A6 styles */
+.size-a6 .calendar.print {
   font-size: 0.5rem;
   padding: 1.5em;
 }
-.size-a6 .print .calendar-grid {
+
+.size-a6 .calendar.print .calendar-grid {
   gap: 1em 2em;
 }
 
-/* A5 ================ */
-.size-a5 .print {
+/* A5 styles */
+.size-a5 .calendar.print {
   font-size: 0.6rem;
   padding: 3em;
 }
-.size-a5 .print .calendar-header h1 {
-  padding-bottom: .6em;
-}
-.size-a5 .print .calendar-grid {
+
+.size-a5 .calendar.print .calendar-grid {
   gap: 1.5em 3em;
 }
-.size-a5.orientation-landscape .print .calendar-grid {
+
+.size-a5.orientation-landscape .calendar.print .calendar-grid {
   gap: 2em 2.6em;
 }
 
-/* A4/LETTER ========= */
+/* A4/Letter styles */
+.size-a4 .calendar.print,
+.size-letter .calendar.print {
+  font-size: 0.8rem;
+  padding: 4em;
+}
 
-.size-a4 .print,
-.size-letter .print {
-  font-size: 0.7rem;
-  padding: 7em;
+.size-a4 .calendar.print .calendar-grid,
+.size-letter .calendar.print .calendar-grid {
+  gap: 2em 4em;
 }
-.size-a4 .print .calendar-header h1,
-.size-letter .print .calendar-header h1 {
-  padding-bottom: .8em;
+
+.size-a4.orientation-landscape .calendar.print .calendar-grid,
+.size-letter.orientation-landscape .calendar.print .calendar-grid {
+  gap: 3em 3.5em;
 }
-.size-a4 .print .calendar-grid, 
-.size-letter .print .calendar-grid {
-  gap: 1em 3em;
+
+/* Additional print-specific styles */
+.calendar.print .calendar-header h1 {
+  padding-bottom: 1em;
 }
-.size-a4.orientation-landscape .print .calendar-grid,
-.size-letter.orientation-landscape .print .calendar-grid {
-  gap: 3em 4em;
+
+.calendar.print .month-header {
+  padding: 0;
+}
+
+.calendar.print .month-grid {
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.calendar.print .calendar-day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 /* legal ========= */
