@@ -12,6 +12,7 @@ interface CalendarImageProps {
   header?: boolean;
   testing?: boolean;
   year?: number;
+  filename?: string;
 }
 
 // Standard print DPI
@@ -38,7 +39,8 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
   dpi = 300,
   header = true,
   testing = false,
-  year = new Date().getFullYear()
+  year = new Date().getFullYear(),
+  filename
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasGeneratedRef = useRef(false);
@@ -98,7 +100,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
           : await toJpeg(containerRef.current, options);
         
         const link = document.createElement('a');
-        link.download = `calendar-${year}-${dpi}dpi-${size}-${orientation}.${format}`;
+        link.download = `${filename || `calendar-${year}-${dpi}dpi-${size}-${orientation}`}.${format}`;
         link.href = dataUrl;
         link.click();
 
@@ -118,7 +120,7 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
     // Small delay to ensure component is fully rendered
     const timeoutId = setTimeout(generateImage, 100);
     return () => clearTimeout(timeoutId);
-  }, [format, size, orientation, columns, rows, dpi, dimensions, testing]);
+  }, [format, size, orientation, columns, rows, dpi, dimensions, testing, filename]);
 
   // Calculate base size to match paper aspect ratio
   const baseStyle: React.CSSProperties = {

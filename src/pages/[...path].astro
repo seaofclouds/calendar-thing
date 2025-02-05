@@ -6,18 +6,99 @@ import '../index.css';
 // Get path segments and search params
 const { path } = Astro.params;
 const segments = path?.split('/') || [];
-const [year, format] = segments;
 const url = new URL(Astro.request.url);
 const searchParams = Object.fromEntries(url.searchParams);
 
 // Handle root redirect
-if (!year) {
+if (!segments.length || segments[0] === '') {
   return Astro.redirect(`/${new Date().getFullYear()}`);
 }
 
-// Get orientation and size first to determine other defaults
-const orientation = searchParams.orientation || 'portrait';
-const size = searchParams.size || 'letter';
+// Parse URL segments for RESTful structure
+let [year, size, orientation, lastSegment] = segments;
+
+// Check if second segment is a month
+if (segments.length > 1 && /^(0[1-9]|1[0-2])$/.test(segments[1])) {
+  [year, /* month */, size, orientation, lastSegment] = segments;
+}
+
+// Show calendar view if only year is provided
+if (segments.length === 1) {
+  const yearNum = parseInt(year);
+  return (
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Calendar {year}</title>
+      </head>
+      <body>
+        <div id="root">
+          <Calendar 
+            client:only="react"
+            year={yearNum}
+            header={searchParams.header !== 'false'}
+            testing={searchParams.test === 'true'}
+          />
+        </div>
+      </body>
+    </html>
+  );
+}
+
+// Validate required URL segments
+if (!year || !size || !orientation) {
+  return new Response('Invalid URL format. Use: /<year>[/month]/size/orientation[/dpidpi.format]', {
+    status: 400
+  });
+}
+
+// Parse format and DPI if provided in the last segment
+let outputFormat: 'png' | 'jpg' | null = null;
+let dpi = 300; // Default DPI
+
+if (lastSegment) {
+  // Check if it's just a format extension
+  if (lastSegment.startsWith('.')) {
+    outputFormat = lastSegment.slice(1).toLowerCase() as 'png' | 'jpg';
+  } else {
+    // Parse DPI and format
+    const [dpiValue, extension] = lastSegment.split('.');
+    dpi = parseInt(dpiValue?.replace('dpi', '') || '300');
+    outputFormat = extension?.toLowerCase() as 'png' | 'jpg';
+  }
+
+  // Validate format if provided
+  if (outputFormat && !['png', 'jpg'].includes(outputFormat)) {
+    return new Response('Invalid format. Use: png or jpg', { status: 400 });
+  }
+}
+
+// If no format specified, just show the calendar view
+if (!outputFormat) {
+  const yearNum = parseInt(year);
+  return (
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Calendar {year}</title>
+      </head>
+      <body>
+        <div id="root">
+          <Calendar 
+            client:only="react"
+            year={yearNum}
+            size={size}
+            orientation={orientation}
+            header={searchParams.header !== 'false'}
+            testing={searchParams.test === 'true'}
+          />
+        </div>
+      </body>
+    </html>
+  );
+}
 
 // Determine default rows and columns based on orientation and size
 const defaultColumns = orientation === 'landscape' ? 4 : 3;
@@ -38,17 +119,25 @@ const params = {
   orientation,
   rows: parseInt(searchParams.rows || String(defaultRows)),
   columns: parseInt(searchParams.columns || String(defaultColumns)),
-  dpi: parseInt(searchParams.dpi || '300'),
-  header: searchParams.header !== 'off',
-  testing: searchParams.testing === 'on'
+  dpi,
+  header: searchParams.header !== 'false',
+  testing: searchParams.test === 'true'
 };
 
 // Set title based on route
-const title = format 
-  ? `Calendar ${year} - ${format.toUpperCase()}`
-  : `Calendar ${year}`;
-
 const yearNum = parseInt(year);
+const month = segments.length > 1 && /^(0[1-9]|1[0-2])$/.test(segments[1]) ? segments[1] : null;
+const title = `Calendar ${year}${month ? `/${month}` : ''} - ${outputFormat.toUpperCase()}`;
+
+// Generate filename based on parameters
+const filename = [
+  year,
+  month,
+  'calendar',
+  size,
+  orientation,
+  `${dpi}dpi`
+].filter(Boolean).join('--');
 ---
 
 <!DOCTYPE html>
@@ -60,20 +149,13 @@ const yearNum = parseInt(year);
   </head>
   <body>
     <div id="root">
-      {format ? (
-        <CalendarImage 
-          client:only="react"
-          format={format as 'png' | 'jpg'}
-          year={yearNum}
-          {...params}
-        />
-      ) : (
-        <Calendar 
-          client:only="react"
-          year={yearNum}
-          {...params}
-        />
-      )}
+      <CalendarImage 
+        client:only="react"
+        format={outputFormat}
+        year={yearNum}
+        filename={filename}
+        {...params}
+      />
     </div>
   </body>
 </html>

@@ -1,75 +1,68 @@
 # Calendar Thing
 
-A responsive calendar application that generates high-quality calendar images for various paper sizes and orientations. Features astronomical data integration for accurate celestial event tracking.
+A responsive calendar application that generates high-quality calendar images with astronomical data integration. Features customizable layouts, multiple paper sizes, and accurate celestial event tracking.
 
 ## Features
 
-- Parameterized year selection via URL (e.g., `/2025`, `/2026`)
-- Astronomical event indicators:
-  - Full moon phases (calculated using astronomy-engine)
-  - Solstices (Summer and Winter)
-  - Equinoxes (Spring and Fall)
-- Responsive layout that adapts to different screen sizes
+- RESTful URL interface for viewing and generating calendars
+- Astronomical event indicators (moon phases, solstices, equinoxes)
 - High-resolution image export (PNG/JPG)
-- Multiple paper size support
-- Portrait and landscape orientations
+- Multiple paper sizes and orientations
+- Responsive layout with configurable grid system
 
-## Tech Stack
+## Usage Guide
 
-- [Astro](https://astro.build/) - Web framework for content-focused websites
-- [React](https://reactjs.org/) - UI components and interactivity
-- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
-- [astronomy-engine](https://github.com/cosinekitty/astronomy) - Astronomical calculations
-- [html-to-image](https://github.com/bubkoo/html-to-image) - High-quality image generation
+### URL Structure
 
-The application is built with Astro for optimal static site generation while leveraging React for interactive components. TypeScript ensures type safety across the codebase. The astronomy-engine provides precise celestial calculations, and html-to-image enables high-quality calendar exports.
+```
+/<year>[/month]/<size>/<orientation>[/<dpi>dpi.<format>]
+```
 
-## URL Structure
+Required:
+- `year`: Four-digit year (e.g., 2025)
+- `size`: Paper size (a6, a5, a4, letter, legal, tabloid)
+- `orientation`: Page orientation (portrait, landscape)
 
-The application supports the following URL patterns:
+Optional:
+- `month`: Two-digit month (01-12)
+- `dpi`: Resolution for export (default: 300)
+- `format`: File format (png, jpg)
 
-- `/:year` - View calendar for specified year (e.g., `/2025`)
-- `/:year/png` - Export calendar as PNG (e.g., `/2025/png`)
-- `/:year/jpg` - Export calendar as JPG (e.g., `/2025/jpg`)
+### Examples
 
-## URL Parameters
+1. View Calendar:
+```
+/2025                           # Full year
+/2025/letter/portrait          # Specific size/orientation
+/2025/01/letter/portrait      # Single month
+```
 
-The application supports the following URL parameters for customizing the calendar layout:
+2. Download Calendar:
+```
+/2025/letter/portrait.png              # PNG at 300dpi
+/2025/letter/portrait/600dpi.jpg       # JPG at 600dpi
+/2025/01/a4/landscape/300dpi.png      # Single month
+```
 
-- `header`: Control year header visibility (default: on)
-  - Options: on, off
-  - Example: `?header=off`
+### Query Parameters
 
-- `size`: Paper size (default: letter)
-  - Options: a6, a5, a4, letter, legal, tabloid
-  - Example: `?size=a4`
+- `header=false`: Hide the year header
+- `test=true`: Enable layout debug mode
+- `rows=N`: Override default row count
+- `columns=N`: Override default column count
 
-- `orientation`: Page orientation (default: portrait)
-  - Options: portrait, landscape
-  - Example: `?orientation=landscape`
+### Generated Filenames
 
-- `rows`: Number of rows in the grid
-  - Default values:
-    - Portrait: 5 rows for letter/a4/legal/tabloid, 4 rows for other sizes
-    - Landscape: 3 rows for all sizes
-  - Example: `?rows=4`
+When downloading, files are named using this format:
+```
+YYYY--[MM]--calendar--SIZE--ORIENTATION--DDDdpi.FORMAT
 
-- `columns`: Number of columns in the grid
-  - Default values:
-    - Portrait: 3 columns for all sizes
-    - Landscape: 4 columns for all sizes
-  - Example: `?columns=3`
+Examples:
+2025--calendar--letter--portrait--300dpi.png
+2025--01--calendar--a4--landscape--600dpi.jpg
+```
 
-- `dpi`: Resolution for image export (default: 300)
-  - Example: `?dpi=600`
-
-- `testing`: Enable test mode to show layout debug info (default: off)
-  - Options: on, off
-  - Example: `?testing=on`
-
-### Layout Defaults
-
-The calendar layout automatically adjusts based on orientation and paper size:
+### Default Layouts
 
 1. Portrait Orientation:
    - Letter/A4/Legal/Tabloid: 3 columns × 5 rows
@@ -78,111 +71,32 @@ The calendar layout automatically adjusts based on orientation and paper size:
 2. Landscape Orientation:
    - All sizes: 4 columns × 3 rows
 
-These defaults can be overridden using the `rows` and `columns` URL parameters.
-
-### Example URLs
-
-```
-# Portrait Letter (3×5)
-/2025/png?size=letter
-
-# Portrait A6 (3×4)
-/2025/png?size=a6
-
-# Landscape Letter (4×3)
-/2025/png?size=letter&orientation=landscape
-
-# Custom Layout
-/2025/png?size=a4&rows=6&columns=2&dpi=600
-```
+### Paper Sizes (at 300 DPI)
+- A6: 1240 × 1748 px
+- A5: 1748 × 2480 px
+- A4: 2480 × 3508 px
+- Letter: 2550 × 3300 px
+- Legal: 2550 × 4200 px
+- Tabloid: 3300 × 5100 px
 
 ## Astronomical Features
 
-The calendar incorporates astronomical calculations using the astronomy-engine library to display celestial events:
+The calendar displays automatically calculated celestial events:
 
-### Full Moon Indicators
-- Automatically calculated for the selected year
-- Displayed as circular markers on the corresponding dates
-- Updates dynamically when changing years
+1. Moon Phases
+   - Full moon dates with circular markers
+   - Calculated using precise astronomical algorithms
 
-### Solar Events
-- Spring Equinox (March)
-- Summer Solstice (June)
-- Fall Equinox (September)
-- Winter Solstice (December)
-- Displayed as diamond-shaped markers on the corresponding dates
+2. Solar Events
+   - Spring Equinox (March)
+   - Summer Solstice (June)
+   - Fall Equinox (September)
+   - Winter Solstice (December)
 
-## Image Export
+## Tech Stack
 
-The application can generate high-quality PNG and JPG images of the calendar. The export resolution is controlled by the `dpi` parameter.
-
-### Resolution Guidelines
-- Screen viewing: 72-150 DPI
-- Standard printing: 300 DPI
-- High-quality printing: 600 DPI
-
-### Paper Size Dimensions (in pixels at 300 DPI)
-- A6: 1240 × 1748 pixels
-- A5: 1748 × 2480 pixels
-- A4: 2480 × 3508 pixels
-- Letter: 2550 × 3300 pixels
-- Legal: 2550 × 4200 pixels
-- Tabloid: 3300 × 5100 pixels
-
-## Layout Features
-
-### Responsive Design
-- Automatically adjusts font sizes for different paper formats
-- Maintains proper spacing ratios across all sizes
-- Uses relative units (em/rem) for consistent scaling
-
-### Grid System
-- Flexible month grid with configurable columns and rows
-- Proportional day cells that maintain aspect ratio
-- Consistent spacing between months and elements
-
-### Visual Indicators
-- Day markers (full moon, solstice, equinox) scale with text size
-- Clear visual hierarchy with proportional header sizes
-- Optional testing mode for layout visualization
-
-## Examples
-
-Generate a calendar for 2026:
-```
-/2026
-```
-
-View calendar for 2025 without the year header:
-```
-/2025?header=off
-```
-
-Generate a 4-column landscape A4 calendar at 300 DPI:
-```
-/2025/png?size=a4&orientation=landscape&columns=4&dpi=300
-```
-
-Create a high-resolution tabloid calendar with testing mode:
-```
-/2025/png?size=tabloid&header=on&orientation=portrait&rows=5&columns=3&dpi=300&testing=on
-```
-
-Generate a compact A6 calendar with testing indicators:
-```
-/2025/png?size=a6&header=on&orientation=portrait&rows=4&columns=3&dpi=300&testing=on
-```
-
-## Technical Details
-
-### Astronomical Calculations
-The calendar uses the astronomy-engine library to calculate:
-- Full moon phases using `SearchMoonQuarter` and `NextMoonQuarter`
-- Solstices and equinoxes using the `Seasons` function
-- All calculations are performed in UTC to ensure accuracy
-
-### Year Parameterization
-- Default year is 2025 if not specified
-- Supports any valid year through the URL parameter
-- Automatically calculates astronomical events for the selected year
-- Displays 15 months starting from January of the selected year
+- [Astro](https://astro.build/) - Web framework
+- [React](https://reactjs.org/) - UI components
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [astronomy-engine](https://github.com/cosinekitty/astronomy) - Celestial calculations
+- [html-to-image](https://github.com/bubkoo/html-to-image) - Image generation
