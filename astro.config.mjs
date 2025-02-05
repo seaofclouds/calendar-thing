@@ -4,7 +4,9 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   integrations: [react()],
-  output: 'server',  // Use server output to handle dynamic routes
-  adapter: cloudflare(),
+  output: 'server',
+  adapter: cloudflare({
+    mode: 'directory'
+  }),
   trailingSlash: 'never'
 });

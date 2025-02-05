@@ -25,26 +25,26 @@ if (segments.length > 1 && /^(0[1-9]|1[0-2])$/.test(segments[1])) {
 // Show calendar view if only year is provided
 if (segments.length === 1) {
   const yearNum = parseInt(year);
-  return (
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Calendar {year}</title>
-      </head>
-      <body>
-        <div id="root">
-          <Calendar 
-            client:only="react"
-            year={yearNum}
-            header={searchParams.header !== 'false'}
-            testing={searchParams.test === 'true'}
-          />
-        </div>
-      </body>
-    </html>
-  );
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar ${year}</title>
+  </head>
+  <body>
+    <div id="root">
+      ${Calendar({
+        client: 'only="react"',
+        year: yearNum,
+        header: searchParams.header !== 'false',
+        testing: searchParams.test === 'true'
+      })}
+    </div>
+  </body>
+</html>
+  `;
 }
 
 // Validate required URL segments
@@ -78,28 +78,28 @@ if (lastSegment) {
 // If no format specified, just show the calendar view
 if (!outputFormat) {
   const yearNum = parseInt(year);
-  return (
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Calendar {year}</title>
-      </head>
-      <body>
-        <div id="root">
-          <Calendar 
-            client:only="react"
-            year={yearNum}
-            size={size}
-            orientation={orientation}
-            header={searchParams.header !== 'false'}
-            testing={searchParams.test === 'true'}
-          />
-        </div>
-      </body>
-    </html>
-  );
+  return `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar ${year}</title>
+  </head>
+  <body>
+    <div id="root">
+      ${Calendar({
+        client: 'only="react"',
+        year: yearNum,
+        size: size,
+        orientation: orientation,
+        header: searchParams.header !== 'false',
+        testing: searchParams.test === 'true'
+      })}
+    </div>
+  </body>
+</html>
+  `;
 }
 
 // Determine default rows and columns based on orientation and size
@@ -146,7 +146,7 @@ const filename = [
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
   </head>
   <body>
