@@ -7,7 +7,8 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare({
     mode: 'directory',
-    imageService: 'compile'
+    imageService: 'compile',
+    functionPerRoute: true
   }),
   trailingSlash: 'never'
 });

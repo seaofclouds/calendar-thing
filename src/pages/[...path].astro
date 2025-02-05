@@ -25,32 +25,40 @@ if (segments.length > 1 && /^(0[1-9]|1[0-2])$/.test(segments[1])) {
 // Show calendar view if only year is provided
 if (segments.length === 1) {
   const yearNum = parseInt(year);
-  return `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar ${year}</title>
-  </head>
-  <body>
-    <div id="root">
-      <Calendar 
-        client:only="react"
-        year={yearNum}
-        header={searchParams.header !== 'false'}
-        testing={searchParams.test === 'true'}
-      />
-    </div>
-  </body>
-</html>
-  `;
+  return new Response(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Calendar ${year}</title>
+      </head>
+      <body>
+        <div id="root">
+          <Calendar 
+            client:only="react"
+            year={yearNum}
+            header={searchParams.header !== 'false'}
+            testing={searchParams.test === 'true'}
+          />
+        </div>
+      </body>
+    </html>
+  `, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html',
+    },
+  });
 }
 
 // Validate required URL segments
 if (!year || !size || !orientation) {
   return new Response('Invalid URL format. Use: /<year>[/month]/size/orientation[/dpidpi.format]', {
-    status: 400
+    status: 400,
+    headers: {
+      'Content-Type': 'text/plain',
+    },
   });
 }
 
@@ -71,35 +79,45 @@ if (lastSegment) {
 
   // Validate format if provided
   if (outputFormat && !['png', 'jpg'].includes(outputFormat)) {
-    return new Response('Invalid format. Use: png or jpg', { status: 400 });
+    return new Response('Invalid format. Use: png or jpg', {
+      status: 400,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
   }
 }
 
 // If no format specified, just show the calendar view
 if (!outputFormat) {
   const yearNum = parseInt(year);
-  return `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar ${year}</title>
-  </head>
-  <body>
-    <div id="root">
-      <Calendar 
-        client:only="react"
-        year={yearNum}
-        size={size}
-        orientation={orientation}
-        header={searchParams.header !== 'false'}
-        testing={searchParams.test === 'true'}
-      />
-    </div>
-  </body>
-</html>
-  `;
+  return new Response(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Calendar ${year}</title>
+      </head>
+      <body>
+        <div id="root">
+          <Calendar 
+            client:only="react"
+            year={yearNum}
+            size={size}
+            orientation={orientation}
+            header={searchParams.header !== 'false'}
+            testing={searchParams.test === 'true'}
+          />
+        </div>
+      </body>
+    </html>
+  `, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html',
+    },
+  });
 }
 
 // Determine default rows and columns based on orientation and size
@@ -140,24 +158,31 @@ const filename = [
   orientation,
   `${dpi}dpi`
 ].filter(Boolean).join('--');
----
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
-  </head>
-  <body>
-    <div id="root">
-      <CalendarImage 
-        client:only="react"
-        format={outputFormat}
-        year={yearNum}
-        filename={filename}
-        {...params}
-      />
-    </div>
-  </body>
-</html>
+return new Response(`
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${title}</title>
+    </head>
+    <body>
+      <div id="root">
+        <CalendarImage 
+          client:only="react"
+          format={outputFormat}
+          year={yearNum}
+          filename={filename}
+          {...params}
+        />
+      </div>
+    </body>
+  </html>
+`, {
+  status: 200,
+  headers: {
+    'Content-Type': 'text/html',
+  },
+});
+---
