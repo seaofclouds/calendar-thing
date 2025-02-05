@@ -5,3 +5,6 @@ main = "./dist/_worker.js"
 
 [site]
 bucket = "./dist"
+
+[build]
+pages_build_output_dir = "dist"
