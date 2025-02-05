@@ -33,7 +33,7 @@ export const Calendar: React.FC<CalendarProps> = ({
   header = true,
   testing = false
 }) => {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState<number>(0);
   const [visibleMonths, setVisibleMonths] = useState(14); 
   const [columnCount, setColumnCount] = useState(1);
   const showYearHeader = header;
@@ -79,6 +79,10 @@ export const Calendar: React.FC<CalendarProps> = ({
   }, [baseYear, nextYear]);
 
   useEffect(() => {
+    // Initialize window width after component mounts
+    setWindowWidth(window.innerWidth);
+
+    // Add window resize listener
     const handleResize = () => {
       if (forPrint) {
         // If totalMonths is provided, use it (ensuring minimum of 12)
