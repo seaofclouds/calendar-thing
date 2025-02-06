@@ -10,5 +10,5 @@ export default defineConfig({
     imageService: 'compile',
     functionPerRoute: true
   }),
-  trailingSlash: 'never'
+  trailingSlash: 'ignore'
 });

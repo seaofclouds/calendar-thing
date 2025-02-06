@@ -5,7 +5,7 @@ import '../index.css';
 
 // Get path segments and search params
 const { path } = Astro.params;
-const segments = path?.split('/') || [];
+const segments = path?.replace(/\/$/, '').split('/').filter(Boolean) || [];
 const url = new URL(Astro.request.url);
 const searchParams = Object.fromEntries(url.searchParams);
 
@@ -45,12 +45,14 @@ if (lastSegment) {
 }
 
 // Determine if we're in preview/export mode
-const isPreviewMode = Boolean(size && orientation);
+const isPreviewMode = Boolean(size) || format !== null;
 
 // Build wrapper classes for proper CSS hierarchy
 const wrapperClasses = [
+  'calendar',
   size ? `size-${size.toLowerCase()}` : '',
-  orientation ? `orientation-${orientation.toLowerCase()}` : ''
+  orientation ? `orientation-${orientation.toLowerCase()}` : '',
+  isPreviewMode ? 'print' : ''
 ].filter(Boolean).join(' ');
 ---
 
