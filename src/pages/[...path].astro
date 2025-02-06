@@ -37,10 +37,37 @@ let format: 'png' | 'jpg' | null = null;
 let dpi = 300;
 
 if (lastSegment) {
-  const [dpiPart, formatPart] = lastSegment.split('.');
-  if (formatPart === 'png' || formatPart === 'jpg') {
-    format = formatPart;
-    dpi = parseInt(dpiPart.replace('dpi', '')) || 300;
+  // Check if the last segment has a format extension
+  const formatMatch = lastSegment.match(/\.(png|jpg)$/i);
+  if (formatMatch) {
+    format = formatMatch[1].toLowerCase() as 'png' | 'jpg';
+    // If there's a dpi specification before the format
+    if (lastSegment.includes('dpi.')) {
+      const dpiMatch = lastSegment.match(/(\d+)dpi\./);
+      if (dpiMatch) {
+        dpi = parseInt(dpiMatch[1]);
+      }
+    }
+  }
+}
+
+// If size ends with .png or .jpg, it's actually a format specification
+if (!format && size) {
+  const formatMatch = size.match(/\.(png|jpg)$/i);
+  if (formatMatch) {
+    format = formatMatch[1].toLowerCase() as 'png' | 'jpg';
+    // Remove the format extension from size
+    size = size.replace(/\.(png|jpg)$/i, '');
+  }
+}
+
+// If orientation ends with .png or .jpg, it's actually a format specification
+if (!format && orientation) {
+  const formatMatch = orientation.match(/\.(png|jpg)$/i);
+  if (formatMatch) {
+    format = formatMatch[1].toLowerCase() as 'png' | 'jpg';
+    // Remove the format extension from orientation
+    orientation = orientation.replace(/\.(png|jpg)$/i, '');
   }
 }
 

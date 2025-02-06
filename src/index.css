@@ -317,6 +317,16 @@ body {
   height: 355.6mm;
 }
 
+#root.size-tabloid, #root.size-tabloid.orientation-portrait {
+  width: 279.4mm;
+  height: 431.8mm;
+}
+
+#root.size-tabloid.orientation-landscape {
+  width: 431.8mm;
+  height: 279.4mm;
+}
+
 /* A6 styles */
 .size-a6 .calendar.print {
   font-size: 0.5rem;
