@@ -21,9 +21,19 @@ interface DayData {
 
 // Default rows by paper size
 const DEFAULT_ROWS = {
-  a6: 4,
-  legal: 5,
-  tabloid: 5
+  default: {
+    portrait: 4,
+    landscape: 3
+  },
+  // Paper sizes that need different row counts can override here
+  legal: {
+    portrait: 5,
+    landscape: 4
+  },
+  tabloid: {
+    portrait: 6,
+    landscape: 4
+  }
 };
 
 export const Calendar: React.FC<CalendarProps> = ({ 
@@ -41,7 +51,9 @@ export const Calendar: React.FC<CalendarProps> = ({
   const showYearHeader = header;
 
   // Use size-specific default rows if not provided
-  const actualRows = rows ?? DEFAULT_ROWS[size.toLowerCase()] ?? 4;
+  const sizeKey = size.toLowerCase();
+  const sizeConfig = DEFAULT_ROWS[sizeKey] || DEFAULT_ROWS.default;
+  const actualRows = rows ?? sizeConfig[orientation];
   
   // Calculate total months based on rows and columns
   const totalMonths = actualRows * (orientation === 'landscape' ? 4 : 3);

@@ -51,7 +51,7 @@ const isPreviewMode = Boolean(size) || format !== null;
 const wrapperClasses = [
   'calendar',
   size ? `size-${size.toLowerCase()}` : '',
-  orientation ? `orientation-${orientation.toLowerCase()}` : '',
+  `orientation-${(orientation || 'portrait').toLowerCase()}`,
   isPreviewMode ? 'print' : ''
 ].filter(Boolean).join(' ');
 ---

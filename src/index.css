@@ -299,7 +299,7 @@ body {
   height: 210mm;
 }
 
-#root.size-letter {
+#root.size-letter, #root.size-letter.orientation-portrait {
   width: 215.9mm;
   height: 279.4mm;
 }
@@ -307,6 +307,14 @@ body {
 #root.size-letter.orientation-landscape {
   width: 279.4mm;
   height: 215.9mm;
+}
+#root.size-legal.orientation-landscape {
+  width: 355.6mm;
+  height: 215.9mm;
+}
+#root.size-legal, #root.size-legal.orientation-portrait {
+  width: 215.9mm;
+  height: 355.6mm;
 }
 
 /* A6 styles */
