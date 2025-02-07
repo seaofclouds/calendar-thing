@@ -45,6 +45,9 @@ export const CalendarImage: React.FC<CalendarImageProps> = ({
     const generateImage = async () => {
       if (!containerRef.current || hasGeneratedRef.current || testing) return;
       
+      // Add a longer delay to ensure astronomical data is loaded
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       try {
         hasGeneratedRef.current = true;
 
