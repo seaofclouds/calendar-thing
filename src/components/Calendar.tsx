@@ -80,7 +80,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(({
       const width = window.innerWidth;
       let cols = 1;
 
-      if (testing || forPrint) {
+      if (forPrint || testing) {
         cols = orientation === 'landscape' ? 4 : 3;
       } else {
         if (width >= 1200) cols = 4;
@@ -93,7 +93,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(({
     };
     
     handleResize();
-    if (!forPrint) {
+    if (!forPrint && !testing) {
       window.addEventListener('resize', handleResize);
       return () => window.removeEventListener('resize', handleResize);
     }
@@ -175,7 +175,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(({
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
   const calendarStyle = {
-    '--print-columns': testing || forPrint ? (orientation === 'landscape' ? 4 : 3) : columnCount
+    '--print-columns': (forPrint || testing) ? (orientation === 'landscape' ? 4 : 3) : columnCount
   } as React.CSSProperties;
 
   return (
