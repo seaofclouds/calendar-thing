@@ -103,7 +103,9 @@ function renderDay(day: DayData): string {
   const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}`;
 
   let content: string;
-  if (day.moonPhase === "full") {
+  if (!day.currentMonth) {
+    content = `<span class="date">${day.date}</span>`;
+  } else if (day.moonPhase === "full") {
     content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" fill="black" stroke="black" stroke-width="1"/></svg>`;
   } else if (day.moonPhase === "new") {
     content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" fill="white" stroke="black" stroke-width="1"/></svg>`;
