@@ -4,9 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build:client": "esbuild src/client.ts --bundle --outfile=public/client.js --format=esm --target=es2020",
-    "dev": "pnpm build:client && wrangler dev",
-    "deploy": "pnpm build:client && wrangler deploy",
+    "build": "mkdir -p ../../dist && pnpm build:client && pnpm build:worker && pnpm build:assets",
+    "build:client": "esbuild src/client.ts --bundle --outfile=../../dist/client.js --format=esm --target=es2020",
+    "build:worker": "esbuild src/index.ts --bundle --outfile=../../dist/_worker.js --format=esm --target=es2020",
+    "build:assets": "cp public/styles.css ../../dist/",
+    "dev": "esbuild src/client.ts --bundle --outfile=public/client.js --format=esm --target=es2020 && wrangler dev",
+    "deploy": "pnpm build && wrangler deploy",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
