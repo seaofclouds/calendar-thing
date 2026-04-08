@@ -38,6 +38,7 @@ jobs:
       - run: pnpm --filter @calendar-feeds/moon-phase deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-movie-release:
     needs: typecheck
@@ -58,6 +59,7 @@ jobs:
       - run: pnpm --filter @calendar-feeds/movie-release deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-calendar:
     needs: typecheck
@@ -78,3 +80,4 @@ jobs:
       - run: pnpm --filter @calendar-feeds/calendar deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
