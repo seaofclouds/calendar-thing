@@ -1,0 +1,22 @@
+{
+  "name": "@calendar-feeds/calendar",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build:client": "esbuild src/client.ts --bundle --outfile=public/client.js --format=esm --target=es2020",
+    "dev": "pnpm build:client && wrangler dev",
+    "deploy": "pnpm build:client && wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@calendar-feeds/feed-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "esbuild": "^0.24.0",
+    "html-to-image": "^1.11.11",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.93.0"
+  }
+}
