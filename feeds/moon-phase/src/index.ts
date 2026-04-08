@@ -27,8 +27,8 @@ export default {
       });
     }
 
-    // Only /moon.ics and /moon.json are valid endpoints
-    if (url.pathname !== "/moon.ics" && url.pathname !== "/moon.json") {
+    // Only /feeds/moon.ics and /feeds/moon.json are valid endpoints
+    if (url.pathname !== "/feeds/moon.ics" && url.pathname !== "/feeds/moon.json") {
       return new Response("Not Found", { status: 404 });
     }
 
@@ -50,11 +50,11 @@ export default {
         const phases = computeMoonPhases(startDate, endDate);
         const solarEvents = computeSolarEvents(startDate, endDate);
 
-        if (url.pathname === "/moon.ics") {
+        if (url.pathname === "/feeds/moon.ics") {
           return icsResponse(generateICS(phases, solarEvents));
         }
 
-        // /moon.json
+        // /feeds/moon.json
         const json = buildJSON(phases, solarEvents, now);
         return jsonResponse(JSON.stringify(json, null, 2));
       }

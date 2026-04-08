@@ -20,7 +20,7 @@ interface IncludeOptions {
 
 interface CalendarParams {
   year: number;
-  size: string;
+  size?: string;
   orientation: "portrait" | "landscape";
   rows?: number;
   header: boolean;
@@ -29,6 +29,9 @@ interface CalendarParams {
   dpi: number;
   include: IncludeOptions;
 }
+
+const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-tabloid", "a4", "a5", "a6"]);
+const VALID_ORIENTATIONS = new Set(["portrait", "landscape"]);
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -58,7 +61,7 @@ export default {
     const html = renderCalendar({
       ...params,
       header: params.header,
-      forExport: params.format != null || params.size !== "letter" || params.testing,
+      forExport: params.format != null || params.size != null || params.testing,
       fullMoonDates: params.include.fullMoon ? fullMoonDates : [],
       newMoonDates: params.include.newMoon ? newMoonDates : [],
       solarEvents: params.include.solarEvents ? solarEvents : {},
@@ -77,8 +80,7 @@ function parseCalendarURL(
   const segments = path.replace(/^\/|\/$/g, "").split("/").filter(Boolean);
   if (segments.length === 0) return null;
 
-  let [yearStr, size, orientation, lastSegment] = segments;
-  const yearNum = parseInt(yearStr);
+  const yearNum = parseInt(segments[0]);
   if (isNaN(yearNum)) return null;
 
   const rows = searchParams.get("rows")
@@ -88,41 +90,36 @@ function parseCalendarURL(
   const testing = searchParams.get("test") === "true";
   const include = parseIncludeParam(searchParams.get("include"));
 
-  // Parse image format and DPI
+  // Parse format/DPI, size, and orientation from remaining segments
   let format: "png" | "jpg" | undefined;
   let dpi = 300;
+  let size: string | undefined;
+  let orientation: "portrait" | "landscape" = "portrait";
 
-  // Check lastSegment for format
-  if (lastSegment) {
-    const parsed = parseFormatSegment(lastSegment);
-    if (parsed) {
-      format = parsed.format;
-      dpi = parsed.dpi;
+  for (const seg of segments.slice(1)) {
+    // Check for image format (e.g., "300dpi.png", "portrait.jpg")
+    if (!format) {
+      const parsed = parseFormatSegment(seg);
+      if (parsed) {
+        format = parsed.format;
+        dpi = parsed.dpi;
+      }
     }
-  }
 
-  // Check if size contains format
-  if (!format && size) {
-    const parsed = parseFormatSegment(size);
-    if (parsed) {
-      format = parsed.format;
-      size = size.replace(/\.(?:png|jpg)$/i, "");
-    }
-  }
+    const clean = seg.replace(/\.(?:png|jpg)$/i, "").replace(/\d+dpi/i, "").toLowerCase();
+    if (!clean) continue;
 
-  // Check if orientation contains format
-  if (!format && orientation) {
-    const parsed = parseFormatSegment(orientation);
-    if (parsed) {
-      format = parsed.format;
-      orientation = orientation.replace(/\.(?:png|jpg)$/i, "");
+    if (VALID_ORIENTATIONS.has(clean)) {
+      orientation = clean as "portrait" | "landscape";
+    } else if (VALID_SIZES.has(clean)) {
+      size = clean;
     }
   }
 
   return {
     year: yearNum,
-    size: size || "letter",
-    orientation: (orientation as "portrait" | "landscape") || "portrait",
+    size,
+    orientation,
     rows,
     header,
     testing,
@@ -190,7 +187,7 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
   try {
     if (env.MOON_PHASE) {
       const response = await env.MOON_PHASE.fetch(
-        new Request("https://internal/moon.json")
+        new Request("https://internal/feeds/moon.json")
       );
       if (response.ok) {
         const data = (await response.json()) as {
