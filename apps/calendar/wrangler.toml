@@ -8,3 +8,7 @@ directory = "./public"
 [[services]]
 binding = "MOON_PHASE"
 service = "moon-phase-calendar"
+
+[[services]]
+binding = "MOVIE_RELEASE"
+service = "movie-release-calendar"

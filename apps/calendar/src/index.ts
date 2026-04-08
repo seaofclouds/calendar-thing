@@ -8,6 +8,7 @@ import { renderCalendar } from "./render";
 
 interface Env {
   MOON_PHASE: Fetcher;
+  MOVIE_RELEASE: Fetcher;
 }
 
 interface CalendarParams {
