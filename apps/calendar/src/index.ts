@@ -5,6 +5,8 @@
  */
 
 import { renderCalendar } from "./render";
+import { computeMoonPhases } from "../../../feeds/moon-phase/src/moon";
+import { computeSolarEvents } from "../../../feeds/moon-phase/src/solar";
 
 interface Env {
   ASSETS: Fetcher;
@@ -143,33 +145,55 @@ interface MoonData {
 }
 
 async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
-  const empty: MoonData = { fullMoonDates: [], solarEvents: {} };
-
+  // Try service binding first (when moon-phase worker is deployed)
   try {
-    if (!env.MOON_PHASE) return empty;
+    if (env.MOON_PHASE) {
+      const response = await env.MOON_PHASE.fetch(
+        new Request("https://internal/moon.json")
+      );
+      if (response.ok) {
+        const data = (await response.json()) as {
+          phases: Array<{ date: string; phase: string }>;
+          solarEvents: Array<{ date: string; event: string }>;
+        };
 
-    const response = await env.MOON_PHASE.fetch(
-      new Request("https://internal/moon.json")
-    );
-    if (!response.ok) return empty;
+        const fullMoonDates = data.phases
+          .filter((p) => p.phase === "full_moon")
+          .map((p) => p.date);
 
-    const data = (await response.json()) as {
-      phases: Array<{ date: string; phase: string }>;
-      solarEvents: Array<{ date: string; event: string }>;
-    };
+        const solarEvents: Record<string, "solstice" | "equinox"> = {};
+        for (const event of data.solarEvents) {
+          const month = parseInt(event.date.split("-")[1]);
+          solarEvents[event.date] =
+            month === 3 || month === 9 ? "equinox" : "solstice";
+        }
 
-    const fullMoonDates = data.phases
-      .filter((p) => p.phase === "full_moon")
-      .map((p) => p.date);
-
-    const solarEvents: Record<string, "solstice" | "equinox"> = {};
-    for (const event of data.solarEvents) {
-      const month = parseInt(event.date.split("-")[1]);
-      solarEvents[event.date] = month === 3 || month === 9 ? "equinox" : "solstice";
+        return { fullMoonDates, solarEvents };
+      }
     }
-
-    return { fullMoonDates, solarEvents };
   } catch {
-    return empty;
+    // Service binding unavailable — fall through to local computation
   }
+
+  // Local computation fallback (Jean Meeus algorithms)
+  return computeMoonDataLocally(year);
+}
+
+function computeMoonDataLocally(year: number): MoonData {
+  const startDate = new Date(Date.UTC(year, 0, 1));
+  const endDate = new Date(Date.UTC(year + 1, 0, 31));
+
+  const phases = computeMoonPhases(startDate, endDate);
+  const fullMoonDates = phases
+    .filter((p) => p.phase === "full_moon")
+    .map((p) => p.date);
+
+  const solar = computeSolarEvents(startDate, endDate);
+  const solarEvents: Record<string, "solstice" | "equinox"> = {};
+  for (const event of solar) {
+    solarEvents[event.date] =
+      event.event.includes("equinox") ? "equinox" : "solstice";
+  }
+
+  return { fullMoonDates, solarEvents };
 }
