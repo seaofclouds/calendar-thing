@@ -5,8 +5,6 @@
  */
 
 import { renderCalendar } from "./render";
-import { computeMoonPhases } from "../../../feeds/moon-phase/src/moon";
-import { computeSolarEvents } from "../../../feeds/moon-phase/src/solar";
 
 interface Env {
   ASSETS: Fetcher;
@@ -144,6 +142,20 @@ interface MoonData {
   solarEvents: Record<string, "solstice" | "equinox">;
 }
 
+// Pre-computed test data (Jean Meeus algorithms, 2025–2027)
+// Replace with service binding fetch when moon-phase worker is deployed
+const FULL_MOON_DATES: Record<number, string[]> = {
+  2025: ["2025-01-13","2025-02-12","2025-03-14","2025-04-13","2025-05-12","2025-06-11","2025-07-10","2025-08-09","2025-09-07","2025-10-07","2025-11-05","2025-12-04"],
+  2026: ["2026-01-03","2026-02-01","2026-03-03","2026-04-02","2026-05-01","2026-05-31","2026-06-29","2026-07-29","2026-08-28","2026-09-26","2026-10-26","2026-11-24","2026-12-24"],
+  2027: ["2027-01-22","2027-02-20","2027-03-22","2027-04-20","2027-05-20","2027-06-19","2027-07-18","2027-08-17","2027-09-15","2027-10-15","2027-11-14","2027-12-13"],
+};
+
+const SOLAR_EVENTS: Record<number, Record<string, "solstice" | "equinox">> = {
+  2025: { "2025-03-20": "equinox", "2025-06-21": "solstice", "2025-09-22": "equinox", "2025-12-21": "solstice" },
+  2026: { "2026-03-20": "equinox", "2026-06-21": "solstice", "2026-09-23": "equinox", "2026-12-21": "solstice" },
+  2027: { "2027-03-20": "equinox", "2027-06-21": "solstice", "2027-09-23": "equinox", "2027-12-22": "solstice" },
+};
+
 async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
   // Try service binding first (when moon-phase worker is deployed)
   try {
@@ -172,28 +184,12 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
       }
     }
   } catch {
-    // Service binding unavailable — fall through to local computation
+    // Service binding unavailable — fall through to test data
   }
 
-  // Local computation fallback (Jean Meeus algorithms)
-  return computeMoonDataLocally(year);
-}
-
-function computeMoonDataLocally(year: number): MoonData {
-  const startDate = new Date(Date.UTC(year, 0, 1));
-  const endDate = new Date(Date.UTC(year + 1, 0, 31));
-
-  const phases = computeMoonPhases(startDate, endDate);
-  const fullMoonDates = phases
-    .filter((p) => p.phase === "full_moon")
-    .map((p) => p.date);
-
-  const solar = computeSolarEvents(startDate, endDate);
-  const solarEvents: Record<string, "solstice" | "equinox"> = {};
-  for (const event of solar) {
-    solarEvents[event.date] =
-      event.event.includes("equinox") ? "equinox" : "solstice";
-  }
-
-  return { fullMoonDates, solarEvents };
+  // Static test data fallback
+  return {
+    fullMoonDates: FULL_MOON_DATES[year] ?? [],
+    solarEvents: SOLAR_EVENTS[year] ?? {},
+  };
 }
