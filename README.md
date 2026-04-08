@@ -44,13 +44,14 @@ A Cloudflare Pages app that renders printable year calendars as server-side HTML
 ### Calendar URLs
 
 ```
-/:year                              # View calendar (e.g. /2026)
-/:year/:size                        # With page size (letter, a4, a6, etc.)
-/:year/:size/:orientation           # portrait or landscape
+/:year                              # Responsive calendar (e.g. /2026)
+/:year/:orientation                 # portrait or landscape
+/:year/:size                        # Print preview (letter, a4, a6, etc.)
+/:year/:size/:orientation           # Print preview with orientation
 /:year/:size/:orientation/300dpi.png  # Export as image
 ```
 
-Query params: `rows=N`, `header=false`, `test=true`
+Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new,solar:season`
 
 ### Default Layouts
 
@@ -66,8 +67,8 @@ Query params: `rows=N`, `header=false`, `test=true`
 ### Feed Endpoints
 
 Moon phase worker:
-- `/moon.ics` — ICS calendar feed
-- `/moon.json` — JSON data
+- `/feeds/moon.ics` — ICS calendar feed
+- `/feeds/moon.json` — JSON data
 
 Movie release worker:
 - `/theatrical.ics` — Theatrical releases
@@ -78,9 +79,12 @@ All feed endpoints require `?token=<CALENDAR_TOKEN>`.
 
 ### Astronomical Features
 
-- **Full moons** — Filled circle markers on the calendar
+- **Full moons** — Open circle markers (SVG, white fill with black stroke)
+- **New moons** — Filled circle markers (SVG, black fill with black stroke)
 - **Solstices** — Diamond markers (June, December)
 - **Equinoxes** — Diamond markers (March, September)
+
+Control which symbols appear with `?include=moon:full,moon:new,solar:season`. Default (no param): full moons + solar events.
 
 Computed using Jean Meeus' Astronomical Algorithms (Chapters 27 & 49).
 
