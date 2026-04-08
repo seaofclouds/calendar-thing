@@ -12,6 +12,12 @@ interface Env {
   MOVIE_RELEASE: Fetcher;
 }
 
+interface IncludeOptions {
+  fullMoon: boolean;
+  newMoon: boolean;
+  solarEvents: boolean;
+}
+
 interface CalendarParams {
   year: number;
   size: string;
@@ -21,6 +27,7 @@ interface CalendarParams {
   testing: boolean;
   format?: "png" | "jpg";
   dpi: number;
+  include: IncludeOptions;
 }
 
 export default {
@@ -45,15 +52,16 @@ export default {
     }
 
     // Fetch event data from moon-phase feed
-    const { fullMoonDates, solarEvents } = await fetchMoonData(env, params.year);
+    const { fullMoonDates, newMoonDates, solarEvents } = await fetchMoonData(env, params.year);
 
     // Render HTML
     const html = renderCalendar({
       ...params,
       header: params.header,
       forExport: params.format != null || params.size !== "letter" || params.testing,
-      fullMoonDates,
-      solarEvents,
+      fullMoonDates: params.include.fullMoon ? fullMoonDates : [],
+      newMoonDates: params.include.newMoon ? newMoonDates : [],
+      solarEvents: params.include.solarEvents ? solarEvents : {},
     });
 
     return new Response(html, {
@@ -78,6 +86,7 @@ function parseCalendarURL(
     : undefined;
   const header = searchParams.get("header") !== "false";
   const testing = searchParams.get("test") === "true";
+  const include = parseIncludeParam(searchParams.get("include"));
 
   // Parse image format and DPI
   let format: "png" | "jpg" | undefined;
@@ -119,6 +128,7 @@ function parseCalendarURL(
     testing,
     format,
     dpi,
+    include,
   };
 }
 
@@ -137,8 +147,21 @@ function parseFormatSegment(
   return { format, dpi };
 }
 
+function parseIncludeParam(value: string | null): IncludeOptions {
+  if (!value) {
+    return { fullMoon: true, newMoon: false, solarEvents: true };
+  }
+  const tokens = value.split(",").map((s) => s.trim());
+  return {
+    fullMoon: tokens.includes("moon:full"),
+    newMoon: tokens.includes("moon:new"),
+    solarEvents: tokens.includes("solar:season"),
+  };
+}
+
 interface MoonData {
   fullMoonDates: string[];
+  newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
 }
 
@@ -173,6 +196,10 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
           .filter((p) => p.phase === "full_moon")
           .map((p) => p.date);
 
+        const newMoonDates = data.phases
+          .filter((p) => p.phase === "new_moon")
+          .map((p) => p.date);
+
         const solarEvents: Record<string, "solstice" | "equinox"> = {};
         for (const event of data.solarEvents) {
           const month = parseInt(event.date.split("-")[1]);
@@ -180,7 +207,7 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
             month === 3 || month === 9 ? "equinox" : "solstice";
         }
 
-        return { fullMoonDates, solarEvents };
+        return { fullMoonDates, newMoonDates, solarEvents };
       }
     }
   } catch {
@@ -190,6 +217,7 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
   // Static test data fallback
   return {
     fullMoonDates: FULL_MOON_DATES[year] ?? [],
+    newMoonDates: [],
     solarEvents: SOLAR_EVENTS[year] ?? {},
   };
 }
