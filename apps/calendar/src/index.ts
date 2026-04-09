@@ -211,16 +211,11 @@ function parseFormatSegment(
   return { format, dpi };
 }
 
-/** Map friendly /feeds/ paths to service bindings and upstream endpoints */
-const FEED_PROXY_ROUTES: Record<string, { binding: keyof Env; endpoint: string }> = {
-  "/feeds/movies.ics": { binding: "MOVIE_RELEASE", endpoint: "/theatrical.ics" },
-  "/feeds/moon.ics": { binding: "MOON_PHASE", endpoint: "/feeds/moon.ics" },
-  "/feeds/astrology.ics": { binding: "ASTROLOGY", endpoint: "/feeds/astrology.ics" },
-};
-
 async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Response> {
-  const route = FEED_PROXY_ROUTES[path];
-  if (!route) {
+  // Derive route from feed registry: /feeds/{id}.ics → plugin.binding + plugin.endpoint
+  const match = path.match(/^\/feeds\/([^/]+)\.ics$/);
+  const feed = match ? getAllFeeds().find((f) => f.id === match[1]) : undefined;
+  if (!feed) {
     return new Response("Not Found", { status: 404 });
   }
 
@@ -231,13 +226,13 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
   }
 
   // Proxy to service binding (internal hostname bypasses feed worker auth)
-  const binding = env[route.binding] as Fetcher | undefined;
+  const binding = env[feed.binding] as Fetcher | undefined;
   if (!binding) {
     return new Response("Service Unavailable", { status: 503 });
   }
 
   // Forward query params (except token) to upstream
-  const upstream = new URL(`https://internal${route.endpoint}`);
+  const upstream = new URL(`https://internal${feed.endpoint}`);
   for (const [key, value] of url.searchParams) {
     if (key !== "token") upstream.searchParams.set(key, value);
   }
