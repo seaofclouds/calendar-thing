@@ -13,6 +13,7 @@ const MONTH_NAMES = [
 
 const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const FULL_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export interface MonthViewOptions {
   year: number;
@@ -122,7 +123,7 @@ ${renderMiniMonth(MONTH_NAMES[next.month] + (next.year !== opts.year ? ` ${next.
       </div>
       <div class="month-view-grid">
         <div class="month-view-daynames">
-${FULL_DAY_NAMES.map((d) => `          <div class="month-view-dayname">${d}</div>`).join("\n")}
+${FULL_DAY_NAMES.map((d, i) => `          <div class="month-view-dayname"><span class="dayname-full">${d}</span><span class="dayname-short">${SHORT_DAY_NAMES[i]}</span></div>`).join("\n")}
         </div>
         <div class="month-view-days">
 ${renderWeeks(weeks)}
