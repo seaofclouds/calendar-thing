@@ -22,6 +22,7 @@ interface IncludeOptions {
   solarEvents: boolean;
   movies: boolean;
   busd: boolean;
+  astrology: boolean;
 }
 
 interface CalendarParams {
@@ -74,6 +75,9 @@ export default {
           : Promise.resolve([]),
         params.include.busd
           ? fetchFeedEvents(FEEDS.busd, env as unknown as Record<string, unknown>, token)
+          : Promise.resolve([]),
+        params.include.astrology
+          ? fetchFeedEvents(FEEDS.astrology, env as unknown as Record<string, unknown>, token)
           : Promise.resolve([]),
         ...feedUrls.map((u) => fetchExternalFeed(u)),
       ]);
@@ -212,7 +216,7 @@ function parseFormatSegment(
 
 function parseIncludeParam(value: string | null): IncludeOptions {
   if (!value) {
-    return { fullMoon: true, newMoon: false, solarEvents: true, movies: false, busd: false };
+    return { fullMoon: true, newMoon: false, solarEvents: true, movies: false, busd: false, astrology: false };
   }
   const tokens = value.split(",").map((s) => s.trim());
   return {
@@ -221,6 +225,7 @@ function parseIncludeParam(value: string | null): IncludeOptions {
     solarEvents: tokens.includes("solar:season"),
     movies: tokens.includes("movies"),
     busd: tokens.includes("busd"),
+    astrology: tokens.includes("astrology"),
   };
 }
 

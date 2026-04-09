@@ -28,6 +28,7 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
+      astrology: ${{ steps.filter.outputs.astrology }}
       moon-phase: ${{ steps.filter.outputs.moon-phase }}
       movie-release: ${{ steps.filter.outputs.movie-release }}
       calendar: ${{ steps.filter.outputs.calendar }}
@@ -39,6 +40,9 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
+            astrology:
+              - 'feeds/astrology/**'
+              - 'packages/**'
             moon-phase:
               - 'feeds/moon-phase/**'
               - 'packages/**'
@@ -48,6 +52,25 @@ jobs:
             calendar:
               - 'apps/calendar/**'
               - 'packages/**'
+
+  deploy-astrology:
+    needs: [typecheck, detect-changes]
+    if: needs.detect-changes.outputs.astrology == 'true' || (github.event_name == 'workflow_dispatch' && inputs.deploy_all)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter @calendar-feeds/astrology run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-moon-phase:
     needs: [typecheck, detect-changes]

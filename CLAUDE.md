@@ -10,9 +10,11 @@ pnpm typecheck              # Type-check all packages (the only validation step 
 pnpm dev:calendar           # Run calendar app locally (Cloudflare Pages)
 pnpm dev:moon               # Run moon-phase feed worker locally
 pnpm dev:movie              # Run movie-release feed worker locally
+pnpm dev:astrology          # Run astrology feed worker locally
 pnpm deploy:calendar        # Deploy calendar app to CF Pages
 pnpm deploy:moon            # Deploy moon-phase worker
 pnpm deploy:movie           # Deploy movie-release worker
+pnpm deploy:astrology       # Deploy astrology worker
 ```
 
 Individual packages use `pnpm --filter @calendar-feeds/<name> <script>`. Build is esbuild-based (calendar app only).
@@ -29,10 +31,12 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
    - `worker-utils` — `authenticateToken()`, `buildCacheKey()`, `withEdgeCache()`, response helpers
 
 2. **Feed workers** (`feeds/`) — independent CF Workers serving ICS + JSON
+   - `astrology` — Zodiac season events (tropical/Western dates in `zodiac.ts`), no external APIs. Per-sign Streamline SVG icons in calendar app
    - `moon-phase` — Astronomical computations (Jean Meeus algorithms in `moon.ts`, `solar.ts`), no external APIs
    - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two-pass discovery (popularity + release date sort), theatrical/digital endpoint differentiation, excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
 
 3. **Feed fixtures** (`feeds/*/fixtures/`) — ICS test data for local dev, imported as text modules
+   - `astrology/fixtures/astrology.ics` — zodiac seasons for 2026
    - `movie-release/fixtures/theatrical.ics` — real 2026 TMDB data (Apr-Jun)
    - `busd-calendar/fixtures/busd-2025-2026.ics` — BUSD school calendar (3 school years)
 
@@ -52,12 +56,12 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 - **Auth:** All feed endpoints require `?token=CALENDAR_TOKEN`. Service binding calls use `hostname === "internal"` to bypass auth (handled by `authenticateToken()` in worker-utils).
 - **Caching:** 24-hour edge caching via `withEdgeCache()` wrapper.
 - **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
-- **Include param:** `?include=moon:full,moon:new,solar:season,movies,busd` — controls which feeds are shown. Defaults: fullMoon + solarEvents on, others off.
+- **Include param:** `?include=moon:full,moon:new,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults: fullMoon + solarEvents on, others off.
 - **Feed param:** `?feed=https://example.com/cal.ics` — external ICS feed URL (fetched with 5s timeout).
 - **No test framework** — validation is `pnpm typecheck` only.
 - **Wrangler configs** are per-worker (`apps/calendar/wrangler.toml`, `feeds/*/wrangler.toml`). The root `wrangler.toml` is unused.
 
 ## Secrets (set via `npx wrangler secret put`)
 
-- `CALENDAR_TOKEN` — required by both feed workers
+- `CALENDAR_TOKEN` — required by all feed workers (moon-phase, movie-release, astrology)
 - `TMDB_API_KEY` — required by movie-release worker only

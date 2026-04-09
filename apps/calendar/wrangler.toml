@@ -19,3 +19,7 @@ service = "moon-phase-calendar"
 [[services]]
 binding = "MOVIE_RELEASE"
 service = "movie-release-calendar"
+
+[[services]]
+binding = "ASTROLOGY"
+service = "astrology-calendar"

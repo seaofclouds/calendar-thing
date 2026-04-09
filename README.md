@@ -11,6 +11,7 @@ calendar-thing/                   # Monorepo root
 │   ├── worker-utils/           # Shared CF Worker patterns (auth, cache, response)
 │   └── feed-types/             # Shared TypeScript types & feed plugin interface
 ├── feeds/
+│   ├── astrology/              # CF Worker — zodiac seasons (tropical astrology)
 │   ├── moon-phase/             # CF Worker — moon phases + solar events (Jean Meeus)
 │   └── movie-release/          # CF Worker — theatrical + digital releases (TMDB API)
 ├── apps/
@@ -23,6 +24,7 @@ calendar-thing/                   # Monorepo root
 
 Each feed is an independent Cloudflare Worker serving ICS and JSON endpoints:
 
+- **astrology** — Zodiac season events (tropical/Western astrology). Pure computation, no external APIs. Per-sign Streamline icons.
 - **moon-phase** — Computes moon phases (new, first quarter, full, last quarter) and solar events (equinoxes, solstices) using Jean Meeus' Astronomical Algorithms. No external APIs.
 - **movie-release** — Fetches theatrical and digital movie releases from the TMDB API with regional date filtering.
 
@@ -50,7 +52,7 @@ A Cloudflare Worker that renders printable year calendars as server-side HTML wi
 /:year/:size/:orientation/300dpi.png  # Export as image
 ```
 
-Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new,solar:season`
+Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new,solar:season,movies,busd,astrology`
 
 ### Default Layouts
 
@@ -73,6 +75,10 @@ Movie release worker:
 - `/theatrical.ics` — Theatrical releases
 - `/digital.ics` — Digital releases
 - `/theatrical.json`, `/digital.json` — JSON data
+
+Astrology worker:
+- `/feeds/astrology.ics` — Zodiac season events
+- `/feeds/astrology.json` — JSON data (supports `?year=N`)
 
 All feed endpoints require `?token=<CALENDAR_TOKEN>`.
 
@@ -102,6 +108,9 @@ pnpm dev:moon
 # Run movie-release feed locally
 pnpm dev:movie
 
+# Run astrology feed locally
+pnpm dev:astrology
+
 # Type-check all packages
 pnpm typecheck
 ```
@@ -119,6 +128,7 @@ Manual deploy from monorepo root:
 ```bash
 pnpm --filter @calendar-feeds/moon-phase run deploy
 pnpm --filter @calendar-feeds/movie-release run deploy
+pnpm --filter @calendar-feeds/astrology run deploy
 pnpm --filter @calendar-feeds/calendar run deploy
 ```
 
@@ -127,6 +137,7 @@ Feed worker secrets:
 cd feeds/moon-phase && npx wrangler secret put CALENDAR_TOKEN
 cd feeds/movie-release && npx wrangler secret put CALENDAR_TOKEN
 cd feeds/movie-release && npx wrangler secret put TMDB_API_KEY
+cd feeds/astrology && npx wrangler secret put CALENDAR_TOKEN
 ```
 
 ### Service Bindings
@@ -137,6 +148,7 @@ The calendar app connects to feed workers via Cloudflare service bindings (decla
 |---------|---------|
 | `MOON_PHASE` | `moon-phase-calendar` |
 | `MOVIE_RELEASE` | `movie-release-calendar` |
+| `ASTROLOGY` | `astrology-calendar` |
 
 **Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/moon.json?year=2026`) with no token. The `authenticateToken()` helper in `worker-utils` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
 

@@ -303,14 +303,18 @@ ICS sources (all produce .ics):
 | D7 | BUSD school calendar fixture (3 years) | DONE |
 | D8 | Multi-day event expansion | DONE |
 | D9 | Query param preservation in navigation | DONE |
-| D10 | Event de-duplication across feeds | pending |
-| D11 | Multi-day event visual connectors | pending |
-| D12 | BUSD feed worker (PDF→ICS, automated) | pending |
+| D10 | Astrology feed worker (zodiac seasons) | DONE |
+| D11 | Per-sign Streamline SVG icons | DONE |
+| D12 | Event de-duplication across feeds | pending |
+| D13 | Multi-day event visual connectors | pending |
+| D14 | BUSD feed worker (PDF→ICS, automated) | pending |
+| E1 | Mercury retrograde events in astrology feed | pending |
+| E2 | Other astrological events (eclipses, etc.) | pending |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
 
-D10-D12 are next.
+D12-D14 and E1-E2 are next.
 C depends on B+D (month view + feeds needed for config preview).
 
 ---

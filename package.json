@@ -6,7 +6,9 @@
     "typecheck": "pnpm -r run typecheck",
     "dev:moon": "pnpm --filter @calendar-feeds/moon-phase dev",
     "dev:movie": "pnpm --filter @calendar-feeds/movie-release dev",
+    "dev:astrology": "pnpm --filter @calendar-feeds/astrology dev",
     "dev:calendar": "pnpm --filter @calendar-feeds/calendar dev",
+    "deploy:astrology": "pnpm --filter @calendar-feeds/astrology deploy",
     "deploy:moon": "pnpm --filter @calendar-feeds/moon-phase deploy",
     "deploy:movie": "pnpm --filter @calendar-feeds/movie-release deploy",
     "deploy:calendar": "pnpm --filter @calendar-feeds/calendar deploy"

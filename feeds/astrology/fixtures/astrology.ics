@@ -1,0 +1,89 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Astrology Calendar//EN
+X-WR-CALNAME:♈ Astrology
+BEGIN:VEVENT
+UID:zodiac-aquarius-20260120@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260120
+SUMMARY:♒ Aquarius Season (Jan 20 – Feb 18)
+DESCRIPTION:Aquarius Season\nJan 20 – Feb 18\nSymbol: ♒
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-pisces-20260219@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260219
+SUMMARY:♓ Pisces Season (Feb 19 – Mar 20)
+DESCRIPTION:Pisces Season\nFeb 19 – Mar 20\nSymbol: ♓
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-aries-20260321@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260321
+SUMMARY:♈ Aries Season (Mar 21 – Apr 19)
+DESCRIPTION:Aries Season\nMar 21 – Apr 19\nSymbol: ♈
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-taurus-20260420@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260420
+SUMMARY:♉ Taurus Season (Apr 20 – May 20)
+DESCRIPTION:Taurus Season\nApr 20 – May 20\nSymbol: ♉
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-gemini-20260521@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260521
+SUMMARY:♊ Gemini Season (May 21 – Jun 20)
+DESCRIPTION:Gemini Season\nMay 21 – Jun 20\nSymbol: ♊
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-cancer-20260621@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260621
+SUMMARY:♋ Cancer Season (Jun 21 – Jul 22)
+DESCRIPTION:Cancer Season\nJun 21 – Jul 22\nSymbol: ♋
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-leo-20260723@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260723
+SUMMARY:♌ Leo Season (Jul 23 – Aug 22)
+DESCRIPTION:Leo Season\nJul 23 – Aug 22\nSymbol: ♌
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-virgo-20260823@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260823
+SUMMARY:♍ Virgo Season (Aug 23 – Sep 22)
+DESCRIPTION:Virgo Season\nAug 23 – Sep 22\nSymbol: ♍
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-libra-20260923@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20260923
+SUMMARY:♎ Libra Season (Sep 23 – Oct 22)
+DESCRIPTION:Libra Season\nSep 23 – Oct 22\nSymbol: ♎
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-scorpio-20261023@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20261023
+SUMMARY:♏ Scorpio Season (Oct 23 – Nov 21)
+DESCRIPTION:Scorpio Season\nOct 23 – Nov 21\nSymbol: ♏
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-sagittarius-20261122@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:♐ Sagittarius Season (Nov 22 – Dec 21)
+DESCRIPTION:Sagittarius Season\nNov 22 – Dec 21\nSymbol: ♐
+END:VEVENT
+BEGIN:VEVENT
+UID:zodiac-capricorn-20261222@astrology-calendar
+DTSTAMP:20260409T000000Z
+DTSTART;VALUE=DATE:20261222
+SUMMARY:♑ Capricorn Season (Dec 22 – Jan 19)
+DESCRIPTION:Capricorn Season\nDec 22 – Jan 19\nSymbol: ♑
+END:VEVENT
+END:VCALENDAR
