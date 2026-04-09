@@ -220,6 +220,65 @@ Moon-phase worker accepts `?year=N` query param (defaults to current year). Cale
 ### Data source verification
 `<body data-source="...">` attribute shows `"service-binding"` or `"static-fallback:reason"` for debugging.
 
+## Phase D: Universal ICS Feed Consumption
+
+**Goal:** Every data source produces ICS. The calendar app parses ICS universally to display events in the month view.
+
+### Architecture
+
+```
+ICS sources (all produce .ics):
+  ├── moon-phase worker        → /feeds/moon.ics (service binding)
+  ├── movie-release worker     → /theatrical.ics (service binding)
+  ├── busd-calendar worker     → /calendar.ics (future, parses PDF → ICS)
+  └── any external .ics URL    → fetched directly
+                                    ↓
+                    parse-ics.ts → CalendarEvent[]
+                                    ↓
+                    render-month.ts → .month-day-event spans
+```
+
+### D1. ICS parser (`apps/calendar/src/parse-ics.ts`)
+- Minimal VEVENT parser: `DTSTART`, `SUMMARY`, `UID`, `DESCRIPTION`
+- Returns `CalendarEvent[]` from `@calendar-feeds/feed-types`
+- Handles `DTSTART;VALUE=DATE:20260415` and `DTSTART:20260415T120000Z`
+- ~50-80 lines — not a full RFC 5545 parser
+
+### D2. Movie releases via ICS
+- Fetch `env.MOVIE_RELEASE.fetch("https://internal/theatrical.ics")`
+- Parse with `parseICS()` → `CalendarEvent[]`
+- Controlled by `?include=movies` (default: off)
+
+### D3. External ICS feed support
+- `?feed=https://example.com/cal.ics` query param
+- Fetched via `fetch()` with 5s timeout, cached 1hr via Cache API
+- Parsed with same `parseICS()`, merged with other events
+
+### D4. BUSD school calendar worker (future)
+- New feed worker: `feeds/busd-calendar/`
+- Fetches PDF from `https://www.berkeleyschools.net/calendar/`
+- Current: https://www.berkeleyschools.net/wp-content/uploads/2024/12/2025-2026-Tk-12-Calendar-Final-12-19-24.pdf
+- Next year: https://www.berkeleyschools.net/wp-content/uploads/2026/02/2026-2027-TK-12-School-Year-Calendar.pdf
+- Tracks source URL to discover current/future year PDFs
+- Parses school dates → ICS+JSON (same pattern as other feed workers)
+- Added as service binding to calendar app
+- Runs on schedule / caches aggressively (PDFs rarely change)
+
+### D5. Render events in month view
+- Add `events?: CalendarEvent[]` to `MonthViewOptions` and `DayData`
+- `generateWeeks` builds date→events map, attaches to each day
+- `renderDayCell` renders as `<span class="month-day-event">` (limit 3, ellipsis)
+- Events left-aligned, below day header (existing CSS ready)
+
+### URL examples
+```
+/2026/04                                         → moon+solar only (default)
+/2026/04?include=moon:full,solar:season,movies   → + movie releases
+/2026/04?feed=https://example.com/cal.ics        → + external ICS
+```
+
+---
+
 ## Implementation Order
 
 | Step | What | Status |
@@ -228,19 +287,23 @@ Moon-phase worker accepts `?year=N` query param (defaults to current year). Cale
 | Pre | Convert to CF Worker | DONE |
 | Pre | Moon-phase year param | DONE |
 | Pre | Fix GitHub Actions deploys | DONE |
-| A1 | Fix responsive default route | pending |
+| A1 | Fix responsive default route | DONE |
 | A2 | Fix image export (remove ASSETS regex) | DONE (removed in Worker conversion) |
-| B1 | Add month view routing | pending (depends on A1) |
-| B2 | Month view rendering (render-month.ts) | pending |
-| B3 | Month view CSS | pending |
-| B4 | All moon phases + movie data for month view | pending |
+| B1 | Add month view routing | DONE |
+| B2 | Month view rendering (render-month.ts) | DONE |
+| B3 | Month view CSS (borders, mini cals, markers) | DONE |
+| B4 | Year view navigation (month links, year nav) | DONE |
+| D1 | ICS parser (parse-ics.ts) | pending |
+| D2 | Movie releases via ICS in month view | pending |
+| D3 | External ICS feed support (?feed= param) | pending |
+| D4 | BUSD school calendar worker | pending |
+| D5 | Event rendering in month day cells | pending |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
 
-A1 is the only remaining Phase A bug fix (A2 was resolved by the Worker conversion).
-B depends on A1 (routing changes).
-C depends on B (month view needed for config preview).
+D1-D5 are the current focus.
+C depends on B+D (month view + feeds needed for config preview).
 
 ---
 

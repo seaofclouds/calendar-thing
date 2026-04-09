@@ -6,6 +6,8 @@
 
 import { renderCalendar } from "./render";
 import { renderMonthView } from "./render-month";
+import { parseICS } from "./parse-ics";
+import type { CalendarEvent } from "@calendar-feeds/feed-types";
 
 interface Env {
   MOON_PHASE: Fetcher;
@@ -16,6 +18,7 @@ interface IncludeOptions {
   fullMoon: boolean;
   newMoon: boolean;
   solarEvents: boolean;
+  movies: boolean;
 }
 
 interface CalendarParams {
@@ -52,13 +55,26 @@ export default {
       return Response.redirect(`${url.origin}/${new Date().getFullYear()}`, 302);
     }
 
-    // Fetch event data from moon-phase feed
+    // Fetch event data
+    const feedUrls = url.searchParams.getAll("feed");
     const moonData = await fetchMoonData(env, params.year);
 
     const forExport = params.format != null || params.size != null || params.testing;
     let html: string;
 
     if (params.viewMode === "month" && params.month != null) {
+      // Fetch movie + external feed events in parallel
+      const eventSources = await Promise.all([
+        params.include.movies ? fetchMovieEvents(env) : Promise.resolve([]),
+        ...feedUrls.map((u) => fetchExternalFeed(u)),
+      ]);
+      const allEvents = eventSources.flat();
+
+      // Filter to requested month
+      const monthStr = String(params.month).padStart(2, "0");
+      const prefix = `${params.year}-${monthStr}-`;
+      const monthEvents = allEvents.filter((e) => e.date.startsWith(prefix));
+
       html = renderMonthView({
         year: params.year,
         month: params.month,
@@ -73,6 +89,7 @@ export default {
         newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
         solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
         borders: params.borders,
+        events: monthEvents,
         dataSource: moonData.source,
       });
     } else {
@@ -184,13 +201,14 @@ function parseFormatSegment(
 
 function parseIncludeParam(value: string | null): IncludeOptions {
   if (!value) {
-    return { fullMoon: true, newMoon: false, solarEvents: true };
+    return { fullMoon: true, newMoon: false, solarEvents: true, movies: false };
   }
   const tokens = value.split(",").map((s) => s.trim());
   return {
     fullMoon: tokens.includes("moon:full"),
     newMoon: tokens.includes("moon:new"),
     solarEvents: tokens.includes("solar:season"),
+    movies: tokens.includes("movies"),
   };
 }
 
@@ -266,4 +284,36 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     solarEvents: SOLAR_EVENTS[year] ?? {},
     source: `static-fallback:${debugInfo}`,
   };
+}
+
+async function fetchMovieEvents(env: Env): Promise<CalendarEvent[]> {
+  try {
+    if (env.MOVIE_RELEASE) {
+      const response = await env.MOVIE_RELEASE.fetch(
+        new Request("https://internal/theatrical.ics")
+      );
+      if (response.ok) {
+        const ics = await response.text();
+        return parseICS(ics, "movie");
+      }
+    }
+  } catch {
+    // no movie data available
+  }
+  return [];
+}
+
+async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      const ics = await response.text();
+      return parseICS(ics, "external");
+    }
+  } catch {
+    // external feed unavailable
+  }
+  return [];
 }

@@ -4,6 +4,8 @@
  * so that mini prev/next calendars and the main grid share one design system.
  */
 
+import type { CalendarEvent } from "@calendar-feeds/feed-types";
+
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -26,6 +28,7 @@ export interface MonthViewOptions {
   newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
   borders: boolean;
+  events?: CalendarEvent[];
   dataSource?: string;
 }
 
@@ -35,6 +38,7 @@ interface DayData {
   moonPhase?: "full" | "new";
   isSpecialDay?: "solstice" | "equinox";
   isToday?: boolean;
+  events?: CalendarEvent[];
 }
 
 export function renderMonthView(opts: MonthViewOptions): string {
@@ -46,8 +50,16 @@ export function renderMonthView(opts: MonthViewOptions): string {
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
+  // Build events-by-date map
+  const eventsByDate = new Map<string, CalendarEvent[]>();
+  for (const e of opts.events ?? []) {
+    const existing = eventsByDate.get(e.date) ?? [];
+    existing.push(e);
+    eventsByDate.set(e.date, existing);
+  }
+
   // Generate main month grid (6 weeks)
-  const weeks = generateWeeks(opts.year, monthIndex, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);
+  const weeks = generateWeeks(opts.year, monthIndex, fullMoonSet, newMoonSet, opts.solarEvents, todayStr, eventsByDate);
 
   // Prev/next month info
   const prev = monthIndex === 0
@@ -187,11 +199,21 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
     indicator = `<div class="day-marker-${day.isSpecialDay}"></div>`;
   }
 
+  // Event text (left-aligned, max 3)
+  const eventHtml = (day.events ?? [])
+    .slice(0, 3)
+    .map((e) => {
+      const text = escapeHtml(e.summary);
+      return `<span class="month-day-event" title="${escapeAttr(e.summary)}">${text}</span>`;
+    })
+    .join("\n            ");
+
   return `          <div class="${classes}">
             <div class="month-day-header">
               ${dayNum}
               ${indicator}
             </div>
+            ${eventHtml}
           </div>`;
 }
 
@@ -201,7 +223,8 @@ function generateWeeks(
   fullMoonSet: Set<string>,
   newMoonSet: Set<string>,
   solarEvents: Record<string, "solstice" | "equinox">,
-  todayStr: string
+  todayStr: string,
+  eventsByDate?: Map<string, CalendarEvent[]>
 ): DayData[][] {
   const firstDay = new Date(year, monthIndex, 1);
   const lastDay = new Date(year, monthIndex + 1, 0);
@@ -229,6 +252,7 @@ function generateWeeks(
       moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
       isSpecialDay: solarEvents[dateStr],
       isToday: dateStr === todayStr,
+      events: eventsByDate?.get(dateStr),
     });
     if (currentWeek.length === 7) {
       weeks.push(currentWeek);
@@ -253,4 +277,12 @@ function generateWeeks(
   }
 
   return weeks;
+}
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function escapeAttr(str: string): string {
+  return escapeHtml(str).replace(/"/g, "&quot;");
 }
