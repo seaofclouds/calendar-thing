@@ -6,6 +6,12 @@ preview_urls = true
 [assets]
 directory = "./public"
 
+# Allow importing .ics files as text modules (for fixture data)
+[[rules]]
+type = "Text"
+globs = ["**/*.ics"]
+fallthrough = true
+
 [[services]]
 binding = "MOON_PHASE"
 service = "moon-phase-calendar"

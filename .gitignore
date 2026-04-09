@@ -40,3 +40,6 @@ apps/calendar/public/client.js
 # Playwright MCP screenshots
 .playwright-mcp/
 tmp/
+
+# Wrangler local secrets
+.dev.vars

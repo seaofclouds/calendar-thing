@@ -7,11 +7,13 @@
 import { renderCalendar } from "./render";
 import { renderMonthView } from "./render-month";
 import { parseICS } from "./parse-ics";
+import { FEEDS, fetchFeedEvents } from "./feeds";
 import type { CalendarEvent } from "@calendar-feeds/feed-types";
 
 interface Env {
   MOON_PHASE: Fetcher;
   MOVIE_RELEASE: Fetcher;
+  CALENDAR_TOKEN?: string;
 }
 
 interface IncludeOptions {
@@ -63,9 +65,12 @@ export default {
     let html: string;
 
     if (params.viewMode === "month" && params.month != null) {
-      // Fetch movie + external feed events in parallel
+      // Fetch feed events in parallel (movies + external ICS)
+      const token = env.CALENDAR_TOKEN;
       const eventSources = await Promise.all([
-        params.include.movies ? fetchMovieEvents(env) : Promise.resolve([]),
+        params.include.movies
+          ? fetchFeedEvents(FEEDS.movies, env as unknown as Record<string, unknown>, token)
+          : Promise.resolve([]),
         ...feedUrls.map((u) => fetchExternalFeed(u)),
       ]);
       const allEvents = eventSources.flat();
@@ -284,23 +289,6 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     solarEvents: SOLAR_EVENTS[year] ?? {},
     source: `static-fallback:${debugInfo}`,
   };
-}
-
-async function fetchMovieEvents(env: Env): Promise<CalendarEvent[]> {
-  try {
-    if (env.MOVIE_RELEASE) {
-      const response = await env.MOVIE_RELEASE.fetch(
-        new Request("https://internal/theatrical.ics")
-      );
-      if (response.ok) {
-        const ics = await response.text();
-        return parseICS(ics, "movie");
-      }
-    }
-  } catch {
-    // no movie data available
-  }
-  return [];
 }
 
 async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {

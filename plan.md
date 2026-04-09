@@ -293,16 +293,21 @@ ICS sources (all produce .ics):
 | B2 | Month view rendering (render-month.ts) | DONE |
 | B3 | Month view CSS (borders, mini cals, markers) | DONE |
 | B4 | Year view navigation (month links, year nav) | DONE |
-| D1 | ICS parser (parse-ics.ts) | pending |
-| D2 | Movie releases via ICS in month view | pending |
-| D3 | External ICS feed support (?feed= param) | pending |
-| D4 | BUSD school calendar worker | pending |
-| D5 | Event rendering in month day cells | pending |
+| B5 | Month view design refinements (borders, mini cals) | DONE |
+| D1 | ICS parser (parse-ics.ts) | DONE |
+| D2 | Movie releases via ICS in month view | DONE |
+| D3 | External ICS feed support (?feed= param) | DONE |
+| D4 | Feed config with three-tier fallback (feeds.ts) | DONE |
+| D5 | Event rendering in month day cells | DONE |
+| D6 | Streamline SVG icons per feed category | DONE |
+| D7 | US holidays ICS feed | pending |
+| D8 | BUSD school calendar worker (PDF→ICS) | pending |
+| D9 | Event de-duplication across feeds | pending |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
 
-D1-D5 are the current focus.
+D7-D9 are the current focus.
 C depends on B+D (month view + feeds needed for config preview).
 
 ---

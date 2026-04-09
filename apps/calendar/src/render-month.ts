@@ -203,8 +203,9 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
   const eventHtml = (day.events ?? [])
     .slice(0, 3)
     .map((e) => {
+      const icon = e.emoji ?? "";
       const text = escapeHtml(e.summary);
-      return `<span class="month-day-event" title="${escapeAttr(e.summary)}">${text}</span>`;
+      return `<span class="month-day-event" title="${escapeAttr(e.summary)}">${icon}${text}</span>`;
     })
     .join("\n            ");
 
