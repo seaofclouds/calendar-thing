@@ -52,7 +52,7 @@ A Cloudflare Worker that renders printable year and month calendars as server-si
 /:year/:size/:orientation/300dpi.png  # Export as image
 ```
 
-Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new,solar:season,movies,busd,astrology`
+Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new,solar:season,movies,movies-theatrical,movies-digital,busd,astrology`
 
 ### Default Layouts
 
@@ -67,20 +67,28 @@ Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new
 
 ### Feed Endpoints
 
-Moon phase worker:
-- `/feeds/moon.ics` — ICS calendar feed
-- `/feeds/moon.json` — JSON data (supports `?year=N` for specific year)
+All feed workers use `/feeds/{name}.ics` and `/feeds/{name}.json` endpoints. All require `?token=<CALENDAR_TOKEN>`.
 
-Movie release worker:
-- `/theatrical.ics` — Theatrical releases
-- `/digital.ics` — Digital releases
-- `/theatrical.json`, `/digital.json` — JSON data
+| Worker | ICS | JSON |
+|--------|-----|------|
+| moon-phase | `/feeds/moon.ics` | `/feeds/moon.json` |
+| movie-release | `/feeds/movies-theatrical.ics` | `/feeds/movies-theatrical.json` |
+| movie-release | `/feeds/movies-digital.ics` | `/feeds/movies-digital.json` |
+| astrology | `/feeds/astrology.ics` | `/feeds/astrology.json` |
 
-Astrology worker:
-- `/feeds/astrology.ics` — Zodiac season events
-- `/feeds/astrology.json` — JSON data (supports `?year=N`)
+Moon and astrology endpoints support `?year=N` for a specific year.
 
-All feed endpoints require `?token=<CALENDAR_TOKEN>`.
+### Feed Proxy
+
+The calendar app proxies feed ICS through the main domain, so feeds can be subscribed to via:
+
+```
+https://calendar.seaofclouds.com/feeds/movies-theatrical.ics?token=TOKEN
+https://calendar.seaofclouds.com/feeds/moon.ics?token=TOKEN
+https://calendar.seaofclouds.com/feeds/astrology.ics?token=TOKEN
+```
+
+Routes are derived automatically from the feed plugin registry.
 
 ### Astronomical Features
 
@@ -156,14 +164,16 @@ The calendar app connects to feed workers via Cloudflare service bindings (decla
 
 ## Adding a New Feed
 
-1. Create `feeds/my-feed/` with a CF Worker serving ICS + JSON
+1. Create `feeds/my-feed/` with a CF Worker serving ICS + JSON at `/feeds/{name}.ics` and `/feeds/{name}.json`
 2. Use `@calendar-feeds/ics-utils` and `@calendar-feeds/worker-utils`
 3. Create `feeds/my-feed/feed.plugin.ts` exporting a `FeedPlugin` manifest:
-   - `id` — slug for `?include=` param (e.g. `"movies"`)
+   - `id` — slug for `?include=` param and feed proxy route (`/feeds/{id}.ics`)
    - `renderMode` — `"event-list"` (text in day cells) or `"day-marker"` (icon replaces date number)
    - `icon` / `signIcons` — inline SVG icons
    - `includeTokens` / `defaultInclude` — sub-toggles and defaults
    - `fixture` — imported ICS text for offline dev fallback
+   - A single worker can export multiple plugins (e.g. movie-release exports `theatrical` and `digital`)
 4. Register the plugin in `apps/calendar/src/feed-loader.ts`
 5. Add a service binding in `apps/calendar/wrangler.toml`
 6. Add a deploy job to `.github/workflows/deploy.yml`
+7. The feed proxy route (`/feeds/{id}.ics`) is created automatically from the plugin registry

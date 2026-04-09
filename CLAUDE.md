@@ -33,7 +33,7 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 2. **Feed workers** (`feeds/`) — independent CF Workers serving ICS + JSON
    - `astrology` — Zodiac season events (tropical/Western dates in `zodiac.ts`), no external APIs. Per-sign Streamline SVG icons in calendar app
    - `moon-phase` — Astronomical computations (Jean Meeus algorithms in `moon.ts`, `solar.ts`), no external APIs
-   - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two-pass discovery (popularity + release date sort), theatrical/digital endpoint differentiation, excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
+   - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two plugins (`movies-theatrical`, `movies-digital`) from one worker. Two-pass discovery (popularity + release date sort), excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
 
 3. **Feed plugins** (`feeds/*/feed.plugin.ts`) — co-located config for each feed
    - Each feed exports a `FeedPlugin` manifest with name, icons, include tokens, transforms, and fixture data
@@ -58,7 +58,8 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 - **Auth:** All feed endpoints require `?token=CALENDAR_TOKEN`. Service binding calls use `hostname === "internal"` to bypass auth (handled by `authenticateToken()` in worker-utils).
 - **Caching:** 24-hour edge caching via `withEdgeCache()` wrapper.
 - **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
-- **Include param:** `?include=moon:full,moon:new,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults defined per-plugin via `defaultInclude` (moon:full + solar:season on by default, others off).
+- **Include param:** `?include=moon:full,moon:new,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults defined per-plugin via `defaultInclude` (moon:full + solar:season on by default, others off). `movies` is shorthand for both `movies-theatrical` and `movies-digital`.
+- **Feed proxy:** `/feeds/{id}.ics?token=` — proxies ICS feeds through the calendar app via service bindings (e.g. `/feeds/movies-theatrical.ics`, `/feeds/moon.ics`, `/feeds/astrology.ics`). Routes are derived from the feed plugin registry.
 - **Feed param:** `?feed=https://example.com/cal.ics` — external ICS feed URL (fetched with 5s timeout).
 - **No test framework** — validation is `pnpm typecheck` only.
 - **Wrangler configs** are per-worker (`apps/calendar/wrangler.toml`, `feeds/*/wrangler.toml`). The root `wrangler.toml` is unused.

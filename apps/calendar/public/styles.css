@@ -545,11 +545,28 @@ body {
 /* h1 reset handled by .month-view-title */
 
 .month-view-header {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 5fr 1fr;
   align-items: center;
   padding: 0 0 0.5em 0;
 }
+
+/* Month navigation — invisible click targets (hidden on desktop, visible on mobile when mini calendars are hidden) */
+.month-nav {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  text-decoration: none;
+  color: transparent;
+  font-size: 0;
+  z-index: 1;
+}
+
+.month-nav.prev { left: 0; }
+.month-nav.next { right: 0; }
 
 /* Align mini calendars with the first and last day columns */
 .month-view-nav .mini-calendar {
@@ -648,6 +665,16 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: #000;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dayname-short {
+  display: none;
+}
+
+.dayname-full {
+  display: inline;
 }
 
 .month-view-days {
@@ -790,13 +817,60 @@ body {
     font-size: 2em;
   }
 
+  .month-view:not(.print) {
+    padding: 0.5em;
+  }
+
+  .month-view:not(.print) .month-view-daynames {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .month-view:not(.print) .dayname-full {
+    display: none;
+  }
+
+  .month-view:not(.print) .dayname-short {
+    display: inline;
+  }
+
+  .month-view:not(.print) .month-view-dayname {
+    font-size: 0.75em;
+    padding: 0.3em 0.2em;
+    letter-spacing: 0;
+  }
+
+  .month-view:not(.print) .month-view-days {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
   .month-day {
     min-height: 3em;
     padding: 0.2em;
   }
 
-  .month-day-event {
-    font-size: 0.65em;
+  .month-view:not(.print) .month-nav {
+    display: block;
+  }
+
+  .month-view:not(.print) .month-day-event {
+    font-size: 0;
+    line-height: 0;
+    margin-bottom: 0.15em;
+    gap: 0;
+  }
+
+  .month-view:not(.print) .month-day-event::before {
+    content: "";
+    display: inline-block;
+    width: 0.35em;
+    height: 0.35em;
+    border-radius: 50%;
+    background: #888;
+    flex-shrink: 0;
+  }
+
+  .month-view:not(.print) .month-day-event .event-icon {
+    display: none;
   }
 }
 

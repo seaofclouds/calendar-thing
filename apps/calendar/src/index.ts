@@ -16,6 +16,7 @@ import type { CalendarEvent } from "@calendar-feeds/feed-types";
 interface Env {
   MOON_PHASE: Fetcher;
   MOVIE_RELEASE: Fetcher;
+  ASTROLOGY: Fetcher;
   CALENDAR_TOKEN?: string;
   [key: string]: unknown;
 }
@@ -46,6 +47,11 @@ export default {
     // Favicon
     if (path === "/favicon.ico") {
       return new Response(null, { status: 204 });
+    }
+
+    // Feed proxy: /feeds/*.ics → service binding
+    if (path.startsWith("/feeds/")) {
+      return handleFeedProxy(path, url, env);
     }
 
     // Parse URL
@@ -203,6 +209,39 @@ function parseFormatSegment(
   if (dpiMatch) dpi = parseInt(dpiMatch[1]);
 
   return { format, dpi };
+}
+
+async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Response> {
+  // Derive route from feed registry: /feeds/{id}.ics → plugin.binding + plugin.endpoint
+  const match = path.match(/^\/feeds\/([^/]+)\.ics$/);
+  const feed = match ? getAllFeeds().find((f) => f.id === match[1]) : undefined;
+  if (!feed) {
+    return new Response("Not Found", { status: 404 });
+  }
+
+  // Validate token
+  const token = url.searchParams.get("token");
+  if (!token || token !== env.CALENDAR_TOKEN) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  // Proxy to service binding (internal hostname bypasses feed worker auth)
+  const binding = env[feed.binding] as Fetcher | undefined;
+  if (!binding) {
+    return new Response("Service Unavailable", { status: 503 });
+  }
+
+  // Forward query params (except token) to upstream
+  const upstream = new URL(`https://internal${feed.endpoint}`);
+  for (const [key, value] of url.searchParams) {
+    if (key !== "token") upstream.searchParams.set(key, value);
+  }
+
+  const response = await binding.fetch(new Request(upstream.toString()));
+  return new Response(response.body, {
+    status: response.status,
+    headers: response.headers,
+  });
 }
 
 async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {

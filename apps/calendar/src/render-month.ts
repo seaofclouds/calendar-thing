@@ -13,6 +13,7 @@ const MONTH_NAMES = [
 
 const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const FULL_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export interface MonthViewOptions {
   year: number;
@@ -108,6 +109,7 @@ export function renderMonthView(opts: MonthViewOptions): string {
   <div id="root" class="${rootClasses}">
     <div class="${containerClasses}"${dataAttrs}>
       <div class="month-view-header">
+        <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>
         <div class="month-view-nav">
           <a href="${prevUrl}" class="mini-calendar" aria-label="Previous month: ${MONTH_NAMES[prev.month]}">
 ${renderMiniMonth(MONTH_NAMES[prev.month] + (prev.year !== opts.year ? ` ${prev.year}` : ""), prevMiniWeeks)}
@@ -119,10 +121,11 @@ ${renderMiniMonth(MONTH_NAMES[prev.month] + (prev.year !== opts.year ? ` ${prev.
 ${renderMiniMonth(MONTH_NAMES[next.month] + (next.year !== opts.year ? ` ${next.year}` : ""), nextMiniWeeks)}
           </a>
         </div>
+        <a href="${nextUrl}" class="month-nav next" aria-label="Next month: ${MONTH_NAMES[next.month]}"></a>
       </div>
       <div class="month-view-grid">
         <div class="month-view-daynames">
-${FULL_DAY_NAMES.map((d) => `          <div class="month-view-dayname">${d}</div>`).join("\n")}
+${FULL_DAY_NAMES.map((d, i) => `          <div class="month-view-dayname"><span class="dayname-full">${d}</span><span class="dayname-short">${SHORT_DAY_NAMES[i]}</span></div>`).join("\n")}
         </div>
         <div class="month-view-days">
 ${renderWeeks(weeks)}

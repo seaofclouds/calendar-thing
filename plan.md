@@ -227,15 +227,21 @@ Moon-phase worker accepts `?year=N` query param (defaults to current year). Cale
 ### Architecture
 
 ```
-ICS sources (all produce .ics):
+ICS sources (all produce .ics via /feeds/{name}.ics):
   ├── moon-phase worker        → /feeds/moon.ics (service binding)
-  ├── movie-release worker     → /theatrical.ics (service binding)
-  ├── busd-calendar worker     → /calendar.ics (future, parses PDF → ICS)
-  └── any external .ics URL    → fetched directly
+  ├── movie-release worker     → /feeds/movies-theatrical.ics (service binding)
+  │                            → /feeds/movies-digital.ics (service binding)
+  ├── astrology worker         → /feeds/astrology.ics (service binding)
+  ├── busd-calendar worker     → /feeds/busd.ics (future, parses PDF → ICS)
+  ├── ICS importer             → /feeds/{id}.ics (future, imports any external ICS)
+  └── any external .ics URL    → fetched directly via ?feed= param
                                     ↓
                     parse-ics.ts → CalendarEvent[]
                                     ↓
                     render-month.ts → .month-day-event spans
+
+Feed proxy (calendar app):
+  /feeds/{id}.ics → derived from plugin registry → service binding → upstream worker
 ```
 
 ### D1. ICS parser (`apps/calendar/src/parse-ics.ts`)
@@ -245,9 +251,10 @@ ICS sources (all produce .ics):
 - ~50-80 lines — not a full RFC 5545 parser
 
 ### D2. Movie releases via ICS
-- Fetch `env.MOVIE_RELEASE.fetch("https://internal/theatrical.ics")`
+- Fetch `env.MOVIE_RELEASE.fetch("https://internal/feeds/movies-theatrical.ics")`
 - Parse with `parseICS()` → `CalendarEvent[]`
-- Controlled by `?include=movies` (default: off)
+- Two plugins: `movies-theatrical` and `movies-digital` (same binding, different endpoints)
+- Controlled by `?include=movies` (both), `movies-theatrical`, or `movies-digital`
 
 ### D3. External ICS feed support
 - `?feed=https://example.com/cal.ics` query param
@@ -305,16 +312,21 @@ ICS sources (all produce .ics):
 | D9 | Query param preservation in navigation | DONE |
 | D10 | Astrology feed worker (zodiac seasons) | DONE |
 | D11 | Per-sign Streamline SVG icons | DONE |
-| D12 | Event de-duplication across feeds | pending |
-| D13 | Multi-day event visual connectors | pending |
-| D14 | BUSD feed worker (PDF→ICS, automated) | pending |
+| D12 | Standardize all feed endpoints to /feeds/{name}.ics | DONE |
+| D13 | Split movie plugin into theatrical + digital | DONE |
+| D14 | Feed proxy routes (/feeds/{id}.ics via calendar app) | DONE |
+| D15 | Mobile month view (abbreviated days, dot indicators, nav) | DONE |
+| D16 | BUSD feed worker (PDF→ICS, automated) | pending |
+| D17 | ICS importer — load/register external ICS as named feeds | pending |
+| D18 | Event de-duplication across feeds | pending |
+| D19 | Multi-day event visual connectors | pending |
 | E1 | Mercury retrograde events in astrology feed | pending |
 | E2 | Other astrological events (eclipses, etc.) | pending |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
 
-D12-D14 and E1-E2 are next.
+D16-D17 are next: convert BUSD from fixture-only to a real worker, and build an ICS importer so any external ICS URL can be registered as a named feed.
 C depends on B+D (month view + feeds needed for config preview).
 
 ---
