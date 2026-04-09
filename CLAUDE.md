@@ -33,7 +33,7 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 2. **Feed workers** (`feeds/`) — independent CF Workers serving ICS + JSON
    - `astrology` — Zodiac season events (tropical/Western dates in `zodiac.ts`), no external APIs. Per-sign Streamline SVG icons in calendar app
    - `moon-phase` — Astronomical computations (Jean Meeus algorithms in `moon.ts`, `solar.ts`), no external APIs
-   - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two-pass discovery (popularity + release date sort), theatrical/digital endpoint differentiation, excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
+   - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two plugins (`movies-theatrical`, `movies-digital`) from one worker. Two-pass discovery (popularity + release date sort), excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
 
 3. **Feed plugins** (`feeds/*/feed.plugin.ts`) — co-located config for each feed
    - Each feed exports a `FeedPlugin` manifest with name, icons, include tokens, transforms, and fixture data
