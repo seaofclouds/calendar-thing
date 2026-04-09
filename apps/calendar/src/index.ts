@@ -7,7 +7,6 @@
 import { renderCalendar } from "./render";
 
 interface Env {
-  ASSETS: Fetcher;
   MOON_PHASE: Fetcher;
   MOVIE_RELEASE: Fetcher;
 }
@@ -41,11 +40,6 @@ export default {
     // Favicon
     if (path === "/favicon.ico") {
       return new Response(null, { status: 204 });
-    }
-
-    // Serve static assets (CSS, JS) via Pages ASSETS binding
-    if (path.match(/\.(css|js|ico|png|jpg|svg|woff2?)$/)) {
-      return env.ASSETS.fetch(request);
     }
 
     // Parse URL
