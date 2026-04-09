@@ -12,29 +12,35 @@ export function parseICS(ics: string, category = "event"): CalendarEvent[] {
 
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i].split("END:VEVENT")[0];
-    const event = parseVEvent(block, category);
-    if (event) events.push(event);
+    events.push(...parseVEvent(block, category));
   }
 
   return events;
 }
 
-function parseVEvent(block: string, category: string): CalendarEvent | null {
+function parseVEvent(block: string, category: string): CalendarEvent[] {
   const uid = getField(block, "UID");
   const summary = getField(block, "SUMMARY");
-  const dtstart = parseDTStart(block);
+  const dtstart = parseDateField(block, "DTSTART");
+  const dtend = parseDateField(block, "DTEND");
 
-  if (!summary || !dtstart) return null;
+  if (!summary || !dtstart) return [];
 
-  return {
-    uid: uid ?? `${category}-${dtstart}-${summary}`,
-    date: dtstart,
+  const base = {
     summary: unescapeICS(summary),
     description: unescapeICS(getField(block, "DESCRIPTION") ?? "") || undefined,
     url: getField(block, "URL") ?? undefined,
     allDay: true,
     category,
   };
+
+  // Expand multi-day events (DTEND is exclusive in ICS)
+  const dates = expandDateRange(dtstart, dtend);
+  return dates.map((date) => ({
+    ...base,
+    uid: (uid ?? `${category}-${dtstart}-${summary}`) + (dates.length > 1 ? `-${date}` : ""),
+    date,
+  }));
 }
 
 /** Extract a field value from an ICS block, handling folded lines */
@@ -56,23 +62,42 @@ function getField(block: string, name: string): string | null {
   return value.replace(/\r?\n[ \t]/g, "");
 }
 
-/** Parse DTSTART into YYYY-MM-DD format */
-function parseDTStart(block: string): string | null {
-  // Try DTSTART;VALUE=DATE:YYYYMMDD
-  const dateOnly = block.match(/DTSTART;VALUE=DATE:(\d{8})/);
+/** Parse a date field (DTSTART or DTEND) into YYYY-MM-DD format */
+function parseDateField(block: string, field: string): string | null {
+  // Try FIELD;VALUE=DATE:YYYYMMDD
+  const dateOnly = block.match(new RegExp(`${field};VALUE=DATE:(\\d{8})`));
   if (dateOnly) {
     const d = dateOnly[1];
     return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
   }
 
-  // Try DTSTART:YYYYMMDD or DTSTART:YYYYMMDDTHHmmssZ
-  const datetime = block.match(/DTSTART:(\d{8})/);
+  // Try FIELD:YYYYMMDD or FIELD:YYYYMMDDTHHmmssZ
+  const datetime = block.match(new RegExp(`${field}:(\\d{8})`));
   if (datetime) {
     const d = datetime[1];
     return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
   }
 
   return null;
+}
+
+/** Expand a date range into individual YYYY-MM-DD dates. DTEND is exclusive in ICS. */
+function expandDateRange(start: string, end: string | null): string[] {
+  if (!end || end === start) return [start];
+
+  const dates: string[] = [];
+  const current = new Date(start + "T00:00:00");
+  const endDate = new Date(end + "T00:00:00");
+
+  while (current < endDate) {
+    const y = current.getFullYear();
+    const m = String(current.getMonth() + 1).padStart(2, "0");
+    const d = String(current.getDate()).padStart(2, "0");
+    dates.push(`${y}-${m}-${d}`);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates.length > 0 ? dates : [start];
 }
 
 function unescapeICS(value: string): string {
