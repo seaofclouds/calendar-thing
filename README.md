@@ -14,10 +14,9 @@ calendar-thing/                   # Monorepo root
 │   ├── moon-phase/             # CF Worker — moon phases + solar events (Jean Meeus)
 │   └── movie-release/          # CF Worker — theatrical + digital releases (TMDB API)
 ├── apps/
-│   └── calendar/               # CF Pages — printable calendar renderer
+│   └── calendar/               # CF Worker — printable calendar renderer + static assets
 ├── .github/workflows/deploy.yml
-├── pnpm-workspace.yaml
-└── wrangler.toml               # CF Pages build config
+└── pnpm-workspace.yaml
 ```
 
 ### Feed Workers
@@ -31,7 +30,7 @@ Both feeds use token-based authentication and 24-hour edge caching.
 
 ### Calendar App
 
-A Cloudflare Pages app that renders printable year calendars as server-side HTML. Fetches astronomical data from the moon-phase feed via service bindings. Includes client-side JS for responsive layout and image export (html-to-image).
+A Cloudflare Worker that renders printable year calendars as server-side HTML with static assets (CSS, client JS). Fetches astronomical data from the moon-phase feed via service bindings. Includes client-side JS for responsive layout and image export (html-to-image).
 
 ### Shared Packages
 
@@ -68,7 +67,7 @@ Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new
 
 Moon phase worker:
 - `/feeds/moon.ics` — ICS calendar feed
-- `/feeds/moon.json` — JSON data
+- `/feeds/moon.json` — JSON data (supports `?year=N` for specific year)
 
 Movie release worker:
 - `/theatrical.ics` — Theatrical releases
@@ -109,36 +108,39 @@ pnpm typecheck
 
 ## Deployment
 
-The calendar app deploys automatically via Cloudflare Pages on push to `main`.
-
-Feed workers deploy via GitHub Actions (`.github/workflows/deploy.yml`) when their files change. Requires:
+All workers (calendar app + feeds) deploy via GitHub Actions on push to `main`. Change detection (`dorny/paths-filter`) ensures only affected workers redeploy. You can also trigger all deploys manually from the Actions tab via "Run workflow".
 
 | GitHub setting | Type | Value |
 |---|---|---|
 | `CLOUDFLARE_API_TOKEN` | Repository secret | CF API token with Workers Scripts:Edit |
 | `CLOUDFLARE_ACCOUNT_ID` | Repository variable | Your CF account ID |
 
-Manual deploy:
+Manual deploy from monorepo root:
 ```bash
-# Deploy a feed worker
-cd feeds/moon-phase && npx wrangler deploy
+pnpm --filter @calendar-feeds/moon-phase run deploy
+pnpm --filter @calendar-feeds/movie-release run deploy
+pnpm --filter @calendar-feeds/calendar run deploy
+```
 
-# Set secrets
-npx wrangler secret put CALENDAR_TOKEN
+Feed worker secrets:
+```bash
+cd feeds/moon-phase && npx wrangler secret put CALENDAR_TOKEN
+cd feeds/movie-release && npx wrangler secret put CALENDAR_TOKEN
+cd feeds/movie-release && npx wrangler secret put TMDB_API_KEY
 ```
 
 ### Service Bindings
 
-The calendar app connects to feed workers via Cloudflare service bindings (configured in CF Pages dashboard):
+The calendar app connects to feed workers via Cloudflare service bindings (declared in `apps/calendar/wrangler.toml`, applied automatically by `wrangler deploy`):
 
 | Binding | Service |
 |---------|---------|
 | `MOON_PHASE` | `moon-phase-calendar` |
 | `MOVIE_RELEASE` | `movie-release-calendar` |
 
-**Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/moon.json`) with no token. The `authenticateToken()` helper in `worker-utils` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
+**Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/moon.json?year=2026`) with no token. The `authenticateToken()` helper in `worker-utils` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
 
-**Verifying data source:** The calendar app renders a `data-source` attribute on `<body>` (`"service-binding"` or `"static-fallback"`) so you can confirm in DevTools which path is active.
+**Verifying data source:** The calendar app renders a `data-source` attribute on `<body>` showing `"service-binding"` or `"static-fallback:reason"` (e.g. `no-binding`, `status-401`, `error-...`). Check in DevTools to confirm the pipeline is active.
 
 ## Adding a New Feed
 

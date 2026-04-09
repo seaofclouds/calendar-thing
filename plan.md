@@ -2,9 +2,9 @@
 
 ## Context
 
-The monorepo integration is complete and deployed. The calendar app renders at `calendar-thing.pages.dev` but has rendering bugs and is missing features. This plan addresses 4 areas: 2 bugs and 2 new features.
+The monorepo integration is complete and deployed. The calendar app renders at `calendar.seaofclouds.com` but has rendering bugs and is missing features. This plan addresses 4 areas: 2 bugs and 2 new features.
 
-**Repo:** `seaofclouds/calendar-thing` (monorepo, deployed on CF Pages)
+**Repo:** `seaofclouds/calendar-thing` (monorepo, all Cloudflare Workers)
 **Key files:** all in `apps/calendar/src/`
 
 ---
@@ -200,23 +200,36 @@ Add `month?: number` and `viewMode: "year" | "month"` to `CalendarParams`.
 
 ---
 
-## Pre-requisite: Service Binding Auth (DONE)
+## Pre-requisites (DONE)
 
-Feed workers require `?token=CALENDAR_TOKEN` for external requests. Service binding calls from the calendar app use synthetic URLs (`https://internal/...`) with no token — these were returning 401 and silently falling back to hardcoded test data.
+### Service binding auth bypass
+Feed workers require `?token=CALENDAR_TOKEN` for external requests. Service binding calls use synthetic URLs (`https://internal/...`) with no token. Fixed: `authenticateToken()` in `worker-utils` detects `hostname === "internal"` and bypasses auth.
 
-**Fix applied:** `authenticateToken()` in `worker-utils` now detects `hostname === "internal"` and bypasses auth. Merged in PR #3.
+### Converted calendar from CF Pages to CF Worker
+Service bindings are now declared in `apps/calendar/wrangler.toml` and applied by `wrangler deploy` — no dashboard config needed. Static assets served via `[assets]` directive.
 
-**Known limitation:** Moon-phase worker computes data for `currentYear` through `currentYear+1` only. Years outside this range get empty data even with a working service binding. The calendar app's static fallback data covers 2025-2027.
+### Moon-phase year param
+Moon-phase worker accepts `?year=N` query param (defaults to current year). Calendar app passes the requested year so any year gets live data.
 
-**Verification:** Check `<body data-source="service-binding|static-fallback">` in DevTools on `/2026/` or `/2027/`. The `deploy-moon-phase` GitHub Action must have run for the fix to take effect on the feed worker side.
+### GitHub Actions deploy fixes
+- Replaced unreliable `github.event.commits.*.modified` with `dorny/paths-filter`
+- Fixed `pnpm deploy` → `pnpm run deploy`
+- Added `workflow_dispatch` with "deploy all" option for manual retriggers
+- Added `[alias]` in feed worker `wrangler.toml` for workspace package resolution
+
+### Data source verification
+`<body data-source="...">` attribute shows `"service-binding"` or `"static-fallback:reason"` for debugging.
 
 ## Implementation Order
 
 | Step | What | Status |
 |------|------|--------|
-| Pre | Service binding auth bypass | DONE (PR #3) |
+| Pre | Service binding auth bypass | DONE |
+| Pre | Convert to CF Worker | DONE |
+| Pre | Moon-phase year param | DONE |
+| Pre | Fix GitHub Actions deploys | DONE |
 | A1 | Fix responsive default route | pending |
-| A2 | Fix image export (remove ASSETS regex) | pending |
+| A2 | Fix image export (remove ASSETS regex) | DONE (removed in Worker conversion) |
 | B1 | Add month view routing | pending (depends on A1) |
 | B2 | Month view rendering (render-month.ts) | pending |
 | B3 | Month view CSS | pending |
@@ -225,7 +238,7 @@ Feed workers require `?token=CALENDAR_TOKEN` for external requests. Service bind
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
 
-A1 and A2 are independent -- can be done in parallel.
+A1 is the only remaining Phase A bug fix (A2 was resolved by the Worker conversion).
 B depends on A1 (routing changes).
 C depends on B (month view needed for config preview).
 
