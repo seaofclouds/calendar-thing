@@ -109,6 +109,7 @@ export function renderMonthView(opts: MonthViewOptions): string {
   <div id="root" class="${rootClasses}">
     <div class="${containerClasses}"${dataAttrs}>
       <div class="month-view-header">
+        <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>
         <div class="month-view-nav">
           <a href="${prevUrl}" class="mini-calendar" aria-label="Previous month: ${MONTH_NAMES[prev.month]}">
 ${renderMiniMonth(MONTH_NAMES[prev.month] + (prev.year !== opts.year ? ` ${prev.year}` : ""), prevMiniWeeks)}
@@ -120,6 +121,7 @@ ${renderMiniMonth(MONTH_NAMES[prev.month] + (prev.year !== opts.year ? ` ${prev.
 ${renderMiniMonth(MONTH_NAMES[next.month] + (next.year !== opts.year ? ` ${next.year}` : ""), nextMiniWeeks)}
           </a>
         </div>
+        <a href="${nextUrl}" class="month-nav next" aria-label="Next month: ${MONTH_NAMES[next.month]}"></a>
       </div>
       <div class="month-view-grid">
         <div class="month-view-daynames">
