@@ -32,13 +32,13 @@ Both feeds use token-based authentication and 24-hour edge caching.
 
 ### Calendar App
 
-A Cloudflare Worker that renders printable year calendars as server-side HTML with static assets (CSS, client JS). Fetches astronomical data from the moon-phase feed via service bindings. Includes client-side JS for responsive layout and image export (html-to-image).
+A Cloudflare Worker that renders printable year and month calendars as server-side HTML. Discovers feeds via a plugin system — each feed has a co-located `feed.plugin.ts` manifest defining its name, icons, include tokens, and render mode. The calendar app imports these manifests through a loader (`feed-loader.ts`), fetches events via three-tier fallback (service binding → prod URL → fixture ICS), and splits them by `renderMode` for rendering. Includes client-side JS for responsive layout and image export (html-to-image).
 
 ### Shared Packages
 
 - **ics-utils** — `escapeICS()`, `formatICSTimestamp()`, `wrapVCalendar()`, `buildVEvent()`
 - **worker-utils** — `authenticateToken()`, `buildCacheKey()`, `withEdgeCache()`, response helpers
-- **feed-types** — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent` TypeScript interfaces
+- **feed-types** — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent`, `FeedPlugin`, `FeedRenderMode` TypeScript interfaces
 
 ## Usage
 
@@ -158,5 +158,12 @@ The calendar app connects to feed workers via Cloudflare service bindings (decla
 
 1. Create `feeds/my-feed/` with a CF Worker serving ICS + JSON
 2. Use `@calendar-feeds/ics-utils` and `@calendar-feeds/worker-utils`
-3. Add a deploy job to `.github/workflows/deploy.yml`
-4. Add a service binding in the calendar app to consume it
+3. Create `feeds/my-feed/feed.plugin.ts` exporting a `FeedPlugin` manifest:
+   - `id` — slug for `?include=` param (e.g. `"movies"`)
+   - `renderMode` — `"event-list"` (text in day cells) or `"day-marker"` (icon replaces date number)
+   - `icon` / `signIcons` — inline SVG icons
+   - `includeTokens` / `defaultInclude` — sub-toggles and defaults
+   - `fixture` — imported ICS text for offline dev fallback
+4. Register the plugin in `apps/calendar/src/feed-loader.ts`
+5. Add a service binding in `apps/calendar/wrangler.toml`
+6. Add a deploy job to `.github/workflows/deploy.yml`

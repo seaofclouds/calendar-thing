@@ -24,9 +24,7 @@ export interface MonthViewOptions {
   forExport: boolean;
   format?: "png" | "jpg";
   dpi?: number;
-  fullMoonDates: string[];
-  newMoonDates: string[];
-  solarEvents: Record<string, "solstice" | "equinox">;
+  markers: CalendarEvent[];
   borders: boolean;
   events?: CalendarEvent[];
   queryString?: string;
@@ -36,8 +34,7 @@ export interface MonthViewOptions {
 interface DayData {
   date: number;
   currentMonth: boolean;
-  moonPhase?: "full" | "new";
-  isSpecialDay?: "solstice" | "equinox";
+  marker?: CalendarEvent;
   isToday?: boolean;
   events?: CalendarEvent[];
 }
@@ -46,12 +43,14 @@ export function renderMonthView(opts: MonthViewOptions): string {
   const monthIndex = opts.month - 1;
   const isPreview = opts.forExport;
 
-  const fullMoonSet = new Set(opts.fullMoonDates);
-  const newMoonSet = new Set(opts.newMoonDates);
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-  // Build events-by-date map
+  // Build marker and event maps by date
+  const markersByDate = new Map<string, CalendarEvent>();
+  for (const m of opts.markers) {
+    if (!markersByDate.has(m.date)) markersByDate.set(m.date, m);
+  }
   const eventsByDate = new Map<string, CalendarEvent[]>();
   for (const e of opts.events ?? []) {
     const existing = eventsByDate.get(e.date) ?? [];
@@ -60,7 +59,7 @@ export function renderMonthView(opts: MonthViewOptions): string {
   }
 
   // Generate main month grid (6 weeks)
-  const weeks = generateWeeks(opts.year, monthIndex, fullMoonSet, newMoonSet, opts.solarEvents, todayStr, eventsByDate);
+  const weeks = generateWeeks(opts.year, monthIndex, markersByDate, todayStr, eventsByDate);
 
   // Prev/next month info
   const prev = monthIndex === 0
@@ -76,8 +75,8 @@ export function renderMonthView(opts: MonthViewOptions): string {
   const yearUrl = `/${opts.year}${qs}`;
 
   // Mini calendar grids (reuse exact same .month structure as year view)
-  const prevMiniWeeks = generateWeeks(prev.year, prev.month, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);
-  const nextMiniWeeks = generateWeeks(next.year, next.month, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);
+  const prevMiniWeeks = generateWeeks(prev.year, prev.month, markersByDate, todayStr);
+  const nextMiniWeeks = generateWeeks(next.year, next.month, markersByDate, todayStr);
 
   const rootClasses = [
     opts.size ? `size-${opts.size.toLowerCase()}` : "",
@@ -154,12 +153,8 @@ function renderDay(day: DayData): string {
   let content: string;
   if (!day.currentMonth) {
     content = formatDate(day.date);
-  } else if (day.moonPhase === "full") {
-    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
-  } else if (day.moonPhase === "new") {
-    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="black" stroke="black" stroke-width="2"/></svg>`;
-  } else if (day.isSpecialDay) {
-    content = `<div class="day-marker-${day.isSpecialDay}"></div>`;
+  } else if (day.marker?.emoji) {
+    content = day.marker.emoji;
   } else {
     content = formatDate(day.date);
   }
@@ -191,15 +186,8 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
 
   const dayNum = `<span class="month-day-number">${day.date}</span>`;
 
-  // Right-aligned indicator (moon phase or solar event)
-  let indicator = "";
-  if (day.moonPhase === "full") {
-    indicator = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
-  } else if (day.moonPhase === "new") {
-    indicator = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="black" stroke="black" stroke-width="2"/></svg>`;
-  } else if (day.isSpecialDay) {
-    indicator = `<div class="day-marker-${day.isSpecialDay}"></div>`;
-  }
+  // Right-aligned indicator (day-marker events like moon phase or solar event)
+  const indicator = day.marker?.emoji ?? "";
 
   // Event text (left-aligned, max 3)
   const eventHtml = (day.events ?? [])
@@ -223,11 +211,9 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
 function generateWeeks(
   year: number,
   monthIndex: number,
-  fullMoonSet: Set<string>,
-  newMoonSet: Set<string>,
-  solarEvents: Record<string, "solstice" | "equinox">,
+  markersByDate: Map<string, CalendarEvent>,
   todayStr: string,
-  eventsByDate?: Map<string, CalendarEvent[]>
+  eventsByDate?: Map<string, CalendarEvent[]>,
 ): DayData[][] {
   const firstDay = new Date(year, monthIndex, 1);
   const lastDay = new Date(year, monthIndex + 1, 0);
@@ -252,8 +238,7 @@ function generateWeeks(
     currentWeek.push({
       date: day,
       currentMonth: true,
-      moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
-      isSpecialDay: solarEvents[dateStr],
+      marker: markersByDate.get(dateStr),
       isToday: dateStr === todayStr,
       events: eventsByDate?.get(dateStr),
     });

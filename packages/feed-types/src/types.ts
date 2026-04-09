@@ -28,3 +28,30 @@ export interface CalendarEvent {
   allDay: boolean;
   category: string;
 }
+
+/**
+ * How the calendar renderer should display events from a feed.
+ * - "event-list": text events in day cells (movies, school, astrology)
+ * - "day-marker": icon replaces the date number (moon phases, solar events)
+ */
+export type FeedRenderMode = "event-list" | "day-marker";
+
+/**
+ * Feed plugin manifest — each feed defines this in its feed.plugin.ts.
+ * The calendar app imports these to discover and configure feeds.
+ */
+export interface FeedPlugin {
+  id: string;
+  name: string;
+  binding: string;
+  endpoint: string;
+  prodUrl: string;
+  category: string;
+  renderMode: FeedRenderMode;
+  includeTokens?: Record<string, string>;
+  defaultInclude?: string[];
+  stripSummaryPrefix?: string;
+  stripSummarySuffix?: string;
+  icon?: string;
+  signIcons?: Record<string, string>;
+}

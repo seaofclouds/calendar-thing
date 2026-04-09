@@ -26,7 +26,7 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 **Three layers:**
 
 1. **Shared packages** (`packages/`) — no build step, TypeScript only
-   - `feed-types` — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent` interfaces
+   - `feed-types` — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent`, `FeedPlugin`, `FeedRenderMode` interfaces
    - `ics-utils` — RFC 5545 ICS generation helpers
    - `worker-utils` — `authenticateToken()`, `buildCacheKey()`, `withEdgeCache()`, response helpers
 
@@ -35,28 +35,30 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
    - `moon-phase` — Astronomical computations (Jean Meeus algorithms in `moon.ts`, `solar.ts`), no external APIs
    - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two-pass discovery (popularity + release date sort), theatrical/digital endpoint differentiation, excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
 
-3. **Feed fixtures** (`feeds/*/fixtures/`) — ICS test data for local dev, imported as text modules
-   - `astrology/fixtures/astrology.ics` — zodiac seasons for 2026
-   - `movie-release/fixtures/theatrical.ics` — real 2026 TMDB data (Apr-Jun)
-   - `busd-calendar/fixtures/busd-2025-2026.ics` — BUSD school calendar (3 school years)
+3. **Feed plugins** (`feeds/*/feed.plugin.ts`) — co-located config for each feed
+   - Each feed exports a `FeedPlugin` manifest with name, icons, include tokens, transforms, and fixture data
+   - `renderMode: "event-list"` for text events (movies, school, astrology) or `"day-marker"` for icon markers (moon, solar)
+   - Fixtures in `feeds/*/fixtures/*.ics` — ICS data for offline dev fallback
 
 4. **Calendar app** (`apps/calendar/`) — CF Worker rendering printable year + month calendars as server-side HTML
    - **Year view** (`/:year`) — 12-month grid with moon/solar markers, clickable months
    - **Month view** (`/:year/:month`) — single month with day cells, events, mini prev/next calendars
-   - **Feed system** (`feeds.ts`) — plugin-style feed config with three-tier fallback: service binding → prod URL + token → fixture ICS
+   - **Feed loader** (`feed-loader.ts`) — registers all feed plugins, provides `getFeed()`/`getAllFeeds()`
+   - **Feed fetcher** (`feed-fetcher.ts`) — three-tier fallback: service binding → prod URL + token → fixture ICS
+   - **Include parser** (`include.ts`) — data-driven `?include=` param parsing from feed plugin manifests
    - **ICS parser** (`parse-ics.ts`) — universal VEVENT parser, handles multi-day event expansion
    - Connects to feed workers via **service bindings** (not HTTP — uses `env.MOON_PHASE.fetch()`)
    - Internal service binding calls use `https://internal/...` hostname to bypass token auth
    - Client-side JS (`client.ts`) handles responsive layout and image export via `html-to-image`
 
-**Data flow:** Calendar app → feed system (service binding / prod URL / fixture) → ICS → `parseICS()` → `CalendarEvent[]` → server-side HTML render
+**Data flow:** Calendar app → feed-loader (discovers plugins) → feed-fetcher (service binding / prod URL / fixture) → ICS → `parseICS()` → `CalendarEvent[]` → split by `renderMode` → server-side HTML render
 
 ## Key Patterns
 
 - **Auth:** All feed endpoints require `?token=CALENDAR_TOKEN`. Service binding calls use `hostname === "internal"` to bypass auth (handled by `authenticateToken()` in worker-utils).
 - **Caching:** 24-hour edge caching via `withEdgeCache()` wrapper.
 - **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
-- **Include param:** `?include=moon:full,moon:new,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults: fullMoon + solarEvents on, others off.
+- **Include param:** `?include=moon:full,moon:new,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults defined per-plugin via `defaultInclude` (moon:full + solar:season on by default, others off).
 - **Feed param:** `?feed=https://example.com/cal.ics` — external ICS feed URL (fetched with 5s timeout).
 - **No test framework** — validation is `pnpm typecheck` only.
 - **Wrangler configs** are per-worker (`apps/calendar/wrangler.toml`, `feeds/*/wrangler.toml`). The root `wrangler.toml` is unused.

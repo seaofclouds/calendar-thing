@@ -697,6 +697,11 @@ body {
   border-right-color: #e0e0e0;
 }
 
+/* Dark border between other-month and current-month cells */
+.month-view.borders .month-day.other-month:has(+ .month-day:not(.other-month)) {
+  border-right-color: #aaa;
+}
+
 /* Day cells */
 .month-day {
   display: flex;
@@ -747,26 +752,26 @@ body {
   background: black;
 }
 
-/* Events — left aligned, wrapping */
+/* Events — left aligned, wrapping with hanging indent */
 .month-day-event {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25em;
   font-size: 0.75em;
   line-height: 1.3;
   color: #000;
   text-align: left;
   margin-bottom: 0.3em;
-  text-wrap: pretty;
+  text-wrap: balance;
+  padding-left: 1.15em;
+  text-indent: -1.15em;
 }
 
 .event-icon {
   width: 0.9em;
   height: 0.9em;
-  flex-shrink: 0;
+  display: inline-block;
   vertical-align: baseline;
   position: relative;
   top: 0.1em;
+  margin-right: 0.25em;
 }
 
 /* Month view print */

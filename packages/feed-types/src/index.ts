@@ -1,1 +1,1 @@
-export type { CalendarFeed, FeedEndpoint, CalendarEvent } from "./types";
+export type { CalendarFeed, FeedEndpoint, CalendarEvent, FeedRenderMode, FeedPlugin } from "./types";
