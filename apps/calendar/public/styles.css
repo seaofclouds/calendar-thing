@@ -478,6 +478,14 @@ body {
 }
 
 /* ===================
+   Today Highlight (responsive view only)
+   =================== */
+
+.calendar:not(.print) .calendar-day.today .date {
+  font-weight: bold;
+}
+
+/* ===================
    Testing Styles
    =================== */
 

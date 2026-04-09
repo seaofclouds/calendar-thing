@@ -26,6 +26,7 @@ interface DayData {
   currentMonth: boolean;
   moonPhase?: "full" | "new";
   isSpecialDay?: "solstice" | "equinox";
+  isToday?: boolean;
 }
 
 interface MonthData {
@@ -101,7 +102,7 @@ function renderMonth(month: MonthData): string {
 }
 
 function renderDay(day: DayData): string {
-  const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}`;
+  const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
 
   let content: string;
   if (!day.currentMonth) {
@@ -128,6 +129,8 @@ function generateMonths(
 ): MonthData[] {
   const fullMoonSet = new Set(fullMoonDates);
   const newMoonSet = new Set(newMoonDates);
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return Array.from({ length: totalMonths }, (_, i) => {
     const monthIndex = i % 12;
@@ -162,6 +165,7 @@ function generateMonths(
         currentMonth: true,
         moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
         isSpecialDay: solarEvents[dateStr],
+        isToday: dateStr === todayStr,
       });
 
       if (currentWeek.length === 7) {
