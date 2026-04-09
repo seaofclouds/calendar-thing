@@ -8,7 +8,7 @@ export const theatrical: FeedPlugin & { fixture: string } = {
   name: "Theatrical Releases",
   binding: "MOVIE_RELEASE",
   endpoint: "/feeds/movies-theatrical.ics",
-  prodUrl: "https://movie-release-calendar.seaofclouds.workers.dev",
+  prodUrl: "https://calendar-movies.seaofclouds.workers.dev",
   category: "movie",
   renderMode: "event-list",
   fixture,
@@ -21,7 +21,7 @@ export const digital: FeedPlugin & { fixture: string } = {
   name: "Digital Releases",
   binding: "MOVIE_RELEASE",
   endpoint: "/feeds/movies-digital.ics",
-  prodUrl: "https://movie-release-calendar.seaofclouds.workers.dev",
+  prodUrl: "https://calendar-movies.seaofclouds.workers.dev",
   category: "movie",
   renderMode: "event-list",
   fixture: "", // no fixture for digital yet

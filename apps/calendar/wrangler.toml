@@ -14,12 +14,12 @@ fallthrough = true
 
 [[services]]
 binding = "ASTRONOMY"
-service = "astronomy-calendar"
+service = "calendar-astronomy"
 
 [[services]]
 binding = "MOVIE_RELEASE"
-service = "movie-release-calendar"
+service = "calendar-movies"
 
 [[services]]
 binding = "ASTROLOGY"
-service = "astrology-calendar"
+service = "calendar-astrology"

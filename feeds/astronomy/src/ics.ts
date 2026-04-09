@@ -39,7 +39,7 @@ function generateMoonEvent(phase: MoonPhase, timestamp: string): string {
   const emoji = phaseEmoji(phase.phase);
 
   return buildVEvent({
-    uid: `${lunarUidSegment(phase.phase)}-${dateStr}@astronomy-calendar`,
+    uid: `${lunarUidSegment(phase.phase)}-${dateStr}@calendar-astronomy`,
     dtstamp: timestamp,
     dtstart: dateStr,
     summary: escapeICS(`${emoji} ${name}`),
@@ -53,7 +53,7 @@ function generateSolarEvent(event: SolarEvent, timestamp: string): string {
   const dateStr = formatICSDateValue(event.date);
 
   return buildVEvent({
-    uid: `solar-${event.event}-${dateStr}@astronomy-calendar`,
+    uid: `solar-${event.event}-${dateStr}@calendar-astronomy`,
     dtstamp: timestamp,
     dtstart: dateStr,
     summary: escapeICS(`${event.emoji} ${event.name}`),

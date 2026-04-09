@@ -1,4 +1,4 @@
-name = "astrology-calendar"
+name = "calendar-astrology"
 main = "src/index.ts"
 compatibility_date = "2024-11-01"
 

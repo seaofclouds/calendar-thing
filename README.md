@@ -156,9 +156,9 @@ The calendar app connects to feed workers via Cloudflare service bindings (decla
 
 | Binding | Service |
 |---------|---------|
-| `ASTRONOMY` | `astronomy-calendar` |
-| `MOVIE_RELEASE` | `movie-release-calendar` |
-| `ASTROLOGY` | `astrology-calendar` |
+| `ASTRONOMY` | `calendar-astronomy` |
+| `MOVIE_RELEASE` | `calendar-movies` |
+| `ASTROLOGY` | `calendar-astrology` |
 
 **Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/astronomy.json?year=2026`) with no token. The `authenticateToken()` helper in `worker-utils` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
 

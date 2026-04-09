@@ -6,7 +6,7 @@ const plugin: FeedPlugin & { fixture: string } = {
   name: "Moon Phases & Solar Events",
   binding: "ASTRONOMY",
   endpoint: "/feeds/astronomy.ics",
-  prodUrl: "https://astronomy-calendar.seaofclouds.workers.dev",
+  prodUrl: "https://calendar-astronomy.seaofclouds.workers.dev",
   category: "astronomy",
   renderMode: "day-marker",
   fixture,
