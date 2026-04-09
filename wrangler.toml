@@ -1,3 +1,11 @@
 name = "calendar-thing"
 compatibility_date = "2024-11-01"
 pages_build_output_dir = "./dist"
+
+[[services]]
+binding = "MOON_PHASE"
+service = "moon-phase-calendar"
+
+[[services]]
+binding = "MOVIE_RELEASE"
+service = "movie-release-calendar"
