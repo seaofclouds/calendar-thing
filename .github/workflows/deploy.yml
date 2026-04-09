@@ -3,6 +3,12 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_all:
+        description: 'Deploy all workers (skip change detection)'
+        type: boolean
+        default: true
 
 jobs:
   typecheck:
@@ -45,7 +51,7 @@ jobs:
 
   deploy-moon-phase:
     needs: [typecheck, detect-changes]
-    if: needs.detect-changes.outputs.moon-phase == 'true'
+    if: needs.detect-changes.outputs.moon-phase == 'true' || (github.event_name == 'workflow_dispatch' && inputs.deploy_all)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +70,7 @@ jobs:
 
   deploy-movie-release:
     needs: [typecheck, detect-changes]
-    if: needs.detect-changes.outputs.movie-release == 'true'
+    if: needs.detect-changes.outputs.movie-release == 'true' || (github.event_name == 'workflow_dispatch' && inputs.deploy_all)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +89,7 @@ jobs:
 
   deploy-calendar:
     needs: [typecheck, detect-changes]
-    if: needs.detect-changes.outputs.calendar == 'true'
+    if: needs.detect-changes.outputs.calendar == 'true' || (github.event_name == 'workflow_dispatch' && inputs.deploy_all)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
