@@ -16,6 +16,6 @@
     "esbuild": "^0.24.0",
     "html-to-image": "^1.11.11",
     "typescript": "^5.7.2",
-    "wrangler": "^3.93.0"
+    "wrangler": "^4.21.0"
   }
 }
