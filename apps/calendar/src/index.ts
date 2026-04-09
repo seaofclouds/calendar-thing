@@ -155,7 +155,7 @@ interface MoonData {
   fullMoonDates: string[];
   newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
-  source: "service-binding" | "static-fallback";
+  source: string;
 }
 
 // Pre-computed test data (Jean Meeus algorithms, 2025–2027)
