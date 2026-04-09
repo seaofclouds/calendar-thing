@@ -4,6 +4,7 @@
  */
 
 import { getPageLayout } from "./config";
+import type { CalendarEvent } from "@calendar-feeds/feed-types";
 
 export interface RenderOptions {
   year: number;
@@ -15,9 +16,7 @@ export interface RenderOptions {
   forExport: boolean;
   format?: "png" | "jpg";
   dpi?: number;
-  fullMoonDates: string[];
-  newMoonDates: string[];
-  solarEvents: Record<string, "solstice" | "equinox">;
+  markers: CalendarEvent[];
   queryString?: string;
   dataSource?: string;
 }
@@ -25,8 +24,7 @@ export interface RenderOptions {
 interface DayData {
   date: number;
   currentMonth: boolean;
-  moonPhase?: "full" | "new";
-  isSpecialDay?: "solstice" | "equinox";
+  marker?: CalendarEvent;
   isToday?: boolean;
 }
 
@@ -49,7 +47,11 @@ export function renderCalendar(opts: RenderOptions): string {
   const totalMonths = actualRows * layout.columns;
   const isPreview = opts.forExport;
 
-  const months = generateMonths(opts.year, totalMonths, opts.fullMoonDates, opts.newMoonDates, opts.solarEvents);
+  const markersByDate = new Map<string, CalendarEvent>();
+  for (const m of opts.markers) {
+    if (!markersByDate.has(m.date)) markersByDate.set(m.date, m);
+  }
+  const months = generateMonths(opts.year, totalMonths, markersByDate);
 
   const calendarClasses = [
     "calendar",
@@ -122,12 +124,8 @@ function renderDay(day: DayData): string {
   let content: string;
   if (!day.currentMonth) {
     content = formatDate(day.date);
-  } else if (day.moonPhase === "full") {
-    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
-  } else if (day.moonPhase === "new") {
-    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="black" stroke="black" stroke-width="2"/></svg>`;
-  } else if (day.isSpecialDay) {
-    content = `<div class="day-marker-${day.isSpecialDay}"></div>`;
+  } else if (day.marker?.emoji) {
+    content = day.marker.emoji;
   } else {
     content = formatDate(day.date);
   }
@@ -138,12 +136,8 @@ function renderDay(day: DayData): string {
 function generateMonths(
   baseYear: number,
   totalMonths: number,
-  fullMoonDates: string[],
-  newMoonDates: string[],
-  solarEvents: Record<string, "solstice" | "equinox">
+  markersByDate: Map<string, CalendarEvent>,
 ): MonthData[] {
-  const fullMoonSet = new Set(fullMoonDates);
-  const newMoonSet = new Set(newMoonDates);
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
@@ -178,8 +172,7 @@ function generateMonths(
       currentWeek.push({
         date: day,
         currentMonth: true,
-        moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
-        isSpecialDay: solarEvents[dateStr],
+        marker: markersByDate.get(dateStr),
         isToday: dateStr === todayStr,
       });
 

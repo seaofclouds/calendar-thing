@@ -1,0 +1,43 @@
+import type { ResolvedFeed } from "./feed-loader";
+
+export type IncludeState = Record<string, Set<string>>;
+
+export function parseIncludeParam(
+  value: string | null,
+  registry: ResolvedFeed[],
+): IncludeState {
+  const state: IncludeState = {};
+
+  if (!value) {
+    for (const feed of registry) {
+      if (feed.defaultInclude && feed.defaultInclude.length > 0) {
+        state[feed.id] = new Set(feed.defaultInclude);
+      }
+    }
+    return state;
+  }
+
+  const tokens = value.split(",").map((s) => s.trim());
+  for (const feed of registry) {
+    if (feed.includeTokens) {
+      const active = new Set<string>();
+      for (const token of Object.keys(feed.includeTokens)) {
+        if (tokens.includes(token)) active.add(token);
+      }
+      if (active.size > 0) state[feed.id] = active;
+    } else {
+      if (tokens.includes(feed.id)) {
+        state[feed.id] = new Set([feed.id]);
+      }
+    }
+  }
+  return state;
+}
+
+export function isFeedEnabled(state: IncludeState, feedId: string): boolean {
+  return feedId in state;
+}
+
+export function getActiveTokens(state: IncludeState, feedId: string): Set<string> {
+  return state[feedId] ?? new Set();
+}
