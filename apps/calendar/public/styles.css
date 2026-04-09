@@ -478,6 +478,18 @@ body {
 }
 
 /* ===================
+   Today Highlight (responsive view only)
+   =================== */
+
+.calendar:not(.print) .calendar-day.today .date {
+  font-weight: bold;
+}
+
+.date-leading-zero {
+  visibility: hidden;
+}
+
+/* ===================
    Testing Styles
    =================== */
 
@@ -515,8 +527,7 @@ body {
   border-radius: 2px;
 }
 
-/* Today highlight (screen only) */
-.calendar:not(.print) .calendar-day.is-today .date,
+/* Today highlight — month view (screen only) */
 .month-view:not(.print) .month-view-day.is-today .day-number {
   font-weight: 700;
 }

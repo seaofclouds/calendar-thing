@@ -104,16 +104,21 @@ function renderMonth(month: MonthData): string {
         </div>`;
 }
 
+function formatDate(date: number): string {
+  const leading = date < 10 ? `<span class="date-leading-zero">0</span>` : "";
+  return `<span class="date">${leading}${date}</span>`;
+}
+
 function renderDay(day: DayData): string {
   const classList = ["calendar-day"];
   if (!day.currentMonth) classList.push("other-month");
   if (day.currentMonth) classList.push("current-month");
-  if (day.isToday) classList.push("is-today");
+  if (day.isToday) classList.push("today");
   const classes = classList.join(" ");
 
   let content: string;
   if (!day.currentMonth) {
-    content = `<span class="date">${day.date}</span>`;
+    content = formatDate(day.date);
   } else if (day.moonPhase === "full") {
     content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
   } else if (day.moonPhase === "new") {
@@ -121,7 +126,7 @@ function renderDay(day: DayData): string {
   } else if (day.isSpecialDay) {
     content = `<div class="day-marker-${day.isSpecialDay}"></div>`;
   } else {
-    content = `<span class="date">${day.date}</span>`;
+    content = formatDate(day.date);
   }
 
   return `<div class="${classes}">${content}</div>`;

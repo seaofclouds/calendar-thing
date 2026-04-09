@@ -26,8 +26,6 @@ type PageTypeConfig = {
   layout: OrientationConfig;
 };
 
-export const SCREEN_DPI = 96;
-
 export const PAGE_TYPES: Record<string, PageTypeConfig> = {
   letter: {
     dimensions: {
