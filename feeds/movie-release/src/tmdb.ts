@@ -84,7 +84,7 @@ function getDateRange(): { start: string; end: string } {
 
 // Indian cinema languages to exclude — these get wide US theatrical
 // distribution but aren't relevant to our calendar
-const EXCLUDED_LANGUAGES = new Set(["hi", "te", "ta", "kn", "ml"]);
+const EXCLUDED_LANGUAGES = new Set(["hi", "te", "ta", "kn", "ml", "bn", "cn", "ar"]);
 const EXCLUDED_LANGUAGES_PARAM = [...EXCLUDED_LANGUAGES].join(",");
 
 // Release type sets for discover queries.
@@ -159,16 +159,9 @@ export async function fetchUpcomingMovies(
     }
   }
 
-  const now = new Date();
   const filtered = allMovies.filter((m) => {
     if (EXCLUDED_LANGUAGES.has(m.original_language)) return false;
-    // Sliding popularity threshold: far-out movies haven't built buzz yet,
-    // so we use a lower bar the further out they are
-    const releaseDate = new Date(m.release_date);
-    const monthsAway = (releaseDate.getFullYear() - now.getFullYear()) * 12
-      + releaseDate.getMonth() - now.getMonth();
-    const threshold = monthsAway > 6 ? 5 : monthsAway > 3 ? 15 : 20;
-    return m.popularity >= threshold;
+    return m.popularity >= 5;
   });
 
   // Look up actual US release dates (discover's release_date is the original,

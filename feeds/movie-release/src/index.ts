@@ -18,7 +18,7 @@ interface Env {
   CALENDAR_TOKEN: string;
 }
 
-const CACHE_VERSION = 10;
+const CACHE_VERSION = 11;
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

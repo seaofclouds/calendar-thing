@@ -30,7 +30,7 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 
 2. **Feed workers** (`feeds/`) — independent CF Workers serving ICS + JSON
    - `moon-phase` — Astronomical computations (Jean Meeus algorithms in `moon.ts`, `solar.ts`), no external APIs
-   - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret
+   - `movie-release` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two-pass discovery (popularity + release date sort), theatrical/digital endpoint differentiation, excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
 
 3. **Feed fixtures** (`feeds/*/fixtures/`) — ICS test data for local dev, imported as text modules
    - `movie-release/fixtures/theatrical.ics` — real 2026 TMDB data (Apr-Jun)

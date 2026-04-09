@@ -5,58 +5,418 @@ X-WR-CALNAME:Movie Releases (Theatrical)
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
+UID:movie-1539104@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251205
+DTEND;VALUE=DATE:20251205
+SUMMARY:🎥 JUJUTSU KAISEN: Execution
+DESCRIPTION:A veil abruptly descends over the busy Shibuya area amid the bustling Halloween crowds\, trapping countless civilians inside. Satoru Gojo\, the strongest jujutsu sorcerer\, steps into the chaos. But lying in wait are curse users and spirits scheming to seal him away. Yuji Itadori\, accompanied by his classmates and other top-tier jujutsu sorcerers\, enters the fray in an unprecedented clash of curses — the Shibuya Incident. In the aftermath\, ten colonies across Japan are transformed into dens of c...\n\n\nTMDB Popularity: 58.9902\nTMDB Rating: 5.924\n\nhttps://www.themoviedb.org/movie/1539104
+URL:https://www.themoviedb.org/movie/1539104
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1387382@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251205
+DTEND;VALUE=DATE:20251205
+SUMMARY:🎥 Hunting Season
+DESCRIPTION:When a reclusive survivalist and his daughter rescue a mysterious\, wounded woman from a river\, they become entangled in a deadly web of violence and revenge\, forcing them to confront a brutal criminal to survive.\n\n\nTMDB Popularity: 52.6552\nTMDB Rating: 7\n\nhttps://www.themoviedb.org/movie/1387382
+URL:https://www.themoviedb.org/movie/1387382
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1228246@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251205
+DTEND;VALUE=DATE:20251205
+SUMMARY:🎥 Five Nights at Freddy's 2
+DESCRIPTION:One year since the supernatural nightmare at Freddy Fazbear's Pizza\, the stories about what transpired there have been twisted into a campy local legend\, inspiring the town's first ever Fazfest. With the truth kept from her\, Abby sneaks out to reconnect with Freddy\, Bonnie\, Chica\, and Foxy\, setting into motion a terrifying series of events that will reveal dark secrets about the real origin of Freddy's\, and unleash a decades-hidden horror.\n\n\nTMDB Popularity: 34.2555\nTMDB Rating: 6.667\n\nhttps://www.themoviedb.org/movie/1228246
+URL:https://www.themoviedb.org/movie/1228246
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1401778@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251212
+DTEND;VALUE=DATE:20251212
+SUMMARY:🎥 Turbulence
+DESCRIPTION:Young married couple Zach and Emmy decide to take a hot air balloon trip across the Italian Dolomites to rekindle their relationship. When they and pilot Harry are joined by a third passenger\, Julia\, events unfold in ways they could never imagine five thousand meters in the air.\n\n\nTMDB Popularity: 25.5207\nTMDB Rating: 6.3\n\nhttps://www.themoviedb.org/movie/1401778
+URL:https://www.themoviedb.org/movie/1401778
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1480382@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251217
+DTEND;VALUE=DATE:20251217
+SUMMARY:🎥 The Voice of Hind Rajab
+DESCRIPTION:January 29\, 2024. Red Crescent volunteers receive an emergency call. A five-year old girl is trapped in a car under fire in Gaza\, pleading for rescue. While trying to keep her on the line\, they do everything they can to get an ambulance to her. Her name was Hind Rajab.\n\n\nTMDB Popularity: 25.9007\nTMDB Rating: 8.043\n\nhttps://www.themoviedb.org/movie/1480382
+URL:https://www.themoviedb.org/movie/1480382
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-83533@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251219
+DTEND;VALUE=DATE:20251219
+SUMMARY:🎥 Avatar: Fire and Ash
+DESCRIPTION:In the wake of the devastating war against the RDA and the loss of their eldest son\, Jake Sully and Neytiri face a new threat on Pandora: the Ash People\, a violent and power-hungry Na'vi tribe led by the ruthless Varang. Jake's family must fight for their survival and the future of Pandora in a conflict that pushes them to their emotional and physical limits.\n\nDirector: James Cameron\nCast: Sam Worthington\, Zoe Saldaña\, Sigourney Weaver\, Stephen Lang\, Oona Chaplin\n\nTMDB Popularity: 418.2833\nTMDB Rating: 7.374\n\nhttps://www.themoviedb.org/movie/83533\nhttps://www.imdb.com/title/tt1757678/
+URL:https://www.themoviedb.org/movie/83533
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1368166@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251219
+DTEND;VALUE=DATE:20251219
+SUMMARY:🎥 The Housemaid
+DESCRIPTION:Trying to escape her past\, Millie Calloway accepts a job as a live-in housemaid for the wealthy Nina and Andrew Winchester. But what begins as a dream job quickly unravels into something far more dangerous—a sexy\, seductive game of secrets\, scandal\, and power.\n\nDirector: Paul Feig\nCast: Sydney Sweeney\, Amanda Seyfried\, Brandon Sklenar\, Michele Morrone\, Elizabeth Perkins\n\nTMDB Popularity: 91.3335\nTMDB Rating: 7.188\n\nhttps://www.themoviedb.org/movie/1368166\nhttps://www.imdb.com/title/tt27543632/
+URL:https://www.themoviedb.org/movie/1368166
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1167307@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251219
+DTEND;VALUE=DATE:20251219
+SUMMARY:🎥 David
+DESCRIPTION:From the songs of his mother’s heart to the whispers of a faithful God\, David’s story begins in quiet devotion. When the giant Goliath rises to terrorize a nation\, a young shepherd armed with only a sling\, a few stones\, and unshakable faith steps forward. Pursued by power and driven by purpose\, his journey tests the limits of loyalty\, love\, and courage—culminating in a battle not just for a crown\, but for the soul of a kingdom.\n\n\nTMDB Popularity: 50.5539\nTMDB Rating: 8.1\n\nhttps://www.themoviedb.org/movie/1167307
+URL:https://www.themoviedb.org/movie/1167307
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-991494@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251219
+DTEND;VALUE=DATE:20251219
+SUMMARY:🎥 The SpongeBob Movie: Search for SquarePants
+DESCRIPTION:Desperate to be a big guy\, SpongeBob sets out to prove his bravery to Mr. Krabs by following The Flying Dutchman – a mysterious swashbuckling ghost pirate – on a seafaring adventure that takes him to the deepest depths of the deep sea\, where no Sponge has gone before.\n\n\nTMDB Popularity: 44.1139\nTMDB Rating: 6.722\n\nhttps://www.themoviedb.org/movie/991494
+URL:https://www.themoviedb.org/movie/991494
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1317288@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251219
+DTEND;VALUE=DATE:20251219
+SUMMARY:🎥 Marty Supreme
+DESCRIPTION:Marty Mauser\, a young man with a dream no one respects\, goes to hell and back in pursuit of greatness.\n\n\nTMDB Popularity: 29.276\nTMDB Rating: 7.414\n\nhttps://www.themoviedb.org/movie/1317288
+URL:https://www.themoviedb.org/movie/1317288
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1234731@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20251225
+DTEND;VALUE=DATE:20251225
+SUMMARY:🎥 Anaconda
+DESCRIPTION:A group of friends facing mid-life crises head to the rainforest with the intention of remaking their favorite movie from their youth\, only to find themselves in a fight for their lives against natural disasters\, giant snakes and violent criminals.\n\n\nTMDB Popularity: 70.2413\nTMDB Rating: 5.892\n\nhttps://www.themoviedb.org/movie/1234731
+URL:https://www.themoviedb.org/movie/1234731
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-840464@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260109
+DTEND;VALUE=DATE:20260109
+SUMMARY:🎥 Greenland 2: Migration
+DESCRIPTION:Having found the safety of the Greenland bunker after the comet Clarke decimated the Earth\, the Garrity family must now risk everything to embark on a perilous journey across the wasteland of Europe to find a new home.\n\nDirector: Ric Roman Waugh\nCast: Gerard Butler\, Morena Baccarin\, Roman Griffin Davis\, Tommie Earl Jenkins\, Trond Fausa Aurvåg\n\nTMDB Popularity: 227.3793\nTMDB Rating: 6.511\n\nhttps://www.themoviedb.org/movie/840464\nhttps://www.imdb.com/title/tt14850054/
+URL:https://www.themoviedb.org/movie/840464
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1601243@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260109
+DTEND;VALUE=DATE:20260109
+SUMMARY:🎥 Oscar Shaw
+DESCRIPTION:After retiring from the police force\, a relentless detective haunted by the tragic loss of his closest friend sets out on a perilous quest for vengeance\, seeking redemption and fighting to restore justice to the streets he once swore to protect.\n\n\nTMDB Popularity: 38.0392\nTMDB Rating: 6.483\n\nhttps://www.themoviedb.org/movie/1601243
+URL:https://www.themoviedb.org/movie/1601243
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1315303@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260109
+DTEND;VALUE=DATE:20260109
+SUMMARY:🎥 Primate
+DESCRIPTION:Lucy\, a college student\, along with her friends\, spend their vacation at her family's home in Hawaii\, which includes her pet chimpanzee\, Ben. However\, when Ben contracts rabies after being bitten by a rabid animal\, the group must fight for their lives in order to avoid the now-violent chimp.\n\n\nTMDB Popularity: 23.8061\nTMDB Rating: 6.49\n\nhttps://www.themoviedb.org/movie/1315303
+URL:https://www.themoviedb.org/movie/1315303
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1272837@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260116
+DTEND;VALUE=DATE:20260116
+SUMMARY:🎥 28 Years Later: The Bone Temple
+DESCRIPTION:Dr. Kelson finds himself in a shocking new relationship - with consequences that could change the world as they know it - and Spike's encounter with Jimmy Crystal becomes a nightmare he can't escape.\n\n\nTMDB Popularity: 55.9271\nTMDB Rating: 7.172\n\nhttps://www.themoviedb.org/movie/1272837
+URL:https://www.themoviedb.org/movie/1272837
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1575337@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260122
+DTEND;VALUE=DATE:20260122
+SUMMARY:🎥 Cosmic Princess Kaguya!
+DESCRIPTION:Iroha's life gets knocked off its orbit when Kaguya\, a carefree runaway from the Moon\, moves in and convinces her to perform in a virtual world together.\n\n\nTMDB Popularity: 20.4102\nTMDB Rating: 8.438\n\nhttps://www.themoviedb.org/movie/1575337
+URL:https://www.themoviedb.org/movie/1575337
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1236153@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260123
+DTEND;VALUE=DATE:20260123
+SUMMARY:🎥 Mercy
+DESCRIPTION:In the near future\, a detective stands on trial accused of murdering his wife. He has ninety minutes to prove his innocence to the advanced AI Judge he once championed\, before it determines his fate.\n\nDirector: Timur Bekmambetov\nCast: Chris Pratt\, Rebecca Ferguson\, Kali Reis\, Kylie Rogers\, Chris Sullivan\n\nTMDB Popularity: 79.0956\nTMDB Rating: 6.992\n\nhttps://www.themoviedb.org/movie/1236153\nhttps://www.imdb.com/title/tt31050594/
+URL:https://www.themoviedb.org/movie/1236153
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-680493@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260123
+DTEND;VALUE=DATE:20260123
+SUMMARY:🎥 Return to Silent Hill
+DESCRIPTION:When James receives a mysterious letter from his lost love Mary\, he is drawn to Silent Hill—a once-familiar town now consumed by darkness. As he searches for her\, James faces monstrous creatures and unravels a terrifying truth that will push him to the edge of his sanity.\n\nDirector: Christophe Gans\nCast: Jeremy Irvine\, Hannah Emily Anderson\, Evie Templeton\, Pearse Egan\, Nicola Alexis\n\nTMDB Popularity: 98.3314\nTMDB Rating: 4.997\n\nhttps://www.themoviedb.org/movie/680493\nhttps://www.imdb.com/title/tt22868010/
+URL:https://www.themoviedb.org/movie/680493
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1290821@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260130
+DTEND;VALUE=DATE:20260130
+SUMMARY:🎥 Shelter
+DESCRIPTION:A man living in self-imposed exile on a remote island rescues a young girl from a violent storm\, setting off a chain of events that forces him out of seclusion to protect her from enemies tied to his past.\n\nDirector: Ric Roman Waugh\nCast: Jason Statham\, Bodhi Rae Breathnach\, Michael Shaeffer\, Anna Crilly\, Bill Nighy\n\nTMDB Popularity: 289.9247\nTMDB Rating: 6.798\n\nhttps://www.themoviedb.org/movie/1290821\nhttps://www.imdb.com/title/tt32357218/
+URL:https://www.themoviedb.org/movie/1290821
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1198994@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260130
+DTEND;VALUE=DATE:20260130
+SUMMARY:🎥 Send Help
+DESCRIPTION:Two colleagues become stranded on a deserted island\, the only survivors of a plane crash. On the island\, they must overcome past grievances and work together to survive\, but ultimately\, it's a battle of wills and wits to make it out alive.\n\nDirector: Sam Raimi\nCast: Rachel McAdams\, Dylan O'Brien\, Edyll Ismail\, Dennis Haysbert\, Xavier Samuel\n\nTMDB Popularity: 100.2841\nTMDB Rating: 7.061\n\nhttps://www.themoviedb.org/movie/1198994\nhttps://www.imdb.com/title/tt8036976/
+URL:https://www.themoviedb.org/movie/1198994
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1196067@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260130
+DTEND;VALUE=DATE:20260130
+SUMMARY:🎥 Worldbreaker
+DESCRIPTION:Five years ago\, a tear in the fabric of reality brought creatures to our world from an alternate dimension bent on our destruction. A father hides his daughter on an island to keep her safe while he prepares her for survival and the battles to come. But when the world is about to break\, no place is safe.\n\n\nTMDB Popularity: 30.1454\nTMDB Rating: 5.829\n\nhttps://www.themoviedb.org/movie/1196067
+URL:https://www.themoviedb.org/movie/1196067
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1193501@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260206
+DTEND;VALUE=DATE:20260206
+SUMMARY:🎥 Whistle
+DESCRIPTION:A misfit group of unwitting high school students stumble upon a cursed object\, an ancient Aztec Death Whistle. They discover that blowing the whistle and the terrifying sound it emits will summon their future deaths to hunt them down.\n\nDirector: Corin Hardy\nCast: Dafne Keen\, Sophie Nélisse\, Sky Yang\, Jhaleil Swaby\, Alissa Skovbye\n\nTMDB Popularity: 110.3656\nTMDB Rating: 5.969\n\nhttps://www.themoviedb.org/movie/1193501\nhttps://www.imdb.com/title/tt29550683/
+URL:https://www.themoviedb.org/movie/1193501
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1246049@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260206
+DTEND;VALUE=DATE:20260206
+SUMMARY:🎥 Dracula
+DESCRIPTION:In late 15th-century Eastern Europe\, Prince Vlad II’s bride is brutally murdered. As a result\, he renounces God and damns Heaven itself. Cursed with eternal life\, Vlad is reborn as Dracula\, an immortal warlord who defies fate in a blood-soaked crusade to wrench his lost love back from death.\n\n\nTMDB Popularity: 38.6098\nTMDB Rating: 7.09\n\nhttps://www.themoviedb.org/movie/1246049
+URL:https://www.themoviedb.org/movie/1246049
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1171145@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260213
+SUMMARY:🎥 Crime 101
+DESCRIPTION:When an elusive thief whose high-stakes heists unfold along the iconic 101 freeway in Los Angeles eyes the score of a lifetime\, with hopes of this being his final job\, his path collides with a disillusioned insurance broker who is facing her own crossroads. Determined to crack the case\, a relentless detective closes in on the operation\, raising the stakes even higher.\n\nDirector: Bart Layton\nCast: Chris Hemsworth\, Mark Ruffalo\, Halle Berry\, Barry Keoghan\, Monica Barbaro\n\nTMDB Popularity: 289.4823\nTMDB Rating: 7.039\n\nhttps://www.themoviedb.org/movie/1171145\nhttps://www.imdb.com/title/tt32430579/
+URL:https://www.themoviedb.org/movie/1171145
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1297842@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260213
+SUMMARY:🎥 GOAT
+DESCRIPTION:A small goat with big dreams gets a once-in-a-lifetime shot to join the pros and play roarball\, a high-intensity\, co-ed\, full-contact sport dominated by the fastest\, fiercest animals in the world.\n\nDirector: Tyree Dillihay\nCast: Caleb McLaughlin\, Gabrielle Union\, Stephen Curry\, Aaron Pierre\, Nicola Coughlan\n\nTMDB Popularity: 231.3896\nTMDB Rating: 7.9\n\nhttps://www.themoviedb.org/movie/1297842\nhttps://www.imdb.com/title/tt27613895/
+URL:https://www.themoviedb.org/movie/1297842
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1470130@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260213
+SUMMARY:🎥 The Mortuary Assistant
+DESCRIPTION:Rebecca Owens\, a recent mortuary science graduate takes a night shift job at River Fields Mortuary. Initially\, the job seems straightforward — embalming bodies\, completing paperwork\, and keeping things tidy. But once Rebecca starts working the night shift\, things take a dark turn.\n\nDirector: Jeremiah Kipp\nCast: Willa Holland\, Paul Sparks\, John Adams\, Mark Steger\, Shelly Gibson\n\nTMDB Popularity: 137.4141\nTMDB Rating: 5.405\n\nhttps://www.themoviedb.org/movie/1470130\nhttps://www.imdb.com/title/tt36647890/
+URL:https://www.themoviedb.org/movie/1470130
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1316092@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260213
+SUMMARY:🎥 "Wuthering Heights"
+DESCRIPTION:Tragedy strikes when Heathcliff falls in love with Catherine Earnshaw\, a woman from a wealthy family in 18th-century England.\n\nDirector: Emerald Fennell\nCast: Margot Robbie\, Jacob Elordi\, Hong Chau\, Alison Oliver\, Shazad Latif\n\nTMDB Popularity: 96.0241\nTMDB Rating: 6.522\n\nhttps://www.themoviedb.org/movie/1316092\nhttps://www.imdb.com/title/tt32897959/
+URL:https://www.themoviedb.org/movie/1316092
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1119449@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260213
+SUMMARY:🎥 Good Luck\, Have Fun\, Don't Die
+DESCRIPTION:A 'Man from the Future' arrives at an LA diner where he must recruit the precise combination of disgruntled patrons to join him on a one-night quest to save the world from the terminal threat of a rogue artificial intelligence.\n\n\nTMDB Popularity: 28.7562\nTMDB Rating: 6.9\n\nhttps://www.themoviedb.org/movie/1119449
+URL:https://www.themoviedb.org/movie/1119449
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-696393@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260213
+DTEND;VALUE=DATE:20260213
+SUMMARY:🎥 Cold Storage
+DESCRIPTION:When a mutating\, highly contagious fungus escapes a sealed facility\, two employees – joined by a grizzled bioterror operative – must survive the wildest night shift ever to save humanity from extinction.\n\n\nTMDB Popularity: 21.6277\nTMDB Rating: 6.7\n\nhttps://www.themoviedb.org/movie/696393
+URL:https://www.themoviedb.org/movie/696393
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1305781@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260217
+DTEND;VALUE=DATE:20260217
+SUMMARY:🎥 Blades of the Guardians: Wind Rises in the Desert
+DESCRIPTION:Dao Ma\, the "second most wanted fugitive\," is entrusted by his benefactor\, the chief of Mo family clan\, to take on a mysterious escort mission-escorting the "most wanted fugitive" to Chang'an.\n\n\nTMDB Popularity: 29.8162\nTMDB Rating: 7.1\n\nhttps://www.themoviedb.org/movie/1305781
+URL:https://www.themoviedb.org/movie/1305781
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-467905@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260220
+DTEND;VALUE=DATE:20260220
+SUMMARY:🎥 How to Make a Killing
+DESCRIPTION:Disowned at birth by his obscenely wealthy family\, blue-collar Becket Redfellow will stop at nothing to reclaim his inheritance\, no matter how many relatives stand in his way.\n\n\nTMDB Popularity: 48.5268\nTMDB Rating: 7.054\n\nhttps://www.themoviedb.org/movie/467905
+URL:https://www.themoviedb.org/movie/467905
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1159559@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260227
+DTEND;VALUE=DATE:20260227
+SUMMARY:🎥 Scream 7
+DESCRIPTION:When a new Ghostface killer emerges in the quiet town where Sidney Prescott has built a new life\, her darkest fears are realized as her daughter becomes the next target. Determined to protect her family\, Sidney must face the horrors of her past to put an end to the bloodshed once and for all.\n\nDirector: Kevin Williamson\nCast: Neve Campbell\, Courteney Cox\, Isabel May\, Jasmin Savoy Brown\, Mason Gooding\n\nTMDB Popularity: 176.2805\nTMDB Rating: 6.03\n\nhttps://www.themoviedb.org/movie/1159559\nhttps://www.imdb.com/title/tt27047903/
+URL:https://www.themoviedb.org/movie/1159559
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1327819@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260306
+DTEND;VALUE=DATE:20260306
+SUMMARY:🎥 Hoppers
+DESCRIPTION:Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals\, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology\, uncovering mysteries within the animal world beyond anything she could have imagined.\n\nDirector: Daniel Chong\nCast: Piper Curda\, Bobby Moynihan\, Jon Hamm\, Kathy Najimy\, Dave Franco\n\nTMDB Popularity: 378.3744\nTMDB Rating: 7.6\n\nhttps://www.themoviedb.org/movie/1327819\nhttps://www.imdb.com/title/tt26443616/
+URL:https://www.themoviedb.org/movie/1327819
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1159831@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260306
+DTEND;VALUE=DATE:20260306
+SUMMARY:🎥 The Bride!
+DESCRIPTION:A lonely Frankenstein travels to 1930s Chicago to ask groundbreaking scientist Dr. Euphronious to create a companion for him. The two revive a murdered young woman and The Bride is born. But what ensues is beyond what either of them imagined.\n\nDirector: Maggie Gyllenhaal\nCast: Jessie Buckley\, Christian Bale\, Peter Sarsgaard\, John Magaro\, Jeannie Berlin\n\nTMDB Popularity: 192.7732\nTMDB Rating: 6.289\n\nhttps://www.themoviedb.org/movie/1159831\nhttps://www.imdb.com/title/tt30851137/
+URL:https://www.themoviedb.org/movie/1159831
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-875828@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260306
+DTEND;VALUE=DATE:20260306
+SUMMARY:🎥 Peaky Blinders: The Immortal Man
+DESCRIPTION:After his estranged son gets embroiled in a Nazi plot\, self-exiled gangster Tommy Shelby must return to Birmingham to save his family — and his nation.\n\nDirector: Tom Harper\nCast: Cillian Murphy\, Barry Keoghan\, Rebecca Ferguson\, Tim Roth\, Stephen Graham\n\nTMDB Popularity: 88.303\nTMDB Rating: 7.257\n\nhttps://www.themoviedb.org/movie/875828\nhttps://www.imdb.com/title/tt15574124/
+URL:https://www.themoviedb.org/movie/875828
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-687163@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260320
+DTEND;VALUE=DATE:20260320
+SUMMARY:🎥 Project Hail Mary
+DESCRIPTION:Science teacher Ryland Grace wakes up on a spaceship light years from home with no recollection of who he is or how he got there. As his memory returns\, he begins to uncover his mission: solve the riddle of the mysterious substance causing the sun to die out. He must call on his scientific knowledge and unorthodox ideas to save everything on Earth from extinction… but an unexpected friendship means he may not have to do it alone.\n\nDirector: Phil Lord\nCast: Ryan Gosling\, James Ortiz\, Sandra Hüller\, Lionel Boyce\, Milana Vayntrub\n\nTMDB Popularity: 205.3806\nTMDB Rating: 8.199\n\nhttps://www.themoviedb.org/movie/687163\nhttps://www.imdb.com/title/tt12042730/
+URL:https://www.themoviedb.org/movie/687163
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-999136@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260320
+DTEND;VALUE=DATE:20260320
+SUMMARY:🎥 Do Not Enter
+DESCRIPTION:A group of young explorers investigates an old abandoned hotel\, only to encounter a strange supernatural being and a competing group looking for a legendary hidden treasure.\n\nDirector: Marc Klasfeld\nCast: Francesca Reale\, Nicholas Hamilton\, Adeline Rudolph\, Jake Manley\, Shane Paul McGhie\n\nTMDB Popularity: 77.921\nTMDB Rating: 5.4\n\nhttps://www.themoviedb.org/movie/999136\nhttps://www.imdb.com/title/tt3515878/
+URL:https://www.themoviedb.org/movie/999136
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1266127@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260320
+DTEND;VALUE=DATE:20260320
+SUMMARY:🎥 Ready or Not: Here I Come
+DESCRIPTION:Moments after surviving an all-out attack from the Le Domas family\, Grace discovers she’s reached the next level of the nightmarish game — and this time with her estranged sister Faith at her side. Grace has one chance to survive\, keep her sister alive\, and claim the High Seat of the Council that controls the world. Four rival families are hunting her for the throne\, and whoever wins rules it all.\n\n\nTMDB Popularity: 44.1109\nTMDB Rating: 7.176\n\nhttps://www.themoviedb.org/movie/1266127
+URL:https://www.themoviedb.org/movie/1266127
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1292695@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260327
+DTEND;VALUE=DATE:20260327
+SUMMARY:🎥 They Will Kill You
+DESCRIPTION:A woman answers a help wanted ad to be a housekeeper in a mysterious New York City high-rise\, unaware that she is entering a community that has seen a number of disappearances over the years and may be under the grip of a Satanic cult.\n\n\nTMDB Popularity: 37.3669\nTMDB Rating: 6.6\n\nhttps://www.themoviedb.org/movie/1292695
+URL:https://www.themoviedb.org/movie/1292695
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
 UID:movie-1226863@movie-release-calendar
-DTSTAMP:20260409T094003Z
+DTSTAMP:20260409T111433Z
 DTSTART;VALUE=DATE:20260401
 DTEND;VALUE=DATE:20260401
 SUMMARY:🎥 The Super Mario Galaxy Movie
-DESCRIPTION:Having thwarted Bowser's previous plot to marry Princess Peach\, Mario and Luigi now face a fresh threat in Bowser Jr.\, who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old\, the brothers travel across the stars to stop the young heir's crusade.\n\nDirector: Michael Jelenic\nCast: Chris Pratt\, Charlie Kirk\, Anya Taylor-Joy\, Jack Black\, Keegan-Michael Key\n\nTMDB Popularity: 262.19\nTMDB Rating: 6.894\n\nhttps://www.themoviedb.org/movie/1226863\nhttps://www.imdb.com/title/tt28650488/
+DESCRIPTION:Having thwarted Bowser's previous plot to marry Princess Peach\, Mario and Luigi now face a fresh threat in Bowser Jr.\, who is determined to liberate his father from captivity and restore the family legacy. Alongside companions new and old\, the brothers travel across the stars to stop the young heir's crusade.\n\nDirector: Michael Jelenic\nCast: Chris Pratt\, Charlie Kirk\, Anya Taylor-Joy\, Jack Black\, Keegan-Michael Key\n\nTMDB Popularity: 262.19\nTMDB Rating: 6.892\n\nhttps://www.themoviedb.org/movie/1226863\nhttps://www.imdb.com/title/tt28650488/
 URL:https://www.themoviedb.org/movie/1226863
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1635276@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260401
-DTEND;VALUE=DATE:20260401
-SUMMARY:🎥 Eat Pray Bark
-DESCRIPTION:In this tumultuous comedy\, five eccentric dog owners seek help in dealing with their four-legged friends. Their last hope: an intensive course with the charismatic and legendary dog trainer Nodon in the Tyrolean mountains.\n\n\nTMDB Popularity: 45.7568\nTMDB Rating: 5.574\n\nhttps://www.themoviedb.org/movie/1635276
-URL:https://www.themoviedb.org/movie/1635276
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1487320@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260401
-DTEND;VALUE=DATE:20260401
-SUMMARY:🎥 The Giant Falls
-DESCRIPTION:Follows Boris\, a charismatic tour guide who unexpectedly reunites with his estranged father Julián. Their tense and emotional encounters explore past wounds and the possibility of forgiveness.\n\n\nTMDB Popularity: 31.9616\nTMDB Rating: 6.5\n\nhttps://www.themoviedb.org/movie/1487320
-URL:https://www.themoviedb.org/movie/1487320
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1561758@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260401
-DTEND;VALUE=DATE:20260401
-SUMMARY:🎥 It Takes a Village
-DESCRIPTION:When financial trouble forces Halina to call off her wedding\, her friends and family decide to hatch a wild plan to bring in tourist money.\n\n\nTMDB Popularity: 22.5729\nTMDB Rating: 5.214\n\nhttps://www.themoviedb.org/movie/1561758
-URL:https://www.themoviedb.org/movie/1561758
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1620551@movie-release-calendar
-DTSTAMP:20260409T094003Z
+UID:movie-1325734@movie-release-calendar
+DTSTAMP:20260409T111433Z
 DTSTART;VALUE=DATE:20260403
 DTEND;VALUE=DATE:20260403
-SUMMARY:🎥 Feel My Voice
-DESCRIPTION:A teenager\, the only hearing member of a deaf family\, finds her voice and learns to believe in herself through her passion for singing.\n\n\nTMDB Popularity: 41.5037\nTMDB Rating: 6.833\n\nhttps://www.themoviedb.org/movie/1620551
-URL:https://www.themoviedb.org/movie/1620551
+SUMMARY:🎥 The Drama
+DESCRIPTION:A happily engaged couple is put to the test when an unexpected turn sends their wedding week off the rails.\n\n\nTMDB Popularity: 74.7868\nTMDB Rating: 7.1\n\nhttps://www.themoviedb.org/movie/1325734
+URL:https://www.themoviedb.org/movie/1325734
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
 UID:movie-1341137@movie-release-calendar
-DTSTAMP:20260409T094003Z
+DTSTAMP:20260409T111433Z
 DTSTART;VALUE=DATE:20260403
 DTEND;VALUE=DATE:20260403
 SUMMARY:🎥 A Great Awakening
@@ -65,58 +425,8 @@ URL:https://www.themoviedb.org/movie/1341137
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1462146@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260403
-DTEND;VALUE=DATE:20260403
-SUMMARY:🎥 S4: The Bob Lazar Story
-DESCRIPTION:Over 35 years after Bob Lazar's revelations\, this documentary exposes secrets of a facility the government still denies. Featuring Lazar's testimony\, recreations\, and new evidence\, it reopens a case that continues to spark global curiosity\n\n\nTMDB Popularity: 24.6914\nTMDB Rating: 8.438\n\nhttps://www.themoviedb.org/movie/1462146
-URL:https://www.themoviedb.org/movie/1462146
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1542995@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260403
-DTEND;VALUE=DATE:20260403
-SUMMARY:🎥 Bonolota Express
-DESCRIPTION:On a foggy winter journey\, the Bonolota Express carries strangers burdened by secrets whose lives begin to collide within the train’s confined corridors. As the night unfolds\, personal and political crises erupt\, exposing hidden grief\, moral decay\, and moments of unexpected compassion amid chaos and revolt. By dawn\, the train moves on\, leaving its passengers irrevocably changed by a single journey where illusions collapse and human truths emerge.\n\n\nTMDB Popularity: 17.2999\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1542995
-URL:https://www.themoviedb.org/movie/1542995
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1662432@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260405
-DTEND;VALUE=DATE:20260405
-SUMMARY:🎥 Finding Harry: The Craft Behind the Magic
-DESCRIPTION:Featuring interviews from members of the casting\, production design\, costume design\, and creature effects teams\, follow the behind-the-scenes journey of bringing the Harry Potter books to the small screen. Find out how the new Golden Trio were found\, and celebrate the commitment to detail of the artists\, craftspeople\, and technicians who have come together to bring the wizarding world to life.\n\n\nTMDB Popularity: 21.0929\nTMDB Rating: 7.867\n\nhttps://www.themoviedb.org/movie/1662432
-URL:https://www.themoviedb.org/movie/1662432
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1625253@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260407
-DTEND;VALUE=DATE:20260407
-SUMMARY:🎥 Football 17776
-DESCRIPTION:In the distant future\, three sentient space probes observe two humans traveling to watch an evolved form of American football.\n\n\nTMDB Popularity: 16.3327\nTMDB Rating: 10\n\nhttps://www.themoviedb.org/movie/1625253
-URL:https://www.themoviedb.org/movie/1625253
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1641319@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260407
-DTEND;VALUE=DATE:20260407
-SUMMARY:🎥 Sniper: No Nation
-DESCRIPTION:Brandon Beckett and Agent Zero lead a rescue mission in Venezuela when their friends are taken hostage.\n\n\nTMDB Popularity: 93.8792\nTMDB Rating: 6.8\n\nhttps://www.themoviedb.org/movie/1641319
-URL:https://www.themoviedb.org/movie/1641319
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:movie-1408208@movie-release-calendar
-DTSTAMP:20260409T094003Z
+DTSTAMP:20260409T111433Z
 DTSTART;VALUE=DATE:20260410
 DTEND;VALUE=DATE:20260410
 SUMMARY:🎥 Exit 8
@@ -125,38 +435,8 @@ URL:https://www.themoviedb.org/movie/1408208
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-634649@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260415
-DTEND;VALUE=DATE:20260415
-SUMMARY:🎥 Spider-Man: No Way Home
-DESCRIPTION:Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous\, forcing him to discover what it truly means to be Spider-Man.\n\nDirector: Jon Watts\nCast: Tom Holland\, Zendaya\, Benedict Cumberbatch\, Jacob Batalon\, Jon Favreau\n\nTMDB Popularity: 77.1216\nTMDB Rating: 7.934\n\nhttps://www.themoviedb.org/movie/634649\nhttps://www.imdb.com/title/tt10872600/
-URL:https://www.themoviedb.org/movie/634649
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1304313@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260417
-DTEND;VALUE=DATE:20260417
-SUMMARY:🎥 Lee Cronin's The Mummy
-DESCRIPTION:The young daughter of a journalist disappears into the desert without a trace—eight years later\, the broken family is shocked when she is returned to them\, as what should be a joyful reunion turns into a living nightmare.\n\n\nTMDB Popularity: 19.3738\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1304313
-URL:https://www.themoviedb.org/movie/1304313
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:movie-1242332@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260417
-DTEND;VALUE=DATE:20260417
-SUMMARY:🎥 Normal
-DESCRIPTION:Interim sheriff Ulysses\, called to the snowbound town of Normal\, MN\, uncovers an international criminal conspiracy at the heart of the seemingly quaint whistle-stop when he comes to the aid of a bank-robbing couple caught up in a deadly mess.\n\n\nTMDB Popularity: 11.1669\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1242332
-URL:https://www.themoviedb.org/movie/1242332
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:movie-936075@movie-release-calendar
-DTSTAMP:20260409T094003Z
+DTSTAMP:20260409T111433Z
 DTSTART;VALUE=DATE:20260422
 DTEND;VALUE=DATE:20260422
 SUMMARY:🎥 Michael
@@ -165,18 +445,8 @@ URL:https://www.themoviedb.org/movie/936075
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1317149@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260424
-DTEND;VALUE=DATE:20260424
-SUMMARY:🎥 I Swear
-DESCRIPTION:Diagnosed with Tourette Syndrome at 15\, John Davidson navigates his way against the odds through troubled teenage years and into adulthood\, finding inspiration in the kindness of others to discover his true purpose in life.\n\n\nTMDB Popularity: 16.6705\nTMDB Rating: 8.325\n\nhttps://www.themoviedb.org/movie/1317149
-URL:https://www.themoviedb.org/movie/1317149
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:movie-1314481@movie-release-calendar
-DTSTAMP:20260409T094003Z
+DTSTAMP:20260409T111433Z
 DTSTART;VALUE=DATE:20260501
 DTEND;VALUE=DATE:20260501
 SUMMARY:🎥 The Devil Wears Prada 2
@@ -185,43 +455,53 @@ URL:https://www.themoviedb.org/movie/1314481
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1301421@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260508
-DTEND;VALUE=DATE:20260508
-SUMMARY:🎥 The Sheep Detectives
-DESCRIPTION:George is a shepherd who reads detective novels to his beloved sheep every night\, assuming they can't possibly understand. But when a mysterious incident disrupts life on the farm\, the sheep realize they must become the detectives. As they follow the clues and investigate human suspects\, they prove that even sheep can be brilliant crime-solvers.\n\n\nTMDB Popularity: 11.66\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1301421
-URL:https://www.themoviedb.org/movie/1301421
+UID:movie-969681@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260731
+DTEND;VALUE=DATE:20260731
+SUMMARY:🎥 Spider-Man: Brand New Day
+DESCRIPTION:Four years have passed since the events of No Way Home\, and Peter is now an adult living entirely alone\, having voluntarily erased himself from the lives and memories of those he loves. Crime-fighting in a New York that no longer knows his name\, he's devoted himself entirely to protecting his city — a full-time Spider-Man — but as the demands on him intensify\, the pressure sparks a surprising physical evolution that threatens his existence\, even as a strange new pattern of crimes gives rise t...\n\n\nTMDB Popularity: 22.1351\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/969681
+URL:https://www.themoviedb.org/movie/969681
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1083381@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260529
-DTEND;VALUE=DATE:20260529
-SUMMARY:🎥 Backrooms
-DESCRIPTION:A strange doorway appears in the basement of a furniture showroom.\n\n\nTMDB Popularity: 11.1734\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1083381
-URL:https://www.themoviedb.org/movie/1083381
+UID:movie-1497970@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20260909
+DTEND;VALUE=DATE:20260909
+SUMMARY:🎥 Tom and Jerry: Forbidden Compass
+DESCRIPTION:During a chase inside a museum\, Tom and Jerry find a magical object and end up being transported through time. Lost in a distant era\, they will need to work together to find a way back home.\n\n\nTMDB Popularity: 22.4315\nTMDB Rating: 6.2\n\nhttps://www.themoviedb.org/movie/1497970
+URL:https://www.themoviedb.org/movie/1497970
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1084244@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260619
-DTEND;VALUE=DATE:20260619
-SUMMARY:🎥 Toy Story 5
-DESCRIPTION:When Bonnie receives a Lilypad tablet as a gift and becomes obsessed\, Buzz\, Woody\, Jessie and the rest of the gang's jobs become exponentially harder when they have to go head to head with the all-new threat to playtime.\n\n\nTMDB Popularity: 10.3188\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1084244
-URL:https://www.themoviedb.org/movie/1084244
+UID:movie-1003596@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261218
+SUMMARY:🎥 Avengers: Doomsday
+DESCRIPTION:The Avengers\, Wakandans\, Fantastic Four\, Thunderbolts\, and X-Men all fight against Doctor Doom. Plot TBA.\n\n\nTMDB Popularity: 16.9927\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1003596
+URL:https://www.themoviedb.org/movie/1003596
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:movie-1081003@movie-release-calendar
-DTSTAMP:20260409T094003Z
-DTSTART;VALUE=DATE:20260626
-DTEND;VALUE=DATE:20260626
-SUMMARY:🎥 Supergirl
-DESCRIPTION:When an unexpected and ruthless adversary strikes too close to home\, Kara Zor-El\, aka Supergirl\, reluctantly joins forces with an unlikely companion on an epic\, interstellar journey of vengeance and justice.\n\n\nTMDB Popularity: 11.5282\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1081003
-URL:https://www.themoviedb.org/movie/1081003
+UID:movie-1170608@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20261218
+DTEND;VALUE=DATE:20261218
+SUMMARY:🎥 Dune: Part Three
+DESCRIPTION:As Emperor\, Paul Atreides grapples with the consequences of his rise to power as political conspiracies and a galaxy-spanning holy war threaten the future he alone can foresee.\n\n\nTMDB Popularity: 10.7226\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1170608
+URL:https://www.themoviedb.org/movie/1170608
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:movie-1401586@movie-release-calendar
+DTSTAMP:20260409T111433Z
+DTSTART;VALUE=DATE:20270319
+DTEND;VALUE=DATE:20270319
+SUMMARY:🎥 Sonic the Hedgehog 4
+DESCRIPTION:The fourth installment in the Sonic the Hedgehog film franchise. Plot TBA.\n\n\nTMDB Popularity: 7.0416\nTMDB Rating: 0\n\nhttps://www.themoviedb.org/movie/1401586
+URL:https://www.themoviedb.org/movie/1401586
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

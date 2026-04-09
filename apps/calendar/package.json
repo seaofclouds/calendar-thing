@@ -10,12 +10,14 @@
     "deploy": "pnpm build && wrangler deploy",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@calendar-feeds/feed-types": "workspace:*"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
     "esbuild": "^0.24.0",
     "html-to-image": "^1.11.11",
     "typescript": "^5.7.2",
-    "wrangler": "^4.21.0"
+    "wrangler": "^4.81.0"
   }
 }
