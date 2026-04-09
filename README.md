@@ -13,7 +13,7 @@ calendar-thing/                   # Monorepo root
 ├── feeds/
 │   ├── astrology/              # CF Worker — zodiac seasons (tropical astrology)
 │   ├── astronomy/              # CF Worker — lunar phases + solar events (Jean Meeus)
-│   └── movie-release/          # CF Worker — theatrical + digital releases (TMDB API)
+│   └── movies/          # CF Worker — theatrical + digital releases (TMDB API)
 ├── apps/
 │   └── calendar/               # CF Worker — printable calendar renderer + static assets
 ├── .github/workflows/deploy.yml
@@ -26,7 +26,7 @@ Each feed is an independent Cloudflare Worker serving ICS and JSON endpoints:
 
 - **astrology** — Zodiac season events (tropical/Western astrology). Pure computation, no external APIs. Per-sign Streamline icons.
 - **astronomy** — Computes lunar phases (new, first quarter, full, last quarter) and solar events (equinoxes, solstices) using Jean Meeus' Astronomical Algorithms. No external APIs. Future: eclipses.
-- **movie-release** — Fetches theatrical and digital movie releases from the TMDB API with regional date filtering.
+- **movies** — Fetches theatrical and digital movie releases from the TMDB API with regional date filtering.
 
 Both feeds use token-based authentication and 24-hour edge caching.
 
@@ -72,8 +72,8 @@ All feed workers use `/feeds/{name}.ics` and `/feeds/{name}.json` endpoints. All
 | Worker | ICS | JSON |
 |--------|-----|------|
 | astronomy | `/feeds/astronomy.ics` | `/feeds/astronomy.json` |
-| movie-release | `/feeds/movies-theatrical.ics` | `/feeds/movies-theatrical.json` |
-| movie-release | `/feeds/movies-digital.ics` | `/feeds/movies-digital.json` |
+| movies | `/feeds/movies-theatrical.ics` | `/feeds/movies-theatrical.json` |
+| movies | `/feeds/movies-digital.ics` | `/feeds/movies-digital.json` |
 | astrology | `/feeds/astrology.ics` | `/feeds/astrology.json` |
 
 Astronomy and astrology endpoints support `?year=N` for a specific year.
@@ -115,7 +115,7 @@ pnpm dev:calendar
 # Run astronomy feed locally
 pnpm dev:astronomy
 
-# Run movie-release feed locally
+# Run movies feed locally
 pnpm dev:movie
 
 # Run astrology feed locally
@@ -137,7 +137,7 @@ All workers (calendar app + feeds) deploy via GitHub Actions on push to `main`. 
 Manual deploy from monorepo root:
 ```bash
 pnpm --filter @calendar-feeds/astronomy run deploy
-pnpm --filter @calendar-feeds/movie-release run deploy
+pnpm --filter @calendar-feeds/movies run deploy
 pnpm --filter @calendar-feeds/astrology run deploy
 pnpm --filter @calendar-feeds/calendar run deploy
 ```
@@ -145,8 +145,8 @@ pnpm --filter @calendar-feeds/calendar run deploy
 Feed worker secrets:
 ```bash
 cd feeds/astronomy && npx wrangler secret put CALENDAR_TOKEN
-cd feeds/movie-release && npx wrangler secret put CALENDAR_TOKEN
-cd feeds/movie-release && npx wrangler secret put TMDB_API_KEY
+cd feeds/movies && npx wrangler secret put CALENDAR_TOKEN
+cd feeds/movies && npx wrangler secret put TMDB_API_KEY
 cd feeds/astrology && npx wrangler secret put CALENDAR_TOKEN
 ```
 
@@ -175,7 +175,7 @@ The calendar app connects to feed workers via Cloudflare service bindings (decla
    - `includeTokens` / `defaultInclude` — sub-toggles and defaults
    - `tokenAliases` — shorthand aliases that expand to multiple tokens (e.g. `lunar:phases` → `[lunar:full, lunar:new, lunar:quarter]`)
    - `fixture` — imported ICS text for offline dev fallback
-   - A single worker can export multiple plugins (e.g. movie-release exports `theatrical` and `digital`)
+   - A single worker can export multiple plugins (e.g. movies exports `theatrical` and `digital`)
 4. Register the plugin in `apps/calendar/src/feed-loader.ts`
 5. Add a service binding in `apps/calendar/wrangler.toml`
 6. Add a deploy job to `.github/workflows/deploy.yml`

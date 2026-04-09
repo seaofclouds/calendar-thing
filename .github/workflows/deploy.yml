@@ -30,7 +30,7 @@ jobs:
     outputs:
       astrology: ${{ steps.filter.outputs.astrology }}
       astronomy: ${{ steps.filter.outputs.astronomy }}
-      movie-release: ${{ steps.filter.outputs.movie-release }}
+      movies: ${{ steps.filter.outputs.movies }}
       calendar: ${{ steps.filter.outputs.calendar }}
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +46,8 @@ jobs:
             astronomy:
               - 'feeds/astronomy/**'
               - 'packages/**'
-            movie-release:
-              - 'feeds/movie-release/**'
+            movies:
+              - 'feeds/movies/**'
               - 'packages/**'
             calendar:
               - 'apps/calendar/**'
@@ -91,9 +91,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
-  deploy-movie-release:
+  deploy-movies:
     needs: [typecheck, detect-changes]
-    if: needs.detect-changes.outputs.movie-release == 'true' || (github.event_name == 'workflow_dispatch' && inputs.deploy_all)
+    if: needs.detect-changes.outputs.movies == 'true' || (github.event_name == 'workflow_dispatch' && inputs.deploy_all)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +105,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install
-      - run: pnpm --filter @calendar-feeds/movie-release run deploy
+      - run: pnpm --filter @calendar-feeds/movies run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

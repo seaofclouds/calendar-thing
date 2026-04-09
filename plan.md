@@ -229,10 +229,10 @@ Moon-phase worker accepts `?year=N` query param (defaults to current year). Cale
 ```
 ICS sources (all produce .ics via /feeds/{name}.ics):
   ├── astronomy worker        → /feeds/astronomy.ics (service binding)
-  ├── movie-release worker     → /feeds/movies-theatrical.ics (service binding)
+  ├── movies worker     → /feeds/movies-theatrical.ics (service binding)
   │                            → /feeds/movies-digital.ics (service binding)
   ├── astrology worker         → /feeds/astrology.ics (service binding)
-  ├── busd-calendar worker     → /feeds/busd.ics (future, parses PDF → ICS)
+  ├── busd feed     → /feeds/busd.ics (future, parses PDF → ICS)
   ├── ICS importer             → /feeds/{id}.ics (future, imports any external ICS)
   └── any external .ics URL    → fetched directly via ?feed= param
                                     ↓
@@ -262,7 +262,7 @@ Feed proxy (calendar app):
 - Parsed with same `parseICS()`, merged with other events
 
 ### D4. BUSD school calendar worker (future)
-- New feed worker: `feeds/busd-calendar/`
+- New feed worker: `feeds/busd/`
 - Fetches PDF from `https://www.berkeleyschools.net/calendar/`
 - Current: https://www.berkeleyschools.net/wp-content/uploads/2024/12/2025-2026-Tk-12-Calendar-Final-12-19-24.pdf
 - Next year: https://www.berkeleyschools.net/wp-content/uploads/2026/02/2026-2027-TK-12-School-Year-Calendar.pdf
