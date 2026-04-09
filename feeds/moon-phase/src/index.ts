@@ -38,15 +38,16 @@ export default {
     }
 
     const now = new Date();
+    const requestedYear = url.searchParams.get("year");
+    const year = requestedYear ? parseInt(requestedYear) : now.getUTCFullYear();
 
     return withEdgeCache(
       request,
       ctx,
-      { version: CACHE_VERSION, extraParams: { _y: String(now.getUTCFullYear()) } },
+      { version: CACHE_VERSION, extraParams: { _y: String(year) } },
       async () => {
-        // Compute events: current year through end of next year
-        const startDate = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
-        const endDate = new Date(Date.UTC(now.getUTCFullYear() + 1, 11, 31, 23, 59, 59));
+        const startDate = new Date(Date.UTC(year, 0, 1));
+        const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
         const phases = computeMoonPhases(startDate, endDate);
         const solarEvents = computeSolarEvents(startDate, endDate);
 

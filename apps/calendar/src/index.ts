@@ -185,7 +185,7 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     if (env.MOON_PHASE) {
       debugInfo = "binding-exists";
       const response = await env.MOON_PHASE.fetch(
-        new Request("https://internal/feeds/moon.json")
+        new Request(`https://internal/feeds/moon.json?year=${year}`)
       );
       debugInfo = `status-${response.status}`;
       if (response.ok) {
