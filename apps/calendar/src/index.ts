@@ -55,16 +55,17 @@ export default {
     }
 
     // Fetch event data from moon-phase feed
-    const { fullMoonDates, newMoonDates, solarEvents } = await fetchMoonData(env, params.year);
+    const moonData = await fetchMoonData(env, params.year);
 
     // Render HTML
     const html = renderCalendar({
       ...params,
       header: params.header,
       forExport: params.format != null || params.size != null || params.testing,
-      fullMoonDates: params.include.fullMoon ? fullMoonDates : [],
-      newMoonDates: params.include.newMoon ? newMoonDates : [],
-      solarEvents: params.include.solarEvents ? solarEvents : {},
+      fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
+      newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
+      solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
+      dataSource: moonData.source,
     });
 
     return new Response(html, {
@@ -160,6 +161,7 @@ interface MoonData {
   fullMoonDates: string[];
   newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
+  source: "service-binding" | "static-fallback";
 }
 
 // Pre-computed test data (Jean Meeus algorithms, 2025–2027)
@@ -210,7 +212,7 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
             month === 3 || month === 9 ? "equinox" : "solstice";
         }
 
-        return { fullMoonDates, newMoonDates, solarEvents };
+        return { fullMoonDates, newMoonDates, solarEvents, source: "service-binding" };
       }
     }
   } catch {
@@ -222,5 +224,6 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     fullMoonDates: FULL_MOON_DATES[year] ?? [],
     newMoonDates: NEW_MOON_DATES[year] ?? [],
     solarEvents: SOLAR_EVENTS[year] ?? {},
+    source: "static-fallback",
   };
 }

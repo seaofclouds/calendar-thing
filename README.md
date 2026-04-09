@@ -136,6 +136,10 @@ The calendar app connects to feed workers via Cloudflare service bindings (confi
 | `MOON_PHASE` | `moon-phase-calendar` |
 | `MOVIE_RELEASE` | `movie-release-calendar` |
 
+**Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/moon.json`) with no token. The `authenticateToken()` helper in `worker-utils` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
+
+**Verifying data source:** The calendar app renders a `data-source` attribute on `<body>` (`"service-binding"` or `"static-fallback"`) so you can confirm in DevTools which path is active.
+
 ## Adding a New Feed
 
 1. Create `feeds/my-feed/` with a CF Worker serving ICS + JSON
