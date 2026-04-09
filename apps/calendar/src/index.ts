@@ -21,6 +21,7 @@ interface IncludeOptions {
   newMoon: boolean;
   solarEvents: boolean;
   movies: boolean;
+  busd: boolean;
 }
 
 interface CalendarParams {
@@ -70,6 +71,9 @@ export default {
       const eventSources = await Promise.all([
         params.include.movies
           ? fetchFeedEvents(FEEDS.movies, env as unknown as Record<string, unknown>, token)
+          : Promise.resolve([]),
+        params.include.busd
+          ? fetchFeedEvents(FEEDS.busd, env as unknown as Record<string, unknown>, token)
           : Promise.resolve([]),
         ...feedUrls.map((u) => fetchExternalFeed(u)),
       ]);
@@ -206,7 +210,7 @@ function parseFormatSegment(
 
 function parseIncludeParam(value: string | null): IncludeOptions {
   if (!value) {
-    return { fullMoon: true, newMoon: false, solarEvents: true, movies: false };
+    return { fullMoon: true, newMoon: false, solarEvents: true, movies: false, busd: false };
   }
   const tokens = value.split(",").map((s) => s.trim());
   return {
@@ -214,6 +218,7 @@ function parseIncludeParam(value: string | null): IncludeOptions {
     newMoon: tokens.includes("moon:new"),
     solarEvents: tokens.includes("solar:season"),
     movies: tokens.includes("movies"),
+    busd: tokens.includes("busd"),
   };
 }
 
