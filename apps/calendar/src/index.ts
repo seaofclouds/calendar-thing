@@ -186,11 +186,14 @@ const SOLAR_EVENTS: Record<number, Record<string, "solstice" | "equinox">> = {
 
 async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
   // Try service binding first (when moon-phase worker is deployed)
+  let debugInfo = "no-binding";
   try {
     if (env.MOON_PHASE) {
+      debugInfo = "binding-exists";
       const response = await env.MOON_PHASE.fetch(
         new Request("https://internal/feeds/moon.json")
       );
+      debugInfo = `status-${response.status}`;
       if (response.ok) {
         const data = (await response.json()) as {
           phases: Array<{ date: string; phase: string }>;
@@ -215,8 +218,8 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
         return { fullMoonDates, newMoonDates, solarEvents, source: "service-binding" };
       }
     }
-  } catch {
-    // Service binding unavailable — fall through to test data
+  } catch (e) {
+    debugInfo = `error-${e instanceof Error ? e.message : String(e)}`;
   }
 
   // Static test data fallback
@@ -224,6 +227,6 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     fullMoonDates: FULL_MOON_DATES[year] ?? [],
     newMoonDates: NEW_MOON_DATES[year] ?? [],
     solarEvents: SOLAR_EVENTS[year] ?? {},
-    source: "static-fallback",
+    source: `static-fallback:${debugInfo}`,
   };
 }
