@@ -31,6 +31,8 @@ interface DayData {
 
 interface MonthData {
   name: string;
+  year: number;
+  monthIndex: number; // 0-based
   weeks: DayData[][];
 }
 
@@ -79,7 +81,11 @@ export function renderCalendar(opts: RenderOptions): string {
 <body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
   <div id="root" class="${rootClasses}">
     <div class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
-      ${opts.header ? `<div class="calendar-header"><h1>${opts.year}</h1></div>` : ""}
+      ${opts.header ? `<div class="calendar-header">
+        <a href="/${opts.year - 1}" class="year-nav prev" aria-label="Previous year"></a>
+        <h1><a href="/${new Date().getFullYear()}">${opts.year}</a></h1>
+        <a href="/${opts.year + 1}" class="year-nav next" aria-label="Next year"></a>
+      </div>` : ""}
       <div class="calendar-grid">
         ${months.map(renderMonth).join("\n        ")}
       </div>
@@ -90,7 +96,9 @@ export function renderCalendar(opts: RenderOptions): string {
 }
 
 function renderMonth(month: MonthData): string {
-  return `<div class="month">
+  const monthUrl = `/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}`;
+  return `<a href="${monthUrl}" class="month-link">
+          <div class="month">
           <div class="month-header"><h2>${month.name}</h2></div>
           <div class="week-days">
             ${WEEK_DAYS.map((d) => `<h3 class="week-day">${d}</h3>`).join("")}
@@ -98,7 +106,7 @@ function renderMonth(month: MonthData): string {
           <div class="month-grid">
             ${month.weeks.flat().map(renderDay).join("")}
           </div>
-        </div>`;
+        </div></a>`;
 }
 
 function formatDate(date: number): string {
@@ -205,6 +213,8 @@ function generateMonths(
 
     return {
       name: MONTH_NAMES[monthIndex],
+      year,
+      monthIndex,
       weeks,
     };
   });

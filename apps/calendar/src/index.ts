@@ -5,6 +5,7 @@
  */
 
 import { renderCalendar } from "./render";
+import { renderMonthView } from "./render-month";
 
 interface Env {
   MOON_PHASE: Fetcher;
@@ -27,6 +28,9 @@ interface CalendarParams {
   format?: "png" | "jpg";
   dpi: number;
   include: IncludeOptions;
+  month?: number;
+  viewMode: "year" | "month";
+  borders: boolean;
 }
 
 const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-tabloid", "a4", "a5", "a6"]);
@@ -51,16 +55,37 @@ export default {
     // Fetch event data from moon-phase feed
     const moonData = await fetchMoonData(env, params.year);
 
-    // Render HTML
-    const html = renderCalendar({
-      ...params,
-      header: params.header,
-      forExport: params.format != null || params.size != null || params.testing,
-      fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
-      newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
-      solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
-      dataSource: moonData.source,
-    });
+    const forExport = params.format != null || params.size != null || params.testing;
+    let html: string;
+
+    if (params.viewMode === "month" && params.month != null) {
+      html = renderMonthView({
+        year: params.year,
+        month: params.month,
+        size: params.size,
+        orientation: params.orientation,
+        header: params.header,
+        testing: params.testing,
+        forExport,
+        format: params.format,
+        dpi: params.dpi,
+        fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
+        newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
+        solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
+        borders: params.borders,
+        dataSource: moonData.source,
+      });
+    } else {
+      html = renderCalendar({
+        ...params,
+        header: params.header,
+        forExport,
+        fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
+        newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
+        solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
+        dataSource: moonData.source,
+      });
+    }
 
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -84,14 +109,29 @@ function parseCalendarURL(
   const header = searchParams.get("header") !== "false";
   const testing = searchParams.get("test") === "true";
   const include = parseIncludeParam(searchParams.get("include"));
+  const borders = searchParams.get("borders") !== "false"; // default true
 
   // Parse format/DPI, size, and orientation from remaining segments
   let format: "png" | "jpg" | undefined;
   let dpi = 300;
   let size: string | undefined;
   let orientation: "portrait" | "landscape" = "portrait";
+  let month: number | undefined;
+  let viewMode: "year" | "month" = "year";
 
-  for (const seg of segments.slice(1)) {
+  const rest = segments.slice(1);
+
+  // Check if second segment is a month number (1-12)
+  if (rest.length > 0) {
+    const monthNum = parseInt(rest[0]);
+    if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12 && /^\d{1,2}$/.test(rest[0])) {
+      month = monthNum;
+      viewMode = "month";
+      rest.shift();
+    }
+  }
+
+  for (const seg of rest) {
     // Check for image format (e.g., "300dpi.png", "portrait.jpg")
     if (!format) {
       const parsed = parseFormatSegment(seg);
@@ -121,6 +161,9 @@ function parseCalendarURL(
     format,
     dpi,
     include,
+    month,
+    viewMode,
+    borders,
   };
 }
 

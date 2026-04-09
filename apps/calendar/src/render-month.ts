@@ -1,0 +1,256 @@
+/**
+ * Month view renderer.
+ * Reuses the same HTML structure as the year view (.month, .month-grid, .calendar-day)
+ * so that mini prev/next calendars and the main grid share one design system.
+ */
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const FULL_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+export interface MonthViewOptions {
+  year: number;
+  month: number; // 1-12
+  size?: string;
+  orientation: "portrait" | "landscape";
+  header: boolean;
+  testing: boolean;
+  forExport: boolean;
+  format?: "png" | "jpg";
+  dpi?: number;
+  fullMoonDates: string[];
+  newMoonDates: string[];
+  solarEvents: Record<string, "solstice" | "equinox">;
+  borders: boolean;
+  dataSource?: string;
+}
+
+interface DayData {
+  date: number;
+  currentMonth: boolean;
+  moonPhase?: "full" | "new";
+  isSpecialDay?: "solstice" | "equinox";
+  isToday?: boolean;
+}
+
+export function renderMonthView(opts: MonthViewOptions): string {
+  const monthIndex = opts.month - 1;
+  const isPreview = opts.forExport;
+
+  const fullMoonSet = new Set(opts.fullMoonDates);
+  const newMoonSet = new Set(opts.newMoonDates);
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  // Generate main month grid (6 weeks)
+  const weeks = generateWeeks(opts.year, monthIndex, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);
+
+  // Prev/next month info
+  const prev = monthIndex === 0
+    ? { year: opts.year - 1, month: 11 }
+    : { year: opts.year, month: monthIndex - 1 };
+  const next = monthIndex === 11
+    ? { year: opts.year + 1, month: 0 }
+    : { year: opts.year, month: monthIndex + 1 };
+
+  const prevUrl = `/${prev.year}/${String(prev.month + 1).padStart(2, "0")}`;
+  const nextUrl = `/${next.year}/${String(next.month + 1).padStart(2, "0")}`;
+  const yearUrl = `/${opts.year}`;
+
+  // Mini calendar grids (reuse exact same .month structure as year view)
+  const prevMiniWeeks = generateWeeks(prev.year, prev.month, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);
+  const nextMiniWeeks = generateWeeks(next.year, next.month, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);
+
+  const rootClasses = [
+    opts.size ? `size-${opts.size.toLowerCase()}` : "",
+    `orientation-${opts.orientation}`,
+    isPreview ? "print" : "",
+  ].filter(Boolean).join(" ");
+
+  const containerClasses = [
+    "month-view",
+    isPreview ? "print" : "",
+    opts.testing ? "testing" : "",
+    opts.borders ? "borders" : "",
+  ].filter(Boolean).join(" ");
+
+  const dataAttrs = opts.format
+    ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${MONTH_NAMES[monthIndex]} ${opts.year}</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/client.js" type="module" defer></script>
+</head>
+<body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
+  <div id="root" class="${rootClasses}">
+    <div class="${containerClasses}"${dataAttrs}>
+      <div class="month-view-header">
+        <div class="month-view-nav">
+          <a href="${prevUrl}" class="mini-calendar" aria-label="Previous month: ${MONTH_NAMES[prev.month]}">
+${renderMiniMonth(MONTH_NAMES[prev.month] + (prev.year !== opts.year ? ` ${prev.year}` : ""), prevMiniWeeks)}
+          </a>
+        </div>
+        <h1 class="month-view-title"><a href="${yearUrl}">${MONTH_NAMES[monthIndex]}</a></h1>
+        <div class="month-view-nav">
+          <a href="${nextUrl}" class="mini-calendar" aria-label="Next month: ${MONTH_NAMES[next.month]}">
+${renderMiniMonth(MONTH_NAMES[next.month] + (next.year !== opts.year ? ` ${next.year}` : ""), nextMiniWeeks)}
+          </a>
+        </div>
+      </div>
+      <div class="month-view-grid">
+        <div class="month-view-daynames">
+${FULL_DAY_NAMES.map((d) => `          <div class="month-view-dayname">${d}</div>`).join("\n")}
+        </div>
+        <div class="month-view-days">
+${renderWeeks(weeks)}
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+/** Renders a mini calendar as a single flat 7-column grid */
+function renderMiniMonth(title: string, weeks: DayData[][]): string {
+  const titleCell = `<div class="mini-title">${title}</div>`;
+  const weekdayCells = WEEK_DAYS.map((d) => `<div class="mini-weekday">${d}</div>`).join("");
+  const dayCells = weeks.flat().map(renderDay).join("");
+  return `            <div class="mini-grid">
+              ${titleCell}
+              ${weekdayCells}
+              ${dayCells}
+            </div>`;
+}
+
+/** Year-view style day cell (used in mini calendars) */
+function renderDay(day: DayData): string {
+  const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
+
+  let content: string;
+  if (!day.currentMonth) {
+    content = formatDate(day.date);
+  } else if (day.moonPhase === "full") {
+    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
+  } else if (day.moonPhase === "new") {
+    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="black" stroke="black" stroke-width="2"/></svg>`;
+  } else if (day.isSpecialDay) {
+    content = `<div class="day-marker-${day.isSpecialDay}"></div>`;
+  } else {
+    content = formatDate(day.date);
+  }
+
+  return `<div class="${classes}">${content}</div>`;
+}
+
+function formatDate(date: number): string {
+  const leading = date < 10 ? `<span class="date-leading-zero">0</span>` : "";
+  return `<span class="date">${leading}${date}</span>`;
+}
+
+/** Render all weeks, marking rows that contain current-month days */
+function renderWeeks(weeks: DayData[][]): string {
+  return weeks.map((week) => {
+    const rowHasCurrent = week.some((d) => d.currentMonth);
+    return week.map((day) => renderDayCell(day, rowHasCurrent)).join("\n");
+  }).join("\n");
+}
+
+/** Main month grid day cell — with event markers right-aligned */
+function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
+  const classes = [
+    "month-day",
+    !day.currentMonth ? "other-month" : "",
+    day.isToday ? "today" : "",
+    rowHasCurrent ? "current-row" : "",
+  ].filter(Boolean).join(" ");
+
+  const dayNum = `<span class="month-day-number">${day.date}</span>`;
+
+  // Right-aligned indicator (moon phase or solar event)
+  let indicator = "";
+  if (day.moonPhase === "full") {
+    indicator = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
+  } else if (day.moonPhase === "new") {
+    indicator = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="black" stroke="black" stroke-width="2"/></svg>`;
+  } else if (day.isSpecialDay) {
+    indicator = `<div class="day-marker-${day.isSpecialDay}"></div>`;
+  }
+
+  return `          <div class="${classes}">
+            <div class="month-day-header">
+              ${dayNum}
+              ${indicator}
+            </div>
+          </div>`;
+}
+
+function generateWeeks(
+  year: number,
+  monthIndex: number,
+  fullMoonSet: Set<string>,
+  newMoonSet: Set<string>,
+  solarEvents: Record<string, "solstice" | "equinox">,
+  todayStr: string
+): DayData[][] {
+  const firstDay = new Date(year, monthIndex, 1);
+  const lastDay = new Date(year, monthIndex + 1, 0);
+  const prevMonthLastDay = new Date(year, monthIndex, 0);
+
+  const daysInMonth = lastDay.getDate();
+  const startingDay = firstDay.getDay();
+  const prevMonthDays = prevMonthLastDay.getDate();
+
+  const weeks: DayData[][] = [];
+  let currentWeek: DayData[] = [];
+
+  for (let i = 0; i < startingDay; i++) {
+    currentWeek.push({
+      date: prevMonthDays - startingDay + i + 1,
+      currentMonth: false,
+    });
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    currentWeek.push({
+      date: day,
+      currentMonth: true,
+      moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
+      isSpecialDay: solarEvents[dateStr],
+      isToday: dateStr === todayStr,
+    });
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  }
+
+  let nextDay = 1;
+  while (currentWeek.length < 7) {
+    currentWeek.push({ date: nextDay++, currentMonth: false });
+  }
+  if (currentWeek.length > 0) {
+    weeks.push(currentWeek);
+  }
+
+  while (weeks.length < 6) {
+    const fillWeek: DayData[] = [];
+    for (let d = 0; d < 7; d++) {
+      fillWeek.push({ date: nextDay++, currentMonth: false });
+    }
+    weeks.push(fillWeek);
+  }
+
+  return weeks;
+}
