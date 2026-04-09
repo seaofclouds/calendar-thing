@@ -19,12 +19,34 @@ jobs:
       - run: pnpm install
       - run: pnpm -r run typecheck
 
-  deploy-moon-phase:
-    needs: typecheck
+  detect-changes:
     runs-on: ubuntu-latest
-    if: >-
-      contains(join(github.event.commits.*.modified, ','), 'feeds/moon-phase/') ||
-      contains(join(github.event.commits.*.modified, ','), 'packages/')
+    outputs:
+      moon-phase: ${{ steps.filter.outputs.moon-phase }}
+      movie-release: ${{ steps.filter.outputs.movie-release }}
+      calendar: ${{ steps.filter.outputs.calendar }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            moon-phase:
+              - 'feeds/moon-phase/**'
+              - 'packages/**'
+            movie-release:
+              - 'feeds/movie-release/**'
+              - 'packages/**'
+            calendar:
+              - 'apps/calendar/**'
+              - 'packages/**'
+
+  deploy-moon-phase:
+    needs: [typecheck, detect-changes]
+    if: needs.detect-changes.outputs.moon-phase == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -41,11 +63,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-movie-release:
-    needs: typecheck
+    needs: [typecheck, detect-changes]
+    if: needs.detect-changes.outputs.movie-release == 'true'
     runs-on: ubuntu-latest
-    if: >-
-      contains(join(github.event.commits.*.modified, ','), 'feeds/movie-release/') ||
-      contains(join(github.event.commits.*.modified, ','), 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -62,11 +82,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-calendar:
-    needs: typecheck
+    needs: [typecheck, detect-changes]
+    if: needs.detect-changes.outputs.calendar == 'true'
     runs-on: ubuntu-latest
-    if: >-
-      contains(join(github.event.commits.*.modified, ','), 'apps/calendar/') ||
-      contains(join(github.event.commits.*.modified, ','), 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
