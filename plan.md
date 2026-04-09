@@ -200,19 +200,30 @@ Add `month?: number` and `viewMode: "year" | "month"` to `CalendarParams`.
 
 ---
 
+## Pre-requisite: Service Binding Auth (DONE)
+
+Feed workers require `?token=CALENDAR_TOKEN` for external requests. Service binding calls from the calendar app use synthetic URLs (`https://internal/...`) with no token — these were returning 401 and silently falling back to hardcoded test data.
+
+**Fix applied:** `authenticateToken()` in `worker-utils` now detects `hostname === "internal"` and bypasses auth. Merged in PR #3.
+
+**Known limitation:** Moon-phase worker computes data for `currentYear` through `currentYear+1` only. Years outside this range get empty data even with a working service binding. The calendar app's static fallback data covers 2025-2027.
+
+**Verification:** Check `<body data-source="service-binding|static-fallback">` in DevTools on `/2026/` or `/2027/`. The `deploy-moon-phase` GitHub Action must have run for the fix to take effect on the feed worker side.
+
 ## Implementation Order
 
-| Step | What | Depends on |
-|------|------|-----------|
-| A1 | Fix responsive default route | -- |
-| A2 | Fix image export (remove ASSETS regex) | -- |
-| B1 | Add month view routing | A1 |
-| B2 | Month view rendering (render-month.ts) | B1 |
-| B3 | Month view CSS | B2 |
-| B4 | All moon phases + movie data for month view | B2 |
-| C1 | Config route + layout (render-config.ts) | B2 |
-| C2 | Config sidebar HTML + CSS | C1 |
-| C3 | Config client-side JS (navigation, save) | C2 |
+| Step | What | Status |
+|------|------|--------|
+| Pre | Service binding auth bypass | DONE (PR #3) |
+| A1 | Fix responsive default route | pending |
+| A2 | Fix image export (remove ASSETS regex) | pending |
+| B1 | Add month view routing | pending (depends on A1) |
+| B2 | Month view rendering (render-month.ts) | pending |
+| B3 | Month view CSS | pending |
+| B4 | All moon phases + movie data for month view | pending |
+| C1 | Config route + layout (render-config.ts) | pending |
+| C2 | Config sidebar HTML + CSS | pending |
+| C3 | Config client-side JS (navigation, save) | pending |
 
 A1 and A2 are independent -- can be done in parallel.
 B depends on A1 (routing changes).
