@@ -26,7 +26,10 @@ export function parseIncludeParam(
       }
       if (active.size > 0) state[feed.id] = active;
     } else {
-      if (tokens.includes(feed.id)) {
+      // Match exact id or prefix shorthand (e.g. "movies" matches "movies-theatrical" and "movies-digital")
+      const match = tokens.includes(feed.id)
+        || tokens.some((t) => feed.id.startsWith(t + "-"));
+      if (match) {
         state[feed.id] = new Set([feed.id]);
       }
     }

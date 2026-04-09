@@ -1,6 +1,6 @@
 import type { FeedPlugin } from "@calendar-feeds/feed-types";
 import moonPlugin from "../../../feeds/moon-phase/feed.plugin";
-import moviePlugin from "../../../feeds/movie-release/feed.plugin";
+import { theatrical as movieTheatricalPlugin, digital as movieDigitalPlugin } from "../../../feeds/movie-release/feed.plugin";
 import busdPlugin from "../../../feeds/busd-calendar/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
 
@@ -15,7 +15,8 @@ function registerFeed(plugin: ResolvedFeed) {
 }
 
 registerFeed(moonPlugin);
-registerFeed(moviePlugin);
+registerFeed(movieTheatricalPlugin);
+registerFeed(movieDigitalPlugin);
 registerFeed(busdPlugin);
 registerFeed(astrologyPlugin);
 

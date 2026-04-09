@@ -37,19 +37,19 @@ export default {
     }
 
     // Route handling
-    if (url.pathname === "/theatrical.ics") {
+    if (url.pathname === "/feeds/movies-theatrical.ics") {
       return handleCalendarRequest(request, env, ctx, RELEASE_TYPE.THEATRICAL, "Movie Releases (Theatrical)");
     }
 
-    if (url.pathname === "/digital.ics") {
+    if (url.pathname === "/feeds/movies-digital.ics") {
       return handleCalendarRequest(request, env, ctx, RELEASE_TYPE.DIGITAL, "Movie Releases (Digital)");
     }
 
-    if (url.pathname === "/theatrical.json") {
+    if (url.pathname === "/feeds/movies-theatrical.json") {
       return handleJsonRequest(request, env, ctx, RELEASE_TYPE.THEATRICAL);
     }
 
-    if (url.pathname === "/digital.json") {
+    if (url.pathname === "/feeds/movies-digital.json") {
       return handleJsonRequest(request, env, ctx, RELEASE_TYPE.DIGITAL);
     }
 
@@ -68,7 +68,7 @@ async function handleCalendarRequest(
     try {
       const result = await fetchUpcomingMovies(env.TMDB_API_KEY, releaseType);
       const icsContent = generateICS(result.movies, calendarName);
-      const filename = releaseType === RELEASE_TYPE.THEATRICAL ? "theatrical.ics" : "digital.ics";
+      const filename = releaseType === RELEASE_TYPE.THEATRICAL ? "movies-theatrical.ics" : "movies-digital.ics";
 
       return icsResponse(icsContent, filename);
     } catch (error) {
