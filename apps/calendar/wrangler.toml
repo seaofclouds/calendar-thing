@@ -13,8 +13,8 @@ globs = ["**/*.ics"]
 fallthrough = true
 
 [[services]]
-binding = "MOON_PHASE"
-service = "moon-phase-calendar"
+binding = "ASTRONOMY"
+service = "astronomy-calendar"
 
 [[services]]
 binding = "MOVIE_RELEASE"

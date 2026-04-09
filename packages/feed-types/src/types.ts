@@ -49,6 +49,7 @@ export interface FeedPlugin {
   category: string;
   renderMode: FeedRenderMode;
   includeTokens?: Record<string, string>;
+  tokenAliases?: Record<string, string[]>;
   defaultInclude?: string[];
   stripSummaryPrefix?: string;
   stripSummarySuffix?: string;

@@ -14,7 +14,7 @@ import type { IncludeState } from "./include";
 import type { CalendarEvent } from "@calendar-feeds/feed-types";
 
 interface Env {
-  MOON_PHASE: Fetcher;
+  ASTRONOMY: Fetcher;
   MOVIE_RELEASE: Fetcher;
   ASTROLOGY: Fetcher;
   CALENDAR_TOKEN?: string;
