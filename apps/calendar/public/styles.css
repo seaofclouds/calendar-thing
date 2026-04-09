@@ -528,11 +528,11 @@ body {
 }
 
 /* Today highlight — month view (screen only) */
-.month-view:not(.print) .month-view-day.is-today .day-number {
+.month-view:not(.print) .month-view-day.today .day-number {
   font-weight: 700;
 }
 
-.month-view:not(.print) .month-view-day.is-today {
+.month-view:not(.print) .month-view-day.today {
   background: #fefce8;
 }
 
@@ -766,11 +766,11 @@ body {
   display: none;
 }
 
-.month-view.print .month-view-day.is-today {
+.month-view.print .month-view-day.today {
   background: transparent;
 }
 
-.month-view.print .month-view-day.is-today .day-number {
+.month-view.print .month-view-day.today .day-number {
   font-weight: 300;
 }
 

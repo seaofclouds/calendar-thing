@@ -158,7 +158,7 @@ function renderDayCell(day: DayCellData): string {
   const classes = [
     "month-view-day",
     !day.currentMonth ? "other-month" : "",
-    day.isToday ? "is-today" : "",
+    day.isToday ? "today" : "",
   ].filter(Boolean).join(" ");
 
   const moonSvg = day.moonPhase === "full" ? FULL_MOON_SVG
