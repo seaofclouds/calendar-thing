@@ -18,6 +18,7 @@ export interface RenderOptions {
   fullMoonDates: string[];
   newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
+  dataSource?: string;
 }
 
 interface DayData {
@@ -74,7 +75,7 @@ export function renderCalendar(opts: RenderOptions): string {
   <link rel="stylesheet" href="/styles.css">
   <script src="/client.js" type="module" defer></script>
 </head>
-<body>
+<body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
   <div id="root" class="${rootClasses}">
     <div class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
       ${opts.header ? `<div class="calendar-header"><h1>${opts.year}</h1></div>` : ""}
