@@ -2,6 +2,11 @@ name = "movie-release-calendar"
 main = "src/index.ts"
 compatibility_date = "2024-11-01"
 
+# Resolve workspace packages for wrangler's bundler
+[alias]
+"@calendar-feeds/ics-utils" = "../../packages/ics-utils/src/index.ts"
+"@calendar-feeds/worker-utils" = "../../packages/worker-utils/src/index.ts"
+
 # Secrets (never committed):
 #   npx wrangler secret put TMDB_API_KEY
 #   npx wrangler secret put CALENDAR_TOKEN
