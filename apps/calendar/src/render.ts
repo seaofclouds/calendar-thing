@@ -18,6 +18,7 @@ export interface RenderOptions {
   fullMoonDates: string[];
   newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
+  queryString?: string;
   dataSource?: string;
 }
 
@@ -82,12 +83,12 @@ export function renderCalendar(opts: RenderOptions): string {
   <div id="root" class="${rootClasses}">
     <div class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
       ${opts.header ? `<div class="calendar-header">
-        <a href="/${opts.year - 1}" class="year-nav prev" aria-label="Previous year"></a>
-        <h1><a href="/${new Date().getFullYear()}">${opts.year}</a></h1>
-        <a href="/${opts.year + 1}" class="year-nav next" aria-label="Next year"></a>
+        <a href="/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
+        <h1><a href="/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>
+        <a href="/${opts.year + 1}${opts.queryString ?? ""}" class="year-nav next" aria-label="Next year"></a>
       </div>` : ""}
       <div class="calendar-grid">
-        ${months.map(renderMonth).join("\n        ")}
+        ${months.map((m) => renderMonth(m, opts.queryString)).join("\n        ")}
       </div>
     </div>
   </div>
@@ -95,8 +96,9 @@ export function renderCalendar(opts: RenderOptions): string {
 </html>`;
 }
 
-function renderMonth(month: MonthData): string {
-  const monthUrl = `/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}`;
+function renderMonth(month: MonthData, queryString?: string): string {
+  const qs = queryString ?? "";
+  const monthUrl = `/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}${qs}`;
   return `<a href="${monthUrl}" class="month-link">
           <div class="month">
           <div class="month-header"><h2>${month.name}</h2></div>

@@ -29,6 +29,7 @@ export interface MonthViewOptions {
   solarEvents: Record<string, "solstice" | "equinox">;
   borders: boolean;
   events?: CalendarEvent[];
+  queryString?: string;
   dataSource?: string;
 }
 
@@ -69,9 +70,10 @@ export function renderMonthView(opts: MonthViewOptions): string {
     ? { year: opts.year + 1, month: 0 }
     : { year: opts.year, month: monthIndex + 1 };
 
-  const prevUrl = `/${prev.year}/${String(prev.month + 1).padStart(2, "0")}`;
-  const nextUrl = `/${next.year}/${String(next.month + 1).padStart(2, "0")}`;
-  const yearUrl = `/${opts.year}`;
+  const qs = opts.queryString ?? "";
+  const prevUrl = `/${prev.year}/${String(prev.month + 1).padStart(2, "0")}${qs}`;
+  const nextUrl = `/${next.year}/${String(next.month + 1).padStart(2, "0")}${qs}`;
+  const yearUrl = `/${opts.year}${qs}`;
 
   // Mini calendar grids (reuse exact same .month structure as year view)
   const prevMiniWeeks = generateWeeks(prev.year, prev.month, fullMoonSet, newMoonSet, opts.solarEvents, todayStr);

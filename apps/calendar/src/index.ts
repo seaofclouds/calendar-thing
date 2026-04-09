@@ -99,6 +99,7 @@ export default {
         solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
         borders: params.borders,
         events: monthEvents,
+        queryString: url.search,
         dataSource: moonData.source,
       });
     } else {
@@ -106,6 +107,7 @@ export default {
         ...params,
         header: params.header,
         forExport,
+        queryString: url.search,
         fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
         newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
         solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
