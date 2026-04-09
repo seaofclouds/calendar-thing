@@ -19,14 +19,6 @@ const EVENT_META: Record<SolarEventType, { emoji: string; name: string }> = {
   winter_solstice:   { emoji: "\u25D0", name: "Winter Solstice" },
 };
 
-export function solarEventName(event: SolarEventType): string {
-  return EVENT_META[event].name;
-}
-
-export function solarEventEmoji(event: SolarEventType): string {
-  return EVENT_META[event].emoji;
-}
-
 /** Degrees to radians */
 function rad(deg: number): number {
   return (deg * Math.PI) / 180;

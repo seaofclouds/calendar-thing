@@ -10,9 +10,7 @@
     "deploy": "pnpm build && wrangler deploy",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@calendar-feeds/feed-types": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
     "esbuild": "^0.24.0",
