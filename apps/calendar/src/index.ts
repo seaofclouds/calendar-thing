@@ -6,7 +6,8 @@
 
 import { renderCalendar } from "./render";
 import { renderMonthView } from "./render-month";
-import type { MoonPhaseEntry, MovieRelease } from "./types";
+import type { MovieRelease } from "./types";
+
 
 interface Env {
   MOON_PHASE: Fetcher;
@@ -58,11 +59,10 @@ export default {
     let html: string;
 
     if (params.viewMode === "month" && params.month != null) {
-      // Month view: fetch all phases + movie data
-      const [allPhases, movieReleases, moonData] = await Promise.all([
-        fetchAllMoonPhases(env, params.year),
-        fetchMovieReleases(env),
+      // Month view: fetch moon data + movie data
+      const [moonData, movieReleases] = await Promise.all([
         fetchMoonData(env, params.year),
+        fetchMovieReleases(env),
       ]);
 
       html = renderMonthView({
@@ -75,9 +75,10 @@ export default {
         forExport,
         format: params.format,
         dpi: params.dpi,
-        allPhases,
+        fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
+        newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
         movieReleases,
-        solarEvents: moonData.solarEvents,
+        solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
         dataSource: moonData.source,
       });
     } else {
@@ -276,39 +277,6 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     solarEvents: SOLAR_EVENTS[year] ?? {},
     source: `static-fallback:${debugInfo}`,
   };
-}
-
-async function fetchAllMoonPhases(env: Env, year: number): Promise<MoonPhaseEntry[]> {
-  try {
-    if (env.MOON_PHASE) {
-      const response = await env.MOON_PHASE.fetch(
-        new Request(`https://internal/feeds/moon.json?year=${year}`)
-      );
-      if (response.ok) {
-        const data = (await response.json()) as {
-          phases: Array<{ date: string; phase: string; name: string; emoji: string }>;
-        };
-        return data.phases.map((p) => ({
-          date: p.date,
-          phase: p.phase as MoonPhaseEntry["phase"],
-          name: p.name,
-          emoji: p.emoji,
-        }));
-      }
-    }
-  } catch {
-    // fall through to static fallback
-  }
-
-  // Build fallback from static full/new moon data
-  const phases: MoonPhaseEntry[] = [];
-  for (const date of FULL_MOON_DATES[year] ?? []) {
-    phases.push({ date, phase: "full_moon", name: "Full Moon", emoji: "\u{1F315}" });
-  }
-  for (const date of NEW_MOON_DATES[year] ?? []) {
-    phases.push({ date, phase: "new_moon", name: "New Moon", emoji: "\u{1F311}" });
-  }
-  return phases.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 async function fetchMovieReleases(env: Env): Promise<MovieRelease[]> {

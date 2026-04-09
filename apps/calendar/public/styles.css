@@ -552,9 +552,10 @@ body {
 .month-view-title {
   flex: 1;
   text-align: center;
-  font-size: 2.5em;
-  font-weight: 100;
+  font-size: 3em;
+  font-weight: 200;
   align-self: center;
+  line-height: 1;
 }
 
 .month-view-year-link {
@@ -589,17 +590,17 @@ body {
 /* Mini calendar */
 .mini-calendar {
   font-size: 0.7em;
+  font-family: "SF Mono", "Menlo", "Consolas", monospace;
   line-height: 1.4;
 }
 
 .mini-cal-title {
-  text-align: center;
-  font-weight: 600;
+  text-align: left;
+  font-weight: 700;
   font-size: 0.9em;
-  padding-bottom: 0.2em;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #555;
+  padding-bottom: 0.15em;
+  letter-spacing: 0.02em;
+  color: #333;
 }
 
 .mini-cal-table {
@@ -607,21 +608,23 @@ body {
 }
 
 .mini-cal-table th {
-  font-weight: 600;
-  text-align: center;
-  padding: 0 0.3em;
+  font-weight: 700;
+  text-align: right;
+  padding: 0 0.2em;
   font-size: 0.85em;
-  color: #888;
-}
-
-.mini-cal-table td {
-  text-align: center;
-  padding: 0.05em 0.3em;
   color: #333;
 }
 
+.mini-cal-table td {
+  text-align: right;
+  padding: 0 0.2em;
+  font-weight: 700;
+  color: #111;
+}
+
 .mini-cal-table td.mini-other {
-  color: #ccc;
+  color: #bbb;
+  font-weight: 400;
 }
 
 /* Main month table */
@@ -634,14 +637,12 @@ body {
 
 .month-view-daynames th {
   border: 1px solid #ccc;
-  padding: 0.4em 0.5em;
+  border-top: none;
+  padding: 0.3em 0.5em;
   text-align: left;
   font-weight: 600;
   font-size: 0.85em;
-  background: #fafafa;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  color: #333;
 }
 
 .day-full {
@@ -659,16 +660,8 @@ body {
   height: 1px; /* trick to let inner div fill */
 }
 
-.month-view-day.other-month {
-  background: #fafafa;
-}
-
-.month-view-day.other-month .day-number {
-  color: #bbb;
-}
-
-.month-view-day.other-month .day-cell-events {
-  opacity: 0.4;
+.month-view-day.other-month .day-cell-inner {
+  opacity: 0.3;
 }
 
 .day-cell-inner {
@@ -747,8 +740,7 @@ body {
 }
 
 .day-event.movie-event {
-  color: #1a5276;
-  background: #eaf2f8;
+  color: #2563eb;
 }
 
 /* ===================
