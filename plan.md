@@ -104,7 +104,7 @@ Add `month?: number` and `viewMode: "year" | "month"` to `CalendarParams`.
 - Moon phase indicator (all 4 phases + intermediates)
 
 **Data for month view:**
-- Moon phases: Fetch ALL phases from moon-phase feed (not just full moons). The `/moon.json` endpoint returns `phases[]` with all 4 quarter types.
+- Moon phases: Fetch ALL phases from astronomy feed (not just full moons). The `/astronomy.json` endpoint returns `phases[]` with all 4 quarter types.
 - Movie releases: Fetch from `env.MOVIE_RELEASE.fetch('/theatrical.json')` -- show movie titles on release dates
 - Holidays: Future feed (not implemented yet, but leave hook for it)
 
@@ -228,7 +228,7 @@ Moon-phase worker accepts `?year=N` query param (defaults to current year). Cale
 
 ```
 ICS sources (all produce .ics via /feeds/{name}.ics):
-  ├── moon-phase worker        → /feeds/moon.ics (service binding)
+  ├── astronomy worker        → /feeds/astronomy.ics (service binding)
   ├── movie-release worker     → /feeds/movies-theatrical.ics (service binding)
   │                            → /feeds/movies-digital.ics (service binding)
   ├── astrology worker         → /feeds/astrology.ics (service binding)
@@ -279,8 +279,8 @@ Feed proxy (calendar app):
 
 ### URL examples
 ```
-/2026/04                                         → moon+solar only (default)
-/2026/04?include=moon:full,solar:season,movies   → + movie releases
+/2026/04                                         → lunar+solar only (default)
+/2026/04?include=lunar:full,solar:season,movies   → + movie releases
 /2026/04?feed=https://example.com/cal.ics        → + external ICS
 ```
 
@@ -321,7 +321,8 @@ Feed proxy (calendar app):
 | D18 | Event de-duplication across feeds | pending |
 | D19 | Multi-day event visual connectors | pending |
 | E1 | Mercury retrograde events in astrology feed | pending |
-| E2 | Other astrological events (eclipses, etc.) | pending |
+| E2 | Lunar/solar eclipses in astronomy feed | pending |
+| E3 | Rename moon-phase → astronomy, lunar:/solar: tokens | DONE |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
