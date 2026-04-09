@@ -2,7 +2,7 @@
   "name": "calendar-feeds",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter @calendar-feeds/calendar build",
+    "build": "pnpm --filter @calendar-feeds/calendar run build:client",
     "typecheck": "pnpm -r run typecheck",
     "dev:moon": "pnpm --filter @calendar-feeds/moon-phase dev",
     "dev:movie": "pnpm --filter @calendar-feeds/movie-release dev",
