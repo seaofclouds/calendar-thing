@@ -485,6 +485,10 @@ body {
   font-weight: bold;
 }
 
+.date-leading-zero {
+  visibility: hidden;
+}
+
 /* ===================
    Testing Styles
    =================== */
