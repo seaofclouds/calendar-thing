@@ -7,7 +7,7 @@ import { getPageLayout } from "./config";
 
 export interface RenderOptions {
   year: number;
-  size: string;
+  size?: string;
   orientation: "portrait" | "landscape";
   rows?: number;
   header: boolean;
@@ -16,13 +16,14 @@ export interface RenderOptions {
   format?: "png" | "jpg";
   dpi?: number;
   fullMoonDates: string[];
+  newMoonDates: string[];
   solarEvents: Record<string, "solstice" | "equinox">;
 }
 
 interface DayData {
   date: number;
   currentMonth: boolean;
-  fullMoon: boolean;
+  moonPhase?: "full" | "new";
   isSpecialDay?: "solstice" | "equinox";
 }
 
@@ -38,12 +39,12 @@ const MONTH_NAMES = [
 ];
 
 export function renderCalendar(opts: RenderOptions): string {
-  const layout = getPageLayout(opts.size, opts.orientation);
+  const layout = getPageLayout(opts.size ?? "letter", opts.orientation);
   const actualRows = opts.rows ?? layout.rows;
   const totalMonths = actualRows * layout.columns;
-  const isPreview = opts.forExport || opts.size !== "letter" || opts.testing;
+  const isPreview = opts.forExport;
 
-  const months = generateMonths(opts.year, totalMonths, opts.fullMoonDates, opts.solarEvents);
+  const months = generateMonths(opts.year, totalMonths, opts.fullMoonDates, opts.newMoonDates, opts.solarEvents);
 
   const calendarClasses = [
     "calendar",
@@ -61,7 +62,7 @@ export function renderCalendar(opts: RenderOptions): string {
 
   // Data attributes for client-side image export
   const dataAttrs = opts.format
-    ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size}" data-orientation="${opts.orientation}"`
+    ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
     : "";
 
   return `<!DOCTYPE html>
@@ -102,8 +103,12 @@ function renderDay(day: DayData): string {
   const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}`;
 
   let content: string;
-  if (day.fullMoon) {
-    content = `<div class="day-marker-moon-full"></div>`;
+  if (!day.currentMonth) {
+    content = `<span class="date">${day.date}</span>`;
+  } else if (day.moonPhase === "full") {
+    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="white" stroke="black" stroke-width="2"/></svg>`;
+  } else if (day.moonPhase === "new") {
+    content = `<svg class="day-marker-moon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="8.5" fill="black" stroke="black" stroke-width="2"/></svg>`;
   } else if (day.isSpecialDay) {
     content = `<div class="day-marker-${day.isSpecialDay}"></div>`;
   } else {
@@ -117,9 +122,11 @@ function generateMonths(
   baseYear: number,
   totalMonths: number,
   fullMoonDates: string[],
+  newMoonDates: string[],
   solarEvents: Record<string, "solstice" | "equinox">
 ): MonthData[] {
   const fullMoonSet = new Set(fullMoonDates);
+  const newMoonSet = new Set(newMoonDates);
 
   return Array.from({ length: totalMonths }, (_, i) => {
     const monthIndex = i % 12;
@@ -142,7 +149,6 @@ function generateMonths(
       currentWeek.push({
         date: prevMonthDays - startingDay + i + 1,
         currentMonth: false,
-        fullMoon: false,
       });
     }
 
@@ -153,7 +159,7 @@ function generateMonths(
       currentWeek.push({
         date: day,
         currentMonth: true,
-        fullMoon: fullMoonSet.has(dateStr),
+        moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
         isSpecialDay: solarEvents[dateStr],
       });
 
@@ -169,7 +175,6 @@ function generateMonths(
       currentWeek.push({
         date: nextDay++,
         currentMonth: false,
-        fullMoon: false,
       });
     }
     if (currentWeek.length > 0) {
@@ -183,7 +188,6 @@ function generateMonths(
         fillWeek.push({
           date: nextDay++,
           currentMonth: false,
-          fullMoon: false,
         });
       }
       weeks.push(fillWeek);
