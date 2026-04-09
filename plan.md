@@ -228,12 +228,12 @@ Moon-phase worker accepts `?year=N` query param (defaults to current year). Cale
 | Pre | Convert to CF Worker | DONE |
 | Pre | Moon-phase year param | DONE |
 | Pre | Fix GitHub Actions deploys | DONE |
-| A1 | Fix responsive default route | pending |
+| A1 | Fix responsive default route | DONE (sizeExplicit flag) |
 | A2 | Fix image export (remove ASSETS regex) | DONE (removed in Worker conversion) |
-| B1 | Add month view routing | pending (depends on A1) |
-| B2 | Month view rendering (render-month.ts) | pending |
-| B3 | Month view CSS | pending |
-| B4 | All moon phases + movie data for month view | pending |
+| B1 | Add month view routing | DONE |
+| B2 | Month view rendering (render-month.ts) | DONE |
+| B3 | Month view CSS | DONE |
+| B4 | All moon phases + movie data for month view | DONE |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |

@@ -494,5 +494,353 @@ body {
 } */
 
 /* ===================
-   Testing Styles
+   Year View Navigation
    =================== */
+
+.month-header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.month-header a:hover {
+  text-decoration: underline;
+}
+
+.calendar:not(.print) .calendar-day.current-month {
+  cursor: pointer;
+}
+
+.calendar:not(.print) .calendar-day.current-month:hover {
+  background: #f0f0f0;
+  border-radius: 2px;
+}
+
+/* Today highlight (screen only) */
+.calendar:not(.print) .calendar-day.is-today .date,
+.month-view:not(.print) .month-view-day.is-today .day-number {
+  font-weight: 700;
+}
+
+.month-view:not(.print) .month-view-day.is-today {
+  background: #fefce8;
+}
+
+/* ===================
+   Month View Styles
+   =================== */
+
+.month-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+}
+
+/* Header with mini calendars */
+.month-view-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0 0 1em 0;
+  gap: 1em;
+}
+
+.month-view-title {
+  flex: 1;
+  text-align: center;
+  font-size: 2.5em;
+  font-weight: 100;
+  align-self: center;
+}
+
+.month-view-year-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.month-view-year-link:hover {
+  text-decoration: underline;
+}
+
+.month-view-nav {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  min-width: 0;
+}
+
+.month-view-nav-link {
+  font-size: 1.5em;
+  text-decoration: none;
+  color: #333;
+  line-height: 1;
+  padding: 0.2em;
+  align-self: center;
+}
+
+.month-view-nav-link:hover {
+  color: #000;
+}
+
+/* Mini calendar */
+.mini-calendar {
+  font-size: 0.7em;
+  line-height: 1.4;
+}
+
+.mini-cal-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9em;
+  padding-bottom: 0.2em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+.mini-cal-table {
+  border-collapse: collapse;
+}
+
+.mini-cal-table th {
+  font-weight: 600;
+  text-align: center;
+  padding: 0 0.3em;
+  font-size: 0.85em;
+  color: #888;
+}
+
+.mini-cal-table td {
+  text-align: center;
+  padding: 0.05em 0.3em;
+  color: #333;
+}
+
+.mini-cal-table td.mini-other {
+  color: #ccc;
+}
+
+/* Main month table */
+.month-view-table {
+  width: 100%;
+  flex: 1;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.month-view-daynames th {
+  border: 1px solid #ccc;
+  padding: 0.4em 0.5em;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85em;
+  background: #fafafa;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.day-full {
+  display: inline;
+}
+
+.day-abbrev {
+  display: none;
+}
+
+.month-view-day {
+  border: 1px solid #ccc;
+  vertical-align: top;
+  padding: 0;
+  height: 1px; /* trick to let inner div fill */
+}
+
+.month-view-day.other-month {
+  background: #fafafa;
+}
+
+.month-view-day.other-month .day-number {
+  color: #bbb;
+}
+
+.month-view-day.other-month .day-cell-events {
+  opacity: 0.4;
+}
+
+.day-cell-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 0.3em 0.4em;
+  height: 100%;
+  min-height: 4em;
+  box-sizing: border-box;
+}
+
+.day-cell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3em;
+  margin-bottom: 0.2em;
+}
+
+.day-number {
+  font-size: 1.1em;
+  font-weight: 300;
+  color: #222;
+}
+
+.day-indicators {
+  display: flex;
+  align-items: center;
+  gap: 0.15em;
+}
+
+.phase-indicator {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.solar-indicator {
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+.solar-indicator.solstice {
+  color: #c59000;
+}
+
+.solar-indicator.equinox {
+  color: #4a8a3f;
+}
+
+/* Events inside cells */
+.day-cell-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  overflow: hidden;
+  font-size: 0.75em;
+  line-height: 1.3;
+}
+
+.day-event {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.05em 0.2em;
+  border-radius: 2px;
+}
+
+.day-event.phase-event {
+  color: #555;
+}
+
+.day-event.solar-event {
+  color: #6b5c00;
+}
+
+.day-event.movie-event {
+  color: #1a5276;
+  background: #eaf2f8;
+}
+
+/* ===================
+   Month View Print Styles
+   =================== */
+
+.month-view.print {
+  padding: 2em;
+}
+
+.month-view.print .month-view-nav-link {
+  display: none;
+}
+
+.month-view.print .month-view-day.is-today {
+  background: transparent;
+}
+
+.month-view.print .month-view-day.is-today .day-number {
+  font-weight: 300;
+}
+
+/* Size-specific month view */
+.size-letter .month-view.print,
+.size-a4 .month-view.print {
+  font-size: 0.8rem;
+  padding: 3em;
+}
+
+.size-tabloid .month-view.print {
+  font-size: 1rem;
+  padding: 4em;
+}
+
+.size-a5 .month-view.print {
+  font-size: 0.65rem;
+  padding: 2em;
+}
+
+.size-a6 .month-view.print {
+  font-size: 0.5rem;
+  padding: 1.5em;
+}
+
+/* ===================
+   Month View Responsive
+   =================== */
+
+@media screen and (max-width: 600px) {
+  .month-view:not(.print) {
+    font-size: 0.8rem;
+  }
+
+  .month-view:not(.print) .month-view-header {
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+
+  .month-view:not(.print) .month-view-title {
+    font-size: 1.8em;
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .month-view:not(.print) .mini-calendar {
+    display: none;
+  }
+
+  .day-full {
+    display: none;
+  }
+
+  .day-abbrev {
+    display: inline;
+  }
+
+  .day-cell-inner {
+    min-height: 3em;
+    padding: 0.2em;
+  }
+
+  .day-cell-events {
+    font-size: 0.65em;
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .month-view:not(.print) {
+    padding: 1.5em 2em;
+  }
+
+  .day-cell-inner {
+    min-height: 5em;
+  }
+}

@@ -17,6 +17,28 @@ function updateColumns() {
 window.addEventListener("resize", updateColumns);
 updateColumns();
 
+// Day click navigation: clicking a current-month day in year view navigates to month view
+function setupDayNavigation() {
+  const calendar = document.querySelector(".calendar") as HTMLElement | null;
+  if (!calendar || calendar.classList.contains("print")) return;
+
+  calendar.addEventListener("click", (e) => {
+    const dayEl = (e.target as HTMLElement).closest(".calendar-day.current-month");
+    if (!dayEl) return;
+
+    const monthEl = dayEl.closest(".month") as HTMLElement | null;
+    if (!monthEl) return;
+
+    const year = monthEl.dataset.year;
+    const month = monthEl.dataset.month;
+    if (year && month) {
+      window.location.href = `/${year}/${month.padStart(2, "0")}`;
+    }
+  });
+}
+
+setupDayNavigation();
+
 // Image export — triggered when server sets data-format on .calendar
 async function maybeExportImage() {
   const calendar = document.querySelector(".calendar") as HTMLElement | null;

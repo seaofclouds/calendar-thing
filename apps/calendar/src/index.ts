@@ -5,6 +5,8 @@
  */
 
 import { renderCalendar } from "./render";
+import { renderMonthView } from "./render-month";
+import type { MoonPhaseEntry, MovieRelease } from "./types";
 
 interface Env {
   MOON_PHASE: Fetcher;
@@ -20,6 +22,7 @@ interface IncludeOptions {
 interface CalendarParams {
   year: number;
   size?: string;
+  sizeExplicit: boolean;
   orientation: "portrait" | "landscape";
   rows?: number;
   header: boolean;
@@ -27,6 +30,8 @@ interface CalendarParams {
   format?: "png" | "jpg";
   dpi: number;
   include: IncludeOptions;
+  month?: number;
+  viewMode: "year" | "month";
 }
 
 const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-tabloid", "a4", "a5", "a6"]);
@@ -48,19 +53,47 @@ export default {
       return Response.redirect(`${url.origin}/${new Date().getFullYear()}`, 302);
     }
 
-    // Fetch event data from moon-phase feed
-    const moonData = await fetchMoonData(env, params.year);
+    const forExport = params.format != null || params.sizeExplicit || params.testing;
 
-    // Render HTML
-    const html = renderCalendar({
-      ...params,
-      header: params.header,
-      forExport: params.format != null || params.size != null || params.testing,
-      fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
-      newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
-      solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
-      dataSource: moonData.source,
-    });
+    let html: string;
+
+    if (params.viewMode === "month" && params.month != null) {
+      // Month view: fetch all phases + movie data
+      const [allPhases, movieReleases, moonData] = await Promise.all([
+        fetchAllMoonPhases(env, params.year),
+        fetchMovieReleases(env),
+        fetchMoonData(env, params.year),
+      ]);
+
+      html = renderMonthView({
+        year: params.year,
+        month: params.month,
+        size: params.size,
+        orientation: params.orientation,
+        header: params.header,
+        testing: params.testing,
+        forExport,
+        format: params.format,
+        dpi: params.dpi,
+        allPhases,
+        movieReleases,
+        solarEvents: moonData.solarEvents,
+        dataSource: moonData.source,
+      });
+    } else {
+      // Year view
+      const moonData = await fetchMoonData(env, params.year);
+
+      html = renderCalendar({
+        ...params,
+        header: params.header,
+        forExport,
+        fullMoonDates: params.include.fullMoon ? moonData.fullMoonDates : [],
+        newMoonDates: params.include.newMoon ? moonData.newMoonDates : [],
+        solarEvents: params.include.solarEvents ? moonData.solarEvents : {},
+        dataSource: moonData.source,
+      });
+    }
 
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -89,9 +122,25 @@ function parseCalendarURL(
   let format: "png" | "jpg" | undefined;
   let dpi = 300;
   let size: string | undefined;
+  let sizeExplicit = false;
   let orientation: "portrait" | "landscape" = "portrait";
+  let month: number | undefined;
+  let viewMode: "year" | "month" = "year";
 
-  for (const seg of segments.slice(1)) {
+  const rest = segments.slice(1);
+
+  // Check if second segment is a month number (1-12)
+  if (rest.length > 0) {
+    const monthNum = parseInt(rest[0]);
+    if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12 && /^\d{1,2}$/.test(rest[0])) {
+      month = monthNum;
+      viewMode = "month";
+      // For month view, remaining segments after month are size/orientation/format
+      rest.shift();
+    }
+  }
+
+  for (const seg of rest) {
     // Check for image format (e.g., "300dpi.png", "portrait.jpg")
     if (!format) {
       const parsed = parseFormatSegment(seg);
@@ -108,12 +157,14 @@ function parseCalendarURL(
       orientation = clean as "portrait" | "landscape";
     } else if (VALID_SIZES.has(clean)) {
       size = clean;
+      sizeExplicit = true;
     }
   }
 
   return {
     year: yearNum,
     size,
+    sizeExplicit,
     orientation,
     rows,
     header,
@@ -121,6 +172,8 @@ function parseCalendarURL(
     format,
     dpi,
     include,
+    month,
+    viewMode,
   };
 }
 
@@ -223,4 +276,59 @@ async function fetchMoonData(env: Env, year: number): Promise<MoonData> {
     solarEvents: SOLAR_EVENTS[year] ?? {},
     source: `static-fallback:${debugInfo}`,
   };
+}
+
+async function fetchAllMoonPhases(env: Env, year: number): Promise<MoonPhaseEntry[]> {
+  try {
+    if (env.MOON_PHASE) {
+      const response = await env.MOON_PHASE.fetch(
+        new Request(`https://internal/feeds/moon.json?year=${year}`)
+      );
+      if (response.ok) {
+        const data = (await response.json()) as {
+          phases: Array<{ date: string; phase: string; name: string; emoji: string }>;
+        };
+        return data.phases.map((p) => ({
+          date: p.date,
+          phase: p.phase as MoonPhaseEntry["phase"],
+          name: p.name,
+          emoji: p.emoji,
+        }));
+      }
+    }
+  } catch {
+    // fall through to static fallback
+  }
+
+  // Build fallback from static full/new moon data
+  const phases: MoonPhaseEntry[] = [];
+  for (const date of FULL_MOON_DATES[year] ?? []) {
+    phases.push({ date, phase: "full_moon", name: "Full Moon", emoji: "\u{1F315}" });
+  }
+  for (const date of NEW_MOON_DATES[year] ?? []) {
+    phases.push({ date, phase: "new_moon", name: "New Moon", emoji: "\u{1F311}" });
+  }
+  return phases.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function fetchMovieReleases(env: Env): Promise<MovieRelease[]> {
+  try {
+    if (env.MOVIE_RELEASE) {
+      const response = await env.MOVIE_RELEASE.fetch(
+        new Request("https://internal/theatrical.json")
+      );
+      if (response.ok) {
+        const data = (await response.json()) as {
+          movies: Array<{ title: string; release_date: string }>;
+        };
+        return data.movies.map((m) => ({
+          title: m.title,
+          date: m.release_date,
+        }));
+      }
+    }
+  } catch {
+    // no movie data available
+  }
+  return [];
 }

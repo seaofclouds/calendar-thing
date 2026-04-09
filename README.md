@@ -43,14 +43,20 @@ A Cloudflare Worker that renders printable year calendars as server-side HTML wi
 ### Calendar URLs
 
 ```
-/:year                              # Responsive calendar (e.g. /2026)
-/:year/:orientation                 # portrait or landscape
-/:year/:size                        # Print preview (letter, a4, a6, etc.)
-/:year/:size/:orientation           # Print preview with orientation
-/:year/:size/:orientation/300dpi.png  # Export as image
+/:year                                 # Responsive year view (e.g. /2026)
+/:year/:orientation                    # portrait or landscape
+/:year/:size                           # Print preview (letter, a4, a6, etc.)
+/:year/:size/:orientation              # Print preview with orientation
+/:year/:size/:orientation/300dpi.png   # Export as image
+
+/:year/:month                          # Month view (e.g. /2026/01)
+/:year/:month/:size                    # Month view at paper size
+/:year/:month/:size/:orientation       # Month view with size + orientation
 ```
 
 Query params: `rows=N`, `header=false`, `test=true`, `include=moon:full,moon:new,solar:season`
+
+**Navigation:** In year view, click a month name to go to that month. Click a day to navigate to its month view. In month view, use prev/next arrows and mini calendars to browse months. Today's date is highlighted (bold) in screen mode.
 
 ### Default Layouts
 

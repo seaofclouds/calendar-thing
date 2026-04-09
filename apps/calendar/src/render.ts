@@ -26,10 +26,13 @@ interface DayData {
   currentMonth: boolean;
   moonPhase?: "full" | "new";
   isSpecialDay?: "solstice" | "equinox";
+  isToday?: boolean;
 }
 
 interface MonthData {
   name: string;
+  year: number;
+  monthIndex: number; // 0-based
   weeks: DayData[][];
 }
 
@@ -89,8 +92,9 @@ export function renderCalendar(opts: RenderOptions): string {
 }
 
 function renderMonth(month: MonthData): string {
-  return `<div class="month">
-          <div class="month-header"><h2>${month.name}</h2></div>
+  const monthUrl = `/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}`;
+  return `<div class="month" data-year="${month.year}" data-month="${month.monthIndex + 1}">
+          <div class="month-header"><h2><a href="${monthUrl}">${month.name}</a></h2></div>
           <div class="week-days">
             ${WEEK_DAYS.map((d) => `<h3 class="week-day">${d}</h3>`).join("")}
           </div>
@@ -101,7 +105,11 @@ function renderMonth(month: MonthData): string {
 }
 
 function renderDay(day: DayData): string {
-  const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}`;
+  const classList = ["calendar-day"];
+  if (!day.currentMonth) classList.push("other-month");
+  if (day.currentMonth) classList.push("current-month");
+  if (day.isToday) classList.push("is-today");
+  const classes = classList.join(" ");
 
   let content: string;
   if (!day.currentMonth) {
@@ -128,6 +136,8 @@ function generateMonths(
 ): MonthData[] {
   const fullMoonSet = new Set(fullMoonDates);
   const newMoonSet = new Set(newMoonDates);
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return Array.from({ length: totalMonths }, (_, i) => {
     const monthIndex = i % 12;
@@ -162,6 +172,7 @@ function generateMonths(
         currentMonth: true,
         moonPhase: fullMoonSet.has(dateStr) ? "full" : newMoonSet.has(dateStr) ? "new" : undefined,
         isSpecialDay: solarEvents[dateStr],
+        isToday: dateStr === todayStr,
       });
 
       if (currentWeek.length === 7) {
@@ -196,6 +207,8 @@ function generateMonths(
 
     return {
       name: MONTH_NAMES[monthIndex],
+      year,
+      monthIndex,
       weeks,
     };
   });
