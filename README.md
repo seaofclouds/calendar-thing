@@ -13,7 +13,8 @@ calendar-thing/                   # Monorepo root
 ├── feeds/
 │   ├── astrology/              # CF Worker — zodiac seasons (tropical astrology)
 │   ├── astronomy/              # CF Worker — lunar phases + solar events (Jean Meeus)
-│   └── movies/          # CF Worker — theatrical + digital releases (TMDB API)
+│   ├── busd/                   # BUSD TK-12 school calendar (fixture-only)
+│   └── movies/                 # CF Worker — theatrical + digital releases (TMDB API)
 ├── apps/
 │   └── calendar/               # CF Worker — printable calendar renderer + static assets
 ├── .github/workflows/deploy.yml
