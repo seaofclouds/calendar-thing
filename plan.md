@@ -300,14 +300,17 @@ ICS sources (all produce .ics):
 | D4 | Feed config with three-tier fallback (feeds.ts) | DONE |
 | D5 | Event rendering in month day cells | DONE |
 | D6 | Streamline SVG icons per feed category | DONE |
-| D7 | US holidays ICS feed | pending |
-| D8 | BUSD school calendar worker (PDF→ICS) | pending |
-| D9 | Event de-duplication across feeds | pending |
+| D7 | BUSD school calendar fixture (3 years) | DONE |
+| D8 | Multi-day event expansion | DONE |
+| D9 | Query param preservation in navigation | DONE |
+| D10 | Event de-duplication across feeds | pending |
+| D11 | Multi-day event visual connectors | pending |
+| D12 | BUSD feed worker (PDF→ICS, automated) | pending |
 | C1 | Config route + layout (render-config.ts) | pending |
 | C2 | Config sidebar HTML + CSS | pending |
 | C3 | Config client-side JS (navigation, save) | pending |
 
-D7-D9 are the current focus.
+D10-D12 are next.
 C depends on B+D (month view + feeds needed for config preview).
 
 ---
