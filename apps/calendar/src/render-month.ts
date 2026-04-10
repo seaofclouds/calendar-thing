@@ -142,7 +142,7 @@ ${renderWeeks(weeks)}
 function renderMiniMonth(title: string, weeks: DayData[][]): string {
   return `            <header class="month-header"><h2>${title}</h2></header>
             <div class="weekdays">
-              ${WEEK_DAYS.map((d) => `<span class="weekday">${d}</span>`).join("")}
+              ${WEEK_DAYS.map((d) => `<div class="weekday">${d}</div>`).join("")}
             </div>
             <section class="month-grid">
               ${weeks.map((week) => `<div class="week">${week.map(renderDay).join("")}</div>`).join("\n              ")}

@@ -20,14 +20,11 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
-  /* Type scale — relative to container context */
-  --font-size-view-title: 3.6em;
-  --font-size-month-name: 1.8em;
-  --font-size-day-number: 1.1em;
-  --font-size-weekday-label: 0.6em;
-  --font-size-event: 0.75em;
-  --font-size-mini-title: 1.1em;
-  --font-size-mini-grid: 0.7em;
+  /* Type scale */
+  --font-size-xl: 3.6em;
+  --font-size-lg: 1.8em;
+  --font-size-md: 1.1em;
+  --font-size-sm: 0.75em;
 }
 
 /* === Reset === */

@@ -106,7 +106,7 @@ function renderMonth(month: MonthData, queryString?: string): string {
           <article class="month">
           <header class="month-header"><h2>${month.name}</h2></header>
           <div class="weekdays">
-            ${WEEK_DAYS.map((d) => `<span class="weekday">${d}</span>`).join("")}
+            ${WEEK_DAYS.map((d) => `<div class="weekday">${d}</div>`).join("")}
           </div>
           <section class="month-grid">
             ${month.weeks.map((week) => `<div class="week">${week.map(renderDay).join("")}</div>`).join("\n            ")}
