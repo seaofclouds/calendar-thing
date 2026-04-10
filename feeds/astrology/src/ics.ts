@@ -18,7 +18,7 @@ export function generateICS(events: ZodiacEvent[]): string {
 
   return wrapVCalendar({
     prodId: "-//Astrology Calendar//EN",
-    calName: "\u2648 Astrology",
+    calName: "\u264B\uFE0F Astrology",
     events: entries,
   });
 }

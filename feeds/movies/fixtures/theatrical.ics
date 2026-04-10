@@ -1,7 +1,7 @@
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Movie Release Calendar//EN
-X-WR-CALNAME:Movie Releases (Theatrical)
+X-WR-CALNAME:🎥 Movies (theatrical)
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT

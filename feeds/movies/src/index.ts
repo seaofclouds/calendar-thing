@@ -26,7 +26,7 @@ export default createFeedWorker({
       handler: async (_request, env: Env) => {
         try {
           const result = await fetchUpcomingMovies(env.TMDB_API_KEY, RELEASE_TYPE.THEATRICAL);
-          return icsResponse(generateICS(result.movies, "Movie Releases (Theatrical)"), "movies-theatrical.ics");
+          return icsResponse(generateICS(result.movies, "🎥 Movies (theatrical)"), "movies-theatrical.ics");
         } catch (error) {
           const message = error instanceof Error ? error.message : "Unknown error";
           return errorResponse(500, `Error generating calendar: ${message}`);
@@ -38,7 +38,7 @@ export default createFeedWorker({
       handler: async (_request, env: Env) => {
         try {
           const result = await fetchUpcomingMovies(env.TMDB_API_KEY, RELEASE_TYPE.DIGITAL);
-          return icsResponse(generateICS(result.movies, "Movie Releases (Digital)"), "movies-digital.ics");
+          return icsResponse(generateICS(result.movies, "📺 Movies (digital)"), "movies-digital.ics");
         } catch (error) {
           const message = error instanceof Error ? error.message : "Unknown error";
           return errorResponse(500, `Error generating calendar: ${message}`);
