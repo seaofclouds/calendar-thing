@@ -17,7 +17,7 @@ export function parseIncludeParam(
     return state;
   }
 
-  const tokens = value.split(",").map((s) => s.trim());
+  const tokens = expandAliases(value.split(",").map((s) => s.trim()), registry);
   for (const feed of registry) {
     if (feed.includeTokens) {
       const active = new Set<string>();
@@ -43,4 +43,27 @@ export function isFeedEnabled(state: IncludeState, feedId: string): boolean {
 
 export function getActiveTokens(state: IncludeState, feedId: string): Set<string> {
   return state[feedId] ?? new Set();
+}
+
+function expandAliases(tokens: string[], registry: ResolvedFeed[]): string[] {
+  const aliasMap = new Map<string, string[]>();
+  for (const feed of registry) {
+    if (feed.tokenAliases) {
+      for (const [alias, expansion] of Object.entries(feed.tokenAliases)) {
+        aliasMap.set(alias, expansion);
+      }
+    }
+  }
+  if (aliasMap.size === 0) return tokens;
+
+  const expanded: string[] = [];
+  for (const token of tokens) {
+    const expansion = aliasMap.get(token);
+    if (expansion) {
+      expanded.push(...expansion);
+    } else {
+      expanded.push(token);
+    }
+  }
+  return expanded;
 }

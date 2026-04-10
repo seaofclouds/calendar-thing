@@ -4,14 +4,14 @@
   "scripts": {
     "build": "pnpm --filter @calendar-feeds/calendar build",
     "typecheck": "pnpm -r run typecheck",
-    "dev:moon": "pnpm --filter @calendar-feeds/moon-phase dev",
-    "dev:movie": "pnpm --filter @calendar-feeds/movie-release dev",
+    "dev:astronomy": "pnpm --filter @calendar-feeds/astronomy dev",
+    "dev:movie": "pnpm --filter @calendar-feeds/movies dev",
     "dev:astrology": "pnpm --filter @calendar-feeds/astrology dev",
     "dev:calendar": "pnpm --filter @calendar-feeds/calendar dev",
-    "deploy:astrology": "pnpm --filter @calendar-feeds/astrology deploy",
-    "deploy:moon": "pnpm --filter @calendar-feeds/moon-phase deploy",
-    "deploy:movie": "pnpm --filter @calendar-feeds/movie-release deploy",
-    "deploy:calendar": "pnpm --filter @calendar-feeds/calendar deploy"
+    "deploy:astrology": "pnpm --filter @calendar-feeds/astrology run deploy",
+    "deploy:astronomy": "pnpm --filter @calendar-feeds/astronomy run deploy",
+    "deploy:movie": "pnpm --filter @calendar-feeds/movies run deploy",
+    "deploy:calendar": "pnpm --filter @calendar-feeds/calendar run deploy"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

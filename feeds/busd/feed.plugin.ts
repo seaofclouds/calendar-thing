@@ -4,8 +4,8 @@ import fixture from "./fixtures/busd-2025-2026.ics";
 const plugin: FeedPlugin & { fixture: string } = {
   id: "busd",
   name: "BUSD School Calendar",
-  binding: "BUSD_CALENDAR",
-  endpoint: "/calendar.ics",
+  binding: "BUSD",
+  endpoint: "/feeds/busd.ics",
   prodUrl: "",
   category: "school",
   renderMode: "event-list",

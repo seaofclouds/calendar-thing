@@ -1,5 +1,5 @@
 /**
- * Moon Phase Calendar — Cloudflare Worker entry point.
+ * Astronomy Calendar — Cloudflare Worker entry point.
  * Serves ICS and JSON feeds for moon phases and solar events.
  */
 
@@ -22,13 +22,13 @@ export default {
 
     // Root health-check
     if (url.pathname === "/") {
-      return new Response("Moon Phase Calendar\n", {
+      return new Response("Astronomy Calendar\n", {
         headers: { "Content-Type": "text/plain" },
       });
     }
 
-    // Only /feeds/moon.ics and /feeds/moon.json are valid endpoints
-    if (url.pathname !== "/feeds/moon.ics" && url.pathname !== "/feeds/moon.json") {
+    // Only /feeds/astronomy.ics and /feeds/astronomy.json are valid endpoints
+    if (url.pathname !== "/feeds/astronomy.ics" && url.pathname !== "/feeds/astronomy.json") {
       return new Response("Not Found", { status: 404 });
     }
 
@@ -51,11 +51,11 @@ export default {
         const phases = computeMoonPhases(startDate, endDate);
         const solarEvents = computeSolarEvents(startDate, endDate);
 
-        if (url.pathname === "/feeds/moon.ics") {
+        if (url.pathname === "/feeds/astronomy.ics") {
           return icsResponse(generateICS(phases, solarEvents));
         }
 
-        // /feeds/moon.json
+        // /feeds/astronomy.json
         const json = buildJSON(phases, solarEvents, now);
         return jsonResponse(JSON.stringify(json, null, 2));
       }

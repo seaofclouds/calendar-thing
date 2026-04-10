@@ -45,7 +45,7 @@ function generateEvent(movie: MovieWithRelease, timestamp: string): string {
   );
 
   return buildVEvent({
-    uid: `movie-${movie.id}@movie-release-calendar`,
+    uid: `movie-${movie.id}@calendar-movies`,
     dtstamp: timestamp,
     dtstart: dateStr,
     summary: escapeICS(`\uD83C\uDFA5 ${movie.title}`),

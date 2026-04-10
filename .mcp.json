@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--output-dir", "/Users/todd/Developer/GitHub/calendar-thing/tmp"]
+    },
+    "streamline": {
+      "type": "http",
+      "url": "https://public-api.streamlinehq.com/mcp",
+      "headers": {
+        "X-API-Key": "oaerYL57NM7NTdjd.5c54c44661c8621e63b28bd37a4124cd"
+      }
+    }
+  }
+}

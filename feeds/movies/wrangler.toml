@@ -1,4 +1,4 @@
-name = "moon-phase-calendar"
+name = "calendar-movies"
 main = "src/index.ts"
 compatibility_date = "2024-11-01"
 
@@ -7,5 +7,6 @@ compatibility_date = "2024-11-01"
 "@calendar-feeds/ics-utils" = "../../packages/ics-utils/src/index.ts"
 "@calendar-feeds/worker-utils" = "../../packages/worker-utils/src/index.ts"
 
-# CALENDAR_TOKEN must be set as a secret:
+# Secrets (never committed):
+#   npx wrangler secret put TMDB_API_KEY
 #   npx wrangler secret put CALENDAR_TOKEN

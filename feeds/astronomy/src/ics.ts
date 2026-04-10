@@ -20,10 +20,17 @@ export function generateICS(phases: MoonPhase[], solarEvents: SolarEvent[]): str
   const solarEntries = solarEvents.map((e) => generateSolarEvent(e, now));
 
   return wrapVCalendar({
-    prodId: "-//Moon Phase Calendar//EN",
+    prodId: "-//Astronomy Calendar//EN",
     calName: "\uD83C\uDF17 Moon Phases",
     events: [...moonEntries, ...solarEntries],
   });
+}
+
+function lunarUidSegment(phase: MoonPhase["phase"]): string {
+  if (phase === "first_quarter" || phase === "last_quarter") return "lunar-quarter";
+  if (phase === "full_moon") return "lunar-full";
+  if (phase === "new_moon") return "lunar-new";
+  return `lunar-${phase}`;
 }
 
 function generateMoonEvent(phase: MoonPhase, timestamp: string): string {
@@ -32,7 +39,7 @@ function generateMoonEvent(phase: MoonPhase, timestamp: string): string {
   const emoji = phaseEmoji(phase.phase);
 
   return buildVEvent({
-    uid: `moon-${phase.phase}-${dateStr}@moon-phase-calendar`,
+    uid: `${lunarUidSegment(phase.phase)}-${dateStr}@calendar-astronomy`,
     dtstamp: timestamp,
     dtstart: dateStr,
     summary: escapeICS(`${emoji} ${name}`),
@@ -46,7 +53,7 @@ function generateSolarEvent(event: SolarEvent, timestamp: string): string {
   const dateStr = formatICSDateValue(event.date);
 
   return buildVEvent({
-    uid: `solar-${event.event}-${dateStr}@moon-phase-calendar`,
+    uid: `solar-${event.event}-${dateStr}@calendar-astronomy`,
     dtstamp: timestamp,
     dtstart: dateStr,
     summary: escapeICS(`${event.emoji} ${event.name}`),

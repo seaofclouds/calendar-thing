@@ -23,7 +23,7 @@ const plugin: FeedPlugin & { fixture: string } = {
   name: "Astrology",
   binding: "ASTROLOGY",
   endpoint: "/feeds/astrology.ics",
-  prodUrl: "https://astrology-calendar.seaofclouds.workers.dev",
+  prodUrl: "https://calendar-astrology.seaofclouds.workers.dev",
   category: "astrology",
   renderMode: "event-list",
   fixture,
