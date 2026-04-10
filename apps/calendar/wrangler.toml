@@ -6,6 +6,10 @@ preview_urls = true
 [assets]
 directory = "./public"
 
+# Resolve workspace packages for wrangler's bundler
+[alias]
+"@calendar-feeds/feeds" = "../../packages/feeds/src/index.ts"
+
 # Allow importing .ics files as text modules (for fixture data)
 [[rules]]
 type = "Text"

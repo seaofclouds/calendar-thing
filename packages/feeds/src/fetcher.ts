@@ -25,6 +25,21 @@ export async function fetchFeedEvents(
   return events;
 }
 
+export async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      const ics = await response.text();
+      return parseICS(ics, "external");
+    }
+  } catch {
+    // external feed unavailable
+  }
+  return [];
+}
+
 async function fetchRaw(
   feed: FeedPlugin,
   env: Record<string, unknown>,
