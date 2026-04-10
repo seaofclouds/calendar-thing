@@ -242,7 +242,14 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
   }
 
   // Proxy to service binding (internal hostname bypasses feed worker auth)
+  // For fixture-only feeds (e.g. busd), serve fixture data directly
   if (!feed.binding) {
+    if (feed.fixture) {
+      return new Response(feed.fixture, {
+        status: 200,
+        headers: { "Content-Type": "text/calendar; charset=utf-8" },
+      });
+    }
     return new Response("Service Unavailable", { status: 503 });
   }
   const binding = env[feed.binding] as Fetcher | undefined;
