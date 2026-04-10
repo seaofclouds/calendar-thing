@@ -10,6 +10,9 @@ importers:
 
   apps/calendar:
     dependencies:
+      '@calendar-feeds/feeds':
+        specifier: workspace:*
+        version: link:../../packages/feeds
       '@calendar-feeds/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -77,6 +80,19 @@ importers:
       wrangler:
         specifier: ^4.81.0
         version: 4.81.0(@cloudflare/workers-types@4.20260408.1)
+
+  packages/feeds:
+    dependencies:
+      '@calendar-feeds/shared':
+        specifier: workspace:*
+        version: link:../../shared
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20241127.0
+        version: 4.20260408.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
 
   shared:
     devDependencies:

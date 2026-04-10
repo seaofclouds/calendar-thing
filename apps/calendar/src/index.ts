@@ -6,12 +6,28 @@
 
 import { renderCalendar } from "./render";
 import { renderMonthView } from "./render-month";
-import { parseICS } from "./parse-ics";
-import { getAllFeeds } from "./feed-loader";
-import { fetchFeedEvents } from "./feed-fetcher";
-import { parseIncludeParam, isFeedEnabled, getActiveTokens } from "./include";
-import type { IncludeState } from "./include";
+import {
+  createFeedRegistry,
+  fetchFeedEvents,
+  fetchExternalFeed,
+  parseIncludeParam,
+  isFeedEnabled,
+  getActiveTokens,
+  type IncludeState,
+} from "@calendar-feeds/feeds";
 import type { CalendarEvent } from "@calendar-feeds/shared";
+import astronomyPlugin from "../../../feeds/astronomy/feed.plugin";
+import { theatrical, digital } from "../../../feeds/movies/feed.plugin";
+import busdPlugin from "../../../feeds/busd/feed.plugin";
+import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
+
+const registry = createFeedRegistry([
+  astronomyPlugin,
+  theatrical,
+  digital,
+  busdPlugin,
+  astrologyPlugin,
+]);
 
 interface Env {
   ASTRONOMY: Fetcher;
@@ -63,10 +79,10 @@ export default {
     // Fetch all enabled feed events in parallel
     const token = env.CALENDAR_TOKEN;
     const feedUrls = url.searchParams.getAll("feed");
-    const registry = getAllFeeds();
+    const allFeeds = registry.getAll();
 
     const feedResults = await Promise.all([
-      ...registry
+      ...allFeeds
         .filter((feed) => isFeedEnabled(params.include, feed.id))
         .map((feed) =>
           fetchFeedEvents(feed, env, token, getActiveTokens(params.include, feed.id))
@@ -77,7 +93,7 @@ export default {
 
     // Split by render mode: day-markers vs event-list
     const markerIds = new Set(
-      registry.filter((f) => f.renderMode === "day-marker").map((f) => f.category),
+      allFeeds.filter((f) => f.renderMode === "day-marker").map((f) => f.category),
     );
     const markers = allEvents.filter((e) => markerIds.has(e.category));
     const events = allEvents.filter((e) => !markerIds.has(e.category));
@@ -137,7 +153,7 @@ function parseCalendarURL(
     : undefined;
   const header = searchParams.get("header") !== "false";
   const testing = searchParams.get("test") === "true";
-  const include = parseIncludeParam(searchParams.get("include"), getAllFeeds());
+  const include = parseIncludeParam(searchParams.get("include"), registry.getAll());
   const borders = searchParams.get("borders") !== "false"; // default true
 
   // Parse format/DPI, size, and orientation from remaining segments
@@ -214,7 +230,7 @@ function parseFormatSegment(
 async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Response> {
   // Derive route from feed registry: /feeds/{id}.ics → plugin.binding + plugin.endpoint
   const match = path.match(/^\/feeds\/([^/]+)\.ics$/);
-  const feed = match ? getAllFeeds().find((f) => f.id === match[1]) : undefined;
+  const feed = match ? registry.get(match[1]) : undefined;
   if (!feed) {
     return new Response("Not Found", { status: 404 });
   }
@@ -245,19 +261,4 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
     status: response.status,
     headers: response.headers,
   });
-}
-
-async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {
-  try {
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (response.ok) {
-      const ics = await response.text();
-      return parseICS(ics, "external");
-    }
-  } catch {
-    // external feed unavailable
-  }
-  return [];
 }
