@@ -1,29 +1,23 @@
-import type { FeedPlugin } from "@calendar-feeds/feed-types";
+import type { FeedPlugin } from "@calendar-feeds/shared";
 import astronomyPlugin from "../../../feeds/astronomy/feed.plugin";
-import { theatrical as movieTheatricalPlugin, digital as movieDigitalPlugin } from "../../../feeds/movies/feed.plugin";
+import { theatrical, digital } from "../../../feeds/movies/feed.plugin";
 import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
 
-export interface ResolvedFeed extends FeedPlugin {
-  fixture: string;
-}
+const plugins: FeedPlugin[] = [
+  astronomyPlugin,
+  theatrical,
+  digital,
+  busdPlugin,
+  astrologyPlugin,
+];
 
-const feeds = new Map<string, ResolvedFeed>();
+const feeds = new Map<string, FeedPlugin>(plugins.map((p) => [p.id, p]));
 
-function registerFeed(plugin: ResolvedFeed) {
-  feeds.set(plugin.id, plugin);
-}
-
-registerFeed(astronomyPlugin);
-registerFeed(movieTheatricalPlugin);
-registerFeed(movieDigitalPlugin);
-registerFeed(busdPlugin);
-registerFeed(astrologyPlugin);
-
-export function getFeed(id: string): ResolvedFeed | undefined {
+export function getFeed(id: string): FeedPlugin | undefined {
   return feeds.get(id);
 }
 
-export function getAllFeeds(): ResolvedFeed[] {
+export function getAllFeeds(): FeedPlugin[] {
   return Array.from(feeds.values());
 }

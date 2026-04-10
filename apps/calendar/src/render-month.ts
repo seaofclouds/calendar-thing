@@ -4,7 +4,7 @@
  * so that mini prev/next calendars and the main grid share one design system.
  */
 
-import type { CalendarEvent } from "@calendar-feeds/feed-types";
+import type { CalendarEvent } from "@calendar-feeds/shared";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",

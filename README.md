@@ -6,10 +6,7 @@ A monorepo of Cloudflare Workers that generate calendar feeds (ICS/JSON) and ren
 
 ```
 calendar-thing/                   # Monorepo root
-├── packages/
-│   ├── ics-utils/              # Shared ICS generation (RFC 5545)
-│   ├── worker-utils/           # Shared CF Worker patterns (auth, cache, response)
-│   └── feed-types/             # Shared TypeScript types & feed plugin interface
+├── shared/                     # Shared types, ICS helpers, worker utils, feed factory
 ├── feeds/
 │   ├── astrology/              # CF Worker — zodiac seasons (tropical astrology)
 │   ├── astronomy/              # CF Worker — lunar phases + solar events (Jean Meeus)
@@ -29,17 +26,20 @@ Each feed is an independent Cloudflare Worker serving ICS and JSON endpoints:
 - **astronomy** — Computes lunar phases (new, first quarter, full, last quarter) and solar events (equinoxes, solstices) using Jean Meeus' Astronomical Algorithms. No external APIs. Future: eclipses.
 - **movies** — Fetches theatrical and digital movie releases from the TMDB API with regional date filtering.
 
-Both feeds use token-based authentication and 24-hour edge caching.
+All feed workers use `createFeedWorker()` from `@calendar-feeds/shared` for consistent routing, token-based authentication, and 24-hour edge caching.
 
 ### Calendar App
 
-A Cloudflare Worker that renders printable year and month calendars as server-side HTML. Discovers feeds via a plugin system — each feed has a co-located `feed.plugin.ts` manifest defining its name, icons, include tokens, token aliases, and render mode. The calendar app imports these manifests through a loader (`feed-loader.ts`), fetches events via three-tier fallback (service binding → prod URL → fixture ICS), and splits them by `renderMode` for rendering. Includes client-side JS for responsive layout and image export (html-to-image).
+A Cloudflare Worker that renders printable year and month calendars as server-side HTML. Discovers feeds via a plugin system — each feed has a co-located `feed.plugin.ts` manifest defining its name, icons, include tokens, token aliases, and render mode. The calendar app imports these manifests through a loader (`feed-loader.ts`), fetches events via four-tier fallback (service binding → prod URL → source URL → fixture ICS), and splits them by `renderMode` for rendering. Includes client-side JS for responsive layout and image export (html-to-image).
 
-### Shared Packages
+### Shared Package (`@calendar-feeds/shared`)
 
-- **ics-utils** — `escapeICS()`, `formatICSTimestamp()`, `wrapVCalendar()`, `buildVEvent()`
-- **worker-utils** — `authenticateToken()`, `buildCacheKey()`, `withEdgeCache()`, response helpers
-- **feed-types** — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent`, `FeedPlugin`, `FeedRenderMode` TypeScript interfaces
+A single shared package providing types, ICS generation, worker utilities, and the feed worker factory:
+
+- **types** — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent`, `FeedPlugin`, `FeedRenderMode`
+- **ics** — `escapeICS()`, `formatICSTimestamp()`, `wrapVCalendar()`, `buildVEvent()`
+- **worker** — `authenticateToken()`, `buildCacheKey()`, `withEdgeCache()`, response helpers
+- **feed-worker** — `createFeedWorker()` factory for shared routing/auth/cache boilerplate
 
 ## Usage
 
@@ -161,23 +161,51 @@ The calendar app connects to feed workers via Cloudflare service bindings (decla
 | `MOVIE_RELEASE` | `calendar-movies` |
 | `ASTROLOGY` | `calendar-astrology` |
 
-**Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/astronomy.json?year=2026`) with no token. The `authenticateToken()` helper in `worker-utils` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
+**Auth bypass for internal calls:** Feed workers require `?token=CALENDAR_TOKEN` for external requests, but service binding calls use synthetic URLs (e.g. `https://internal/feeds/astronomy.json?year=2026`) with no token. The `authenticateToken()` helper in `@calendar-feeds/shared` detects `hostname === "internal"` and bypasses auth for these trusted internal requests. When adding a new feed worker, use the same `"internal"` hostname convention in service binding fetch calls and rely on `authenticateToken()` to handle it — no token plumbing needed.
 
 **Verifying data source:** The calendar app renders a `data-source` attribute on `<body>` showing `"service-binding"` or `"static-fallback:reason"` (e.g. `no-binding`, `status-401`, `error-...`). Check in DevTools to confirm the pipeline is active.
 
 ## Adding a New Feed
 
-1. Create `feeds/my-feed/` with a CF Worker serving ICS + JSON at `/feeds/{name}.ics` and `/feeds/{name}.json`
-2. Use `@calendar-feeds/ics-utils` and `@calendar-feeds/worker-utils`
-3. Create `feeds/my-feed/feed.plugin.ts` exporting a `FeedPlugin` manifest:
+### Worker feed (dynamic data)
+
+1. Create `feeds/my-feed/` with `src/index.ts` using `createFeedWorker()` from `@calendar-feeds/shared`:
+   ```typescript
+   import { createFeedWorker, icsResponse, jsonResponse } from "@calendar-feeds/shared";
+   export default createFeedWorker({
+     name: "My Feed",
+     cacheVersion: 1,
+     routes: [
+       { path: "/feeds/my-feed.ics", handler: async (request, env) => { /* ... */ } },
+       { path: "/feeds/my-feed.json", handler: async (request, env) => { /* ... */ } },
+     ],
+   });
+   ```
+2. Create `feeds/my-feed/feed.plugin.ts` exporting a `FeedPlugin` manifest:
    - `id` — slug for `?include=` param and feed proxy route (`/feeds/{id}.ics`)
+   - `binding` / `prodUrl` — service binding name and production worker URL
    - `renderMode` — `"event-list"` (text in day cells) or `"day-marker"` (icon replaces date number)
    - `icon` / `signIcons` — inline SVG icons
    - `includeTokens` / `defaultInclude` — sub-toggles and defaults
    - `tokenAliases` — shorthand aliases that expand to multiple tokens (e.g. `lunar:phases` → `[lunar:full, lunar:new, lunar:quarter]`)
    - `fixture` — imported ICS text for offline dev fallback
    - A single worker can export multiple plugins (e.g. movies exports `theatrical` and `digital`)
+3. Add `@calendar-feeds/shared` as a dependency in `feeds/my-feed/package.json`
 4. Register the plugin in `apps/calendar/src/feed-loader.ts`
 5. Add a service binding in `apps/calendar/wrangler.toml`
 6. Add a deploy job to `.github/workflows/deploy.yml`
 7. The feed proxy route (`/feeds/{id}.ics`) is created automatically from the plugin registry
+
+### Fixture-only feed (static ICS)
+
+1. Create `feeds/my-feed/` with just `feed.plugin.ts` and `fixtures/my-feed.ics`
+2. In `feed.plugin.ts`, import the fixture and set `fixture` — no `binding` or `prodUrl` needed
+3. Register the plugin in `apps/calendar/src/feed-loader.ts`
+4. No wrangler config, no deploy job — the fixture is bundled into the calendar app
+
+### External URL feed (remote ICS)
+
+1. Create `feeds/my-feed/feed.plugin.ts` with `sourceUrl` pointing to the remote ICS URL
+2. Optionally include a `fixture` for offline fallback
+3. Register the plugin in `apps/calendar/src/feed-loader.ts`
+4. No worker or service binding needed — the calendar app fetches the URL directly

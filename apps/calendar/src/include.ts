@@ -1,10 +1,10 @@
-import type { ResolvedFeed } from "./feed-loader";
+import type { FeedPlugin } from "@calendar-feeds/shared";
 
 export type IncludeState = Record<string, Set<string>>;
 
 export function parseIncludeParam(
   value: string | null,
-  registry: ResolvedFeed[],
+  registry: FeedPlugin[],
 ): IncludeState {
   const state: IncludeState = {};
 
@@ -45,7 +45,7 @@ export function getActiveTokens(state: IncludeState, feedId: string): Set<string
   return state[feedId] ?? new Set();
 }
 
-function expandAliases(tokens: string[], registry: ResolvedFeed[]): string[] {
+function expandAliases(tokens: string[], registry: FeedPlugin[]): string[] {
   const aliasMap = new Map<string, string[]>();
   for (const feed of registry) {
     if (feed.tokenAliases) {

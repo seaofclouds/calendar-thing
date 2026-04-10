@@ -1,12 +1,10 @@
-import type { FeedPlugin } from "../../packages/feed-types/src/types";
+import type { FeedPlugin } from "../../shared/src/types";
 import fixture from "./fixtures/busd-2025-2026.ics";
 
-const plugin: FeedPlugin & { fixture: string } = {
+const plugin: FeedPlugin = {
   id: "busd",
   name: "BUSD School Calendar",
-  binding: "BUSD",
   endpoint: "/feeds/busd.ics",
-  prodUrl: "",
   category: "school",
   renderMode: "event-list",
   fixture,

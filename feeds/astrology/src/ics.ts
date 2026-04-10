@@ -8,7 +8,7 @@ import {
   formatICSDateValue,
   wrapVCalendar,
   buildVEvent,
-} from "@calendar-feeds/ics-utils";
+} from "@calendar-feeds/shared";
 import type { ZodiacEvent } from "./zodiac";
 import { formatSeasonRange } from "./zodiac";
 

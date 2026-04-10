@@ -11,7 +11,7 @@ import { getAllFeeds } from "./feed-loader";
 import { fetchFeedEvents } from "./feed-fetcher";
 import { parseIncludeParam, isFeedEnabled, getActiveTokens } from "./include";
 import type { IncludeState } from "./include";
-import type { CalendarEvent } from "@calendar-feeds/feed-types";
+import type { CalendarEvent } from "@calendar-feeds/shared";
 
 interface Env {
   ASTRONOMY: Fetcher;
@@ -226,6 +226,9 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
   }
 
   // Proxy to service binding (internal hostname bypasses feed worker auth)
+  if (!feed.binding) {
+    return new Response("Service Unavailable", { status: 503 });
+  }
   const binding = env[feed.binding] as Fetcher | undefined;
   if (!binding) {
     return new Response("Service Unavailable", { status: 503 });

@@ -1,6 +1,6 @@
 /**
  * ICS (iCalendar) generator for movie releases.
- * Uses shared @calendar-feeds/ics-utils for common ICS operations.
+ * Uses shared @calendar-feeds/shared for common ICS operations.
  */
 
 import {
@@ -10,7 +10,7 @@ import {
   formatICSDateValue,
   wrapVCalendar,
   buildVEvent,
-} from "@calendar-feeds/ics-utils";
+} from "@calendar-feeds/shared";
 import type { MovieWithRelease } from "./tmdb";
 
 export function generateICS(movies: MovieWithRelease[], calendarName: string): string {

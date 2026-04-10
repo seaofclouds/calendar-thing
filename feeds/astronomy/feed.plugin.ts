@@ -1,7 +1,7 @@
-import type { FeedPlugin } from "../../packages/feed-types/src/types";
+import type { FeedPlugin } from "../../shared/src/types";
 import fixture from "./fixtures/astronomy.ics";
 
-const plugin: FeedPlugin & { fixture: string } = {
+const plugin: FeedPlugin = {
   id: "astronomy",
   name: "Moon Phases & Solar Events",
   binding: "ASTRONOMY",

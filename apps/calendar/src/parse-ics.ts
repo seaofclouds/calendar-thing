@@ -4,7 +4,7 @@
  * our feed workers and most external calendar feeds.
  */
 
-import type { CalendarEvent } from "@calendar-feeds/feed-types";
+import type { CalendarEvent } from "@calendar-feeds/shared";
 
 export function parseICS(ics: string, category = "event"): CalendarEvent[] {
   const events: CalendarEvent[] = [];
