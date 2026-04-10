@@ -1,43 +1,10 @@
 /* ===================
-   Root / Global Styles 
-   =================== */
-
-/* Ensure full height cascade starts from the root */
-html {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  /* Base font size for the document - all rems will reference this */
-  font-size: 16px;
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-}
-
-.calendar h1,
-.calendar h2,
-.calendar h3 {
-  margin: 0;
-  padding: 0;
-  line-height: inherit;
-  font-weight: normal;
-  line-height: 1em;
-}
-
-/* ===================
-   Layout Containers 
+   Layout Containers
    =================== */
 body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
   display: flex;
   min-width: 320px;
   min-height: 100vh;
-  background: white;
 }
 
 #root {
@@ -50,10 +17,10 @@ body {
 }
 
 /* ===================
-   Calendar Container & Main Structure
+   Year View — Main Structure
    =================== */
 
-.calendar {
+.year-view {
   width: 100%;
   height: 100%; /* Inherit full height from #root */
   display: flex;
@@ -65,7 +32,15 @@ body {
   font-size: 1rem;
 }
 
-.calendar-header {
+.year-view h1,
+.year-view h2,
+.year-view h3 {
+  line-height: inherit;
+  font-weight: normal;
+  line-height: 1em;
+}
+
+.view-header {
   width: 100%;
   display: flex;
   align-items: center;
@@ -73,10 +48,10 @@ body {
   position: relative;
 }
 
-.calendar-header h1 {
+.view-header h1 {
   /* Scale relative to calendar container */
-  font-size: 3.6em;
-  font-weight: 100;
+  font-size: var(--font-size-view-title);
+  font-weight: var(--font-weight-thin);
   text-align: center;
   padding-bottom: .8em;
 }
@@ -96,7 +71,7 @@ body {
 .year-nav.next { right: 0; }
 
 /* Year title link */
-.calendar-header h1 a {
+.view-header h1 a {
   color: inherit;
   text-decoration: none;
 }
@@ -109,10 +84,10 @@ body {
 }
 
 .month-link:hover .month-header h2 {
-  color: #c00;
+  color: var(--color-accent);
 }
 
-.calendar-grid {
+.year-grid {
   width: 100%;
   flex: 1; /* Allow grid to grow but not take full height */
   display: grid;
@@ -143,22 +118,22 @@ body {
 
 .month-header h2 {
   /* Scale relative to month container */
-  font-size: 1.8em;
-  font-weight: 200;
-  color: #000;
+  font-size: var(--font-size-month-name);
+  font-weight: var(--font-weight-light);
+  color: var(--color-text);
   padding-bottom: .2em;
 }
 
-.week-days {
+.weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
   /* Scale relative to month container */
-  font-size: 0.6em;
-  color: #000;
+  font-size: var(--font-size-weekday-label);
+  color: var(--color-text);
 }
-.week-days h3 {
-  font-weight: 600;
+.weekdays .weekday {
+  font-weight: var(--font-weight-medium);
 }
 
 .month-grid {
@@ -172,8 +147,8 @@ body {
 /* ===================
    Day Components & Markers
    =================== */
-   
-.calendar-day {
+
+.day {
   position: relative;
   display: flex;
   align-items: center;
@@ -183,8 +158,8 @@ body {
   font-size: clamp(0.6em, 4vmin, 1em);
 }
 
-.calendar-day.other-month {
-  color: #fff;
+.year-view .day.other-month {
+  color: var(--color-bg);
 }
 
 /* Day markers - base styles */
@@ -217,7 +192,7 @@ body {
 /* ===================
    Print Styles
    =================== */
-.calendar-print-container {
+.print-container {
   width: 100%;
   height: 100%;
   position: relative;
@@ -227,7 +202,7 @@ body {
   font-size: 1rem;
 }
 
-.calendar.print {
+.year-view.print {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -237,7 +212,7 @@ body {
   font-size: inherit;
 }
 
-.calendar.print .calendar-grid {
+.year-view.print .year-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(var(--print-columns, 3), minmax(0, 1fr));
@@ -246,17 +221,17 @@ body {
   box-sizing: border-box;
 }
 
-.calendar.print .month {
+.year-view.print .month {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
 }
 
-.calendar.print .month-header {
+.year-view.print .month-header {
   padding: 0;
 }
 
-.calendar.print .month-grid {
+.year-view.print .month-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -264,13 +239,13 @@ body {
   height: 100%; /* Take full height */
 }
 
-.calendar.print .week-days {
+.year-view.print .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   font-size: 0.8em;
 }
 
-.calendar.print .calendar-day {
+.year-view.print .day {
   position: relative;
   display: flex;
   align-items: center;
@@ -279,17 +254,17 @@ body {
   box-sizing: border-box;
 }
 
-.calendar.print .day-marker {
+.year-view.print .day-marker {
   position: absolute;
 }
 
-.calendar.print .day-marker-moon {
+.year-view.print .day-marker-moon {
   width: 1em;
   height: 1em;
 }
 
-.calendar.print .day-marker-solstice,
-.calendar.print .day-marker-equinox {
+.year-view.print .day-marker-solstice,
+.year-view.print .day-marker-equinox {
   width: 0.9em;
   height: 0.9em;
   top: 50%;
@@ -361,74 +336,61 @@ body {
 }
 
 /* A6 styles */
-.size-a6 .calendar.print {
+.size-a6 .year-view.print {
   font-size: 0.5rem;
   padding: 1.5em;
 }
 
-.size-a6 .calendar.print .calendar-grid {
+.size-a6 .year-view.print .year-grid {
   gap: 1em 2em;
 }
 
-.size-a6 .calendar.print .calendar-header {
+.size-a6 .year-view.print .view-header {
   margin-bottom: 1em;
 }
 
-.size-a6 .calendar.print .calendar-header h1 {
+.size-a6 .year-view.print .view-header h1 {
   font-size: 2.5em;
 }
 
 /* A5 styles */
-.size-a5 .calendar.print {
+.size-a5 .year-view.print {
   font-size: 0.6rem;
   padding: 3em;
 }
 
-.size-a5 .calendar.print .calendar-grid {
+.size-a5 .year-view.print .year-grid {
   gap: 1.5em 3em;
 }
 
-.size-a5.orientation-landscape .calendar.print .calendar-grid {
+.size-a5.orientation-landscape .year-view.print .year-grid {
   gap: 2em 2.6em;
 }
 
 /* A4/Letter styles */
-.size-a4 .calendar.print,
-.size-letter .calendar.print {
+.size-a4 .year-view.print,
+.size-letter .year-view.print {
   font-size: 0.8rem;
   padding: 4em;
 }
 
-.size-a4 .calendar.print .calendar-grid,
-.size-letter .calendar.print .calendar-grid {
+.size-a4 .year-view.print .year-grid,
+.size-letter .year-view.print .year-grid {
   gap: 2em 4em;
 }
 
-.size-a4.orientation-landscape .calendar.print .calendar-grid,
-.size-letter.orientation-landscape .calendar.print .calendar-grid {
+.size-a4.orientation-landscape .year-view.print .year-grid,
+.size-letter.orientation-landscape .year-view.print .year-grid {
   gap: 3em 3.5em;
 }
 
 /* Additional print-specific styles */
-.calendar.print .calendar-header h1 {
+.year-view.print .view-header h1 {
   padding-bottom: 1em;
 }
 
-.calendar.print .month-header {
+.year-view.print .month-header {
   padding: 0;
-}
-
-.calendar.print .month-grid {
-  grid-template-rows: repeat(6, 1fr);
-}
-
-.calendar.print .calendar-day {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  box-sizing: border-box;
 }
 
 /* legal ========= */
@@ -437,24 +399,21 @@ body {
   font-size: .8rem;
   padding: 4em;
 }
-.size-legal.orientation-landscape .print .calendar-header h1 {
+.size-legal.orientation-landscape .print .view-header h1 {
   padding-bottom: .8em;
 }
-.size-legal.orientation-portrait .print .calendar-header h1 {
+.size-legal.orientation-portrait .print .view-header h1 {
   font-size: 4em;
-  font-weight: 25;
+  font-weight: var(--font-weight-thin);
   padding-bottom: 1em;
 }
-.size-legal .print .calendar-grid{
-  gap: 1.5em;
-}
-.size-legal .print .calendar-grid{
+.size-legal .print .year-grid {
   gap: 3em 4em;
 }
 .size-legal .print .month .month-header h2 {
   padding-bottom: .5em;
-  font-size: 1.5em;
-  font-weight: 200;
+  font-size: var(--font-size-month-name);
+  font-weight: var(--font-weight-light);
 }
 
 /* tabloid ========= */
@@ -463,17 +422,14 @@ body {
   font-size: 1rem;
   padding: 6em;
 }
-.size-tabloid.orientation-landscape .print .calendar-header h1 {
+.size-tabloid.orientation-landscape .print .view-header h1 {
   padding-bottom: .8em;
 }
-.size-tabloid.orientation-portrait .print .calendar-header h1 {
+.size-tabloid.orientation-portrait .print .view-header h1 {
   font-size: 4em;
-  font-weight: 25;
+  font-weight: var(--font-weight-thin);
 }
-.size-tabloid .print .calendar-grid {
-  gap: 1.5em;
-}
-.size-tabloid .print .calendar-grid {
+.size-tabloid .print .year-grid {
   gap: 3em 4em;
 }
 .size-tabloid .print .month .month-header h2 {
@@ -486,29 +442,29 @@ body {
    =================== */
 
 @media screen and (min-width: 600px) {
-  .calendar:not(.print) {
+  .year-view:not(.print) {
     padding: 1.5em;
   }
-  
-  .calendar:not(.print) .calendar-grid {
+
+  .year-view:not(.print) .year-grid {
     gap: 2rem;
     grid-template-columns: repeat(2, minmax(200px, 1fr));
   }
 }
 
 @media screen and (min-width: 900px) {
-  .calendar:not(.print) .calendar-grid {
+  .year-view:not(.print) .year-grid {
     gap: 2.5em;
     grid-template-columns: repeat(3, minmax(200px, 1fr));
   }
 }
 
 @media screen and (min-width: 1200px) {
-  .calendar:not(.print) {
+  .year-view:not(.print) {
     padding: 2em;
   }
-  
-  .calendar:not(.print) .calendar-grid {
+
+  .year-view:not(.print) .year-grid {
     gap: 2em;
     grid-template-columns: repeat(4, minmax(200px, 1fr));
   }
@@ -518,10 +474,10 @@ body {
    Today Highlight (screen only)
    =================== */
 
-.calendar:not(.print) .calendar-day.today .date,
-.month-view:not(.print) .month-day.today .month-day-number {
+.year-view:not(.print) .day.today .date,
+.month-view:not(.print) .day.today .day-number {
   font-weight: bold;
-  color: #c00;
+  color: var(--color-accent);
 }
 
 .date-leading-zero {
@@ -542,9 +498,9 @@ body {
   font-size: 1rem;
 }
 
-/* h1 reset handled by .month-view-title */
+/* h1 reset handled by .view-title */
 
-.month-view-header {
+.month-view .view-header {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 5fr 1fr;
@@ -569,102 +525,103 @@ body {
 .month-nav.next { right: 0; }
 
 /* Align mini calendars with the first and last day columns */
-.month-view-nav .mini-calendar {
+.view-nav .month.mini {
   width: 100%;
 }
 
-.month-view-title {
+.view-title {
   text-align: center;
-  font-size: 3.6em;
-  font-weight: 100;
+  font-size: var(--font-size-view-title);
+  font-weight: var(--font-weight-thin);
   margin: 0;
   padding: 0 0 0.5em 0;
   line-height: 1;
 }
 
-.month-view-title a {
+.view-title a {
   color: inherit;
   text-decoration: none;
 }
 
-.month-view-nav {
+.view-nav {
   display: flex;
   align-items: flex-start;
 }
 
-.month-view-nav:last-child {
+.view-nav:last-child {
   justify-content: flex-end;
 }
 
 /* Mini calendars: clickable links to prev/next month */
-.mini-calendar {
+.month.mini {
   text-decoration: none;
   color: inherit;
   display: block;
 }
 
-/* Mini calendar — single flat 7-column grid */
-.mini-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  font-size: 0.7em;
-  text-align: center;
+/* Mini calendar — grid font-size */
+.month.mini .month-grid {
+  font-size: var(--font-size-mini-grid);
 }
 
-.mini-title {
-  grid-column: 1 / -1;
-  font-weight: 500;
+.month.mini .month-header h2 {
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #000;
-  font-size: 1.1em;
+  color: var(--color-text);
+  font-size: var(--font-size-mini-title);
   line-height: 1;
   padding-bottom: 0.4em;
 }
 
-.mini-weekday {
-  font-weight: 500;
-  color: #000;
+.month.mini .weekdays {
+  font-size: 1em;
+}
+
+.month.mini .weekdays .weekday {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
   line-height: 1.7;
 }
 
-.mini-grid .calendar-day {
+.month.mini .day {
   padding: 0;
   font-size: 1em;
   line-height: 1.7;
 }
 
-.mini-grid .day-marker-moon {
+.month.mini .day-marker-moon {
   width: 0.8em;
   height: 0.8em;
 }
 
-.mini-grid .day-marker-solstice,
-.mini-grid .day-marker-equinox {
+.month.mini .day-marker-solstice,
+.month.mini .day-marker-equinox {
   width: 0.5em;
   height: 0.5em;
 }
 
 /* Main month grid */
-.month-view-grid {
+.month-expanded {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.month-view-daynames {
+.month-expanded > .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  font-size: 1em;
 }
 
-.month-view-dayname {
+.month-expanded > .weekdays .weekday {
   padding: 0.4em 0.5em;
   text-align: left;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: 0.85em;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #000;
+  color: var(--color-text);
   min-width: 0;
   overflow: hidden;
 }
@@ -677,60 +634,60 @@ body {
   display: inline;
 }
 
-.month-view-days {
+.month-days {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
 }
 
-/* Borders: top + right on day cells; dayname bottom + right as header separator */
-.month-view.borders .month-view-dayname {
-  border-bottom: 1px solid #aaa;
-  border-right: 1px solid #aaa;
+/* Borders: top + right on day cells; weekday bottom + right as header separator */
+.month-view.borders .month-expanded > .weekdays .weekday {
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
 }
 
-.month-view.borders .month-view-dayname:last-child {
+.month-view.borders .month-expanded > .weekdays .weekday:last-child {
   border-right: none;
 }
 
-.month-view.borders .month-day {
-  border-top: 1px solid #aaa;
-  border-right: 1px solid #aaa;
+.month-view.borders .month-days .day {
+  border-top: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
 }
 
-/* First row of days: no top border (dayname bottom is the separator) */
-.month-view.borders .month-day:nth-child(-n+7) {
+/* First row of days: no top border (weekday bottom is the separator) */
+.month-view.borders .month-days .day:nth-child(-n+7) {
   border-top: none;
 }
 
 /* Last column: no right border */
-.month-view.borders .month-day:nth-child(7n) {
+.month-view.borders .month-days .day:nth-child(7n) {
   border-right: none;
 }
 
 /* Rows with current-month days: dark top borders */
-.month-view.borders .month-day.current-row {
-  border-top-color: #aaa;
+.month-view.borders .month-days .day.current-row {
+  border-top-color: var(--color-border);
 }
 
 /* Rows that are all other-month: light top borders */
-.month-view.borders .month-day:not(.current-row) {
-  border-top-color: #e0e0e0;
+.month-view.borders .month-days .day:not(.current-row) {
+  border-top-color: var(--color-border-light);
 }
 
 /* Right borders: current-month = dark, other-month = light */
-.month-view.borders .month-day.other-month {
-  border-right-color: #e0e0e0;
+.month-view.borders .month-days .day.other-month {
+  border-right-color: var(--color-border-light);
 }
 
 /* Dark border between other-month and current-month cells */
-.month-view.borders .month-day.other-month:has(+ .month-day:not(.other-month)) {
-  border-right-color: #aaa;
+.month-view.borders .month-days .day.other-month:has(+ .day:not(.other-month)) {
+  border-right-color: var(--color-border);
 }
 
-/* Day cells */
-.month-day {
+/* Day cells in month-view expanded grid */
+.month-days .day {
   display: flex;
   flex-direction: column;
   padding: 0.3em 0.4em;
@@ -740,39 +697,39 @@ body {
   overflow: hidden;
 }
 
-.month-day.other-month {
-  color: #ccc;
+.month-days .day.other-month {
+  color: var(--color-muted);
 }
 
-.month-day.other-month .day-marker-moon {
+.month-days .day.other-month .day-marker-moon {
   opacity: 0.25;
 }
 
-.month-day.other-month .day-marker-solstice,
-.month-day.other-month .day-marker-equinox {
+.month-days .day.other-month .day-marker-solstice,
+.month-days .day.other-month .day-marker-equinox {
   opacity: 0.25;
 }
 
-.month-day-header {
+.day-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.2em;
 }
 
-.month-day-number {
-  font-size: 1.1em;
-  font-weight: 300;
+.day-number {
+  font-size: var(--font-size-day-number);
+  font-weight: var(--font-weight-book);
 }
 
 /* Moon/solar icons in month view — right-aligned */
-.month-day-header .day-marker-moon {
+.day-header .day-marker-moon {
   width: 1em;
   height: 1em;
 }
 
-.month-day-header .day-marker-solstice,
-.month-day-header .day-marker-equinox {
+.day-header .day-marker-solstice,
+.day-header .day-marker-equinox {
   width: 0.7em;
   height: 0.7em;
   transform: rotate(45deg);
@@ -780,10 +737,16 @@ body {
 }
 
 /* Events — left aligned, wrapping with hanging indent */
-.month-day-event {
-  font-size: 0.75em;
+.day-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.event {
+  font-size: var(--font-size-event);
   line-height: 1.3;
-  color: #000;
+  color: var(--color-text);
   text-align: left;
   margin-bottom: 0.3em;
   text-wrap: balance;
@@ -802,18 +765,18 @@ body {
 }
 
 /* Month view print */
-.month-view.print .month-day.today .month-day-number {
-  font-weight: 300;
+.month-view.print .day.today .day-number {
+  font-weight: var(--font-weight-book);
   color: inherit;
 }
 
 /* Month view responsive */
 @media screen and (max-width: 600px) {
-  .month-view:not(.print) .mini-calendar {
+  .month-view:not(.print) .month.mini {
     display: none;
   }
 
-  .month-view:not(.print) .month-view-title {
+  .month-view:not(.print) .view-title {
     font-size: 2em;
   }
 
@@ -821,7 +784,7 @@ body {
     padding: 0.5em;
   }
 
-  .month-view:not(.print) .month-view-daynames {
+  .month-view:not(.print) .month-expanded > .weekdays {
     grid-template-columns: repeat(7, 1fr);
   }
 
@@ -833,17 +796,17 @@ body {
     display: inline;
   }
 
-  .month-view:not(.print) .month-view-dayname {
+  .month-view:not(.print) .month-expanded > .weekdays .weekday {
     font-size: 0.75em;
     padding: 0.3em 0.2em;
     letter-spacing: 0;
   }
 
-  .month-view:not(.print) .month-view-days {
+  .month-view:not(.print) .month-days {
     grid-template-columns: repeat(7, 1fr);
   }
 
-  .month-day {
+  .month-days .day {
     min-height: 3em;
     padding: 0.2em;
   }
@@ -852,24 +815,24 @@ body {
     display: block;
   }
 
-  .month-view:not(.print) .month-day-event {
+  .month-view:not(.print) .event {
     font-size: 0;
     line-height: 0;
     margin-bottom: 0.15em;
     gap: 0;
   }
 
-  .month-view:not(.print) .month-day-event::before {
+  .month-view:not(.print) .event::before {
     content: "";
     display: inline-block;
     width: 0.35em;
     height: 0.35em;
     border-radius: 50%;
-    background: #888;
+    background: var(--color-muted);
     flex-shrink: 0;
   }
 
-  .month-view:not(.print) .month-day-event .event-icon {
+  .month-view:not(.print) .event .event-icon {
     display: none;
   }
 }
@@ -879,7 +842,7 @@ body {
     padding: 1.5em 2em;
   }
 
-  .month-day {
+  .month-days .day {
     min-height: 5em;
   }
 }

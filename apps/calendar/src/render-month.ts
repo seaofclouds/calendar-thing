@@ -1,6 +1,6 @@
 /**
  * Month view renderer.
- * Reuses the same HTML structure as the year view (.month, .month-grid, .calendar-day)
+ * Reuses the same HTML structure as the year view (.month, .month-grid, .day)
  * so that mini prev/next calendars and the main grid share one design system.
  */
 
@@ -102,56 +102,56 @@ export function renderMonthView(opts: MonthViewOptions): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${MONTH_NAMES[monthIndex]} ${opts.year}</title>
+  <link rel="stylesheet" href="/base.css">
   <link rel="stylesheet" href="/styles.css">
   <script src="/client.js" type="module" defer></script>
 </head>
 <body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
   <div id="root" class="${rootClasses}">
-    <div class="${containerClasses}"${dataAttrs}>
-      <div class="month-view-header">
+    <main class="${containerClasses}"${dataAttrs}>
+      <header class="view-header">
         <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>
-        <div class="month-view-nav">
-          <a href="${prevUrl}" class="mini-calendar" aria-label="Previous month: ${MONTH_NAMES[prev.month]}">
+        <nav class="view-nav">
+          <a href="${prevUrl}" class="month mini" aria-label="Previous month: ${MONTH_NAMES[prev.month]}">
 ${renderMiniMonth(MONTH_NAMES[prev.month] + (prev.year !== opts.year ? ` ${prev.year}` : ""), prevMiniWeeks)}
           </a>
-        </div>
-        <h1 class="month-view-title"><a href="${yearUrl}">${MONTH_NAMES[monthIndex]}</a></h1>
-        <div class="month-view-nav">
-          <a href="${nextUrl}" class="mini-calendar" aria-label="Next month: ${MONTH_NAMES[next.month]}">
+        </nav>
+        <h1 class="view-title"><a href="${yearUrl}">${MONTH_NAMES[monthIndex]}</a></h1>
+        <nav class="view-nav">
+          <a href="${nextUrl}" class="month mini" aria-label="Next month: ${MONTH_NAMES[next.month]}">
 ${renderMiniMonth(MONTH_NAMES[next.month] + (next.year !== opts.year ? ` ${next.year}` : ""), nextMiniWeeks)}
           </a>
-        </div>
+        </nav>
         <a href="${nextUrl}" class="month-nav next" aria-label="Next month: ${MONTH_NAMES[next.month]}"></a>
-      </div>
-      <div class="month-view-grid">
-        <div class="month-view-daynames">
-${FULL_DAY_NAMES.map((d, i) => `          <div class="month-view-dayname"><span class="dayname-full">${d}</span><span class="dayname-short">${SHORT_DAY_NAMES[i]}</span></div>`).join("\n")}
+      </header>
+      <section class="month-expanded">
+        <div class="weekdays">
+${FULL_DAY_NAMES.map((d, i) => `          <div class="weekday"><span class="dayname-full">${d}</span><span class="dayname-short">${SHORT_DAY_NAMES[i]}</span></div>`).join("\n")}
         </div>
-        <div class="month-view-days">
+        <section class="month-days">
 ${renderWeeks(weeks)}
-        </div>
-      </div>
-    </div>
+        </section>
+      </section>
+    </main>
   </div>
 </body>
 </html>`;
 }
 
-/** Renders a mini calendar as a single flat 7-column grid */
+/** Renders a mini calendar using the shared .month component markup */
 function renderMiniMonth(title: string, weeks: DayData[][]): string {
-  const titleCell = `<div class="mini-title">${title}</div>`;
-  const weekdayCells = WEEK_DAYS.map((d) => `<div class="mini-weekday">${d}</div>`).join("");
-  const dayCells = weeks.flat().map(renderDay).join("");
-  return `            <div class="mini-grid">
-              ${titleCell}
-              ${weekdayCells}
-              ${dayCells}
-            </div>`;
+  return `            <header class="month-header"><h2>${title}</h2></header>
+            <div class="weekdays">
+              ${WEEK_DAYS.map((d) => `<span class="weekday">${d}</span>`).join("")}
+            </div>
+            <section class="month-grid">
+              ${weeks.map((week) => `<div class="week">${week.map(renderDay).join("")}</div>`).join("\n              ")}
+            </section>`;
 }
 
 /** Year-view style day cell (used in mini calendars) */
 function renderDay(day: DayData): string {
-  const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
+  const classes = `day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
 
   let content: string;
   if (!day.currentMonth) {
@@ -181,34 +181,37 @@ function renderWeeks(weeks: DayData[][]): string {
 /** Main month grid day cell — with event markers right-aligned */
 function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
   const classes = [
-    "month-day",
+    "day",
     !day.currentMonth ? "other-month" : "",
     day.isToday ? "today" : "",
     rowHasCurrent ? "current-row" : "",
   ].filter(Boolean).join(" ");
 
-  const dayNum = `<span class="month-day-number">${day.date}</span>`;
+  const dayNum = `<span class="day-number">${day.date}</span>`;
 
   // Right-aligned indicator (day-marker events like moon phase or solar event)
   const indicator = day.marker?.emoji ?? "";
 
   // Event text (left-aligned, max 3)
-  const eventHtml = (day.events ?? [])
+  const eventItems = (day.events ?? [])
     .slice(0, 3)
     .map((e) => {
       const icon = e.emoji ?? "";
       const text = escapeHtml(e.summary);
-      return `<span class="month-day-event" title="${escapeAttr(e.summary)}">${icon}${text}</span>`;
+      return `<li class="event" title="${escapeAttr(e.summary)}">${icon}${text}</li>`;
     })
     .join("\n            ");
 
-  return `          <div class="${classes}">
-            <div class="month-day-header">
+  const eventList = eventItems
+    ? `\n            <ul class="day-events">\n            ${eventItems}\n            </ul>`
+    : "";
+
+  return `          <article class="day ${classes}">
+            <header class="day-header">
               ${dayNum}
               ${indicator}
-            </div>
-            ${eventHtml}
-          </div>`;
+            </header>${eventList}
+          </article>`;
 }
 
 function generateWeeks(
