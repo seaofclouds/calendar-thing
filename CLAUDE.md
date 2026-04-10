@@ -23,7 +23,7 @@ Individual packages use `pnpm --filter @calendar-feeds/<name> <script>`. Build i
 
 Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and rendering printable calendars.
 
-**Three layers:**
+**Four layers:**
 
 1. **Shared package** (`shared/`) — no build step, TypeScript only, single `@calendar-feeds/shared` package
    - `types.ts` — `CalendarFeed`, `FeedEndpoint`, `CalendarEvent`, `FeedPlugin`, `FeedRenderMode` interfaces
