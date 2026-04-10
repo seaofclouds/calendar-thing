@@ -4,7 +4,7 @@
  */
 
 import { getPageLayout } from "./config";
-import type { CalendarEvent } from "@calendar-feeds/feed-types";
+import type { CalendarEvent } from "@calendar-feeds/shared";
 
 export interface RenderOptions {
   year: number;

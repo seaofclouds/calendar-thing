@@ -1,16 +1,16 @@
 /**
- * Feed fetching — three-tier fallback for loading events from feed plugins:
+ * Feed fetching — four-tier fallback for loading events from feed plugins:
  * 1. Service binding (production / wrangler dev --remote)
  * 2. Production URL + token (local dev with internet)
- * 3. Fixture ICS data (fully offline dev)
+ * 3. Source URL (external ICS feed, e.g. Google Calendar)
+ * 4. Fixture ICS data (fully offline dev)
  */
 
 import { parseICS } from "./parse-ics";
-import type { CalendarEvent } from "@calendar-feeds/feed-types";
-import type { ResolvedFeed } from "./feed-loader";
+import type { CalendarEvent, FeedPlugin } from "@calendar-feeds/shared";
 
 export async function fetchFeedEvents(
-  feed: ResolvedFeed,
+  feed: FeedPlugin,
   env: Record<string, unknown>,
   token?: string,
   activeTokens?: Set<string>,
@@ -26,24 +26,26 @@ export async function fetchFeedEvents(
 }
 
 async function fetchRaw(
-  feed: ResolvedFeed,
+  feed: FeedPlugin,
   env: Record<string, unknown>,
   token?: string,
 ): Promise<CalendarEvent[]> {
   // 1. Try service binding
-  const binding = env[feed.binding] as Fetcher | undefined;
-  if (binding) {
-    try {
-      const response = await binding.fetch(
-        new Request(`https://internal${feed.endpoint}`)
-      );
-      if (response.ok) {
-        const ics = await response.text();
-        const events = parseICS(ics, feed.category);
-        if (events.length > 0) return events;
+  if (feed.binding) {
+    const binding = env[feed.binding] as Fetcher | undefined;
+    if (binding) {
+      try {
+        const response = await binding.fetch(
+          new Request(`https://internal${feed.endpoint}`)
+        );
+        if (response.ok) {
+          const ics = await response.text();
+          const events = parseICS(ics, feed.category);
+          if (events.length > 0) return events;
+        }
+      } catch {
+        // fall through
       }
-    } catch {
-      // fall through
     }
   }
 
@@ -64,7 +66,23 @@ async function fetchRaw(
     }
   }
 
-  // 3. Fixture data
+  // 3. Try source URL (external ICS feed)
+  if (feed.sourceUrl) {
+    try {
+      const response = await fetch(feed.sourceUrl, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (response.ok) {
+        const ics = await response.text();
+        const events = parseICS(ics, feed.category);
+        if (events.length > 0) return events;
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  // 4. Fixture data
   if (feed.fixture) {
     return parseICS(feed.fixture, feed.category);
   }
@@ -72,7 +90,7 @@ async function fetchRaw(
   return [];
 }
 
-function cleanEvents(events: CalendarEvent[], feed: ResolvedFeed): CalendarEvent[] {
+function cleanEvents(events: CalendarEvent[], feed: FeedPlugin): CalendarEvent[] {
   return events.map((e) => {
     let summary = e.summary;
     if (feed.stripSummaryPrefix && summary.startsWith(feed.stripSummaryPrefix)) {
@@ -98,7 +116,7 @@ function cleanEvents(events: CalendarEvent[], feed: ResolvedFeed): CalendarEvent
 
 function filterByTokens(
   events: CalendarEvent[],
-  feed: ResolvedFeed,
+  feed: FeedPlugin,
   activeTokens: Set<string>,
 ): CalendarEvent[] {
   const tokenToFilter = feed.includeTokens!;

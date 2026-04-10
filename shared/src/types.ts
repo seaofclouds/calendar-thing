@@ -43,11 +43,17 @@ export type FeedRenderMode = "event-list" | "day-marker";
 export interface FeedPlugin {
   id: string;
   name: string;
-  binding: string;
-  endpoint: string;
-  prodUrl: string;
   category: string;
   renderMode: FeedRenderMode;
+  endpoint: string;
+  /** Service binding name — worker feeds only */
+  binding?: string;
+  /** Production worker URL — worker feeds only */
+  prodUrl?: string;
+  /** External ICS URL (e.g. Google Calendar) */
+  sourceUrl?: string;
+  /** Embedded ICS fixture data for offline dev fallback */
+  fixture?: string;
   includeTokens?: Record<string, string>;
   tokenAliases?: Record<string, string[]>;
   defaultInclude?: string[];

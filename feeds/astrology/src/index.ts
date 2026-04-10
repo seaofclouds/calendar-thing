@@ -3,55 +3,38 @@
  * Serves ICS and JSON feeds for zodiac season events.
  */
 
-import { authenticateToken, withEdgeCache, icsResponse, jsonResponse } from "@calendar-feeds/worker-utils";
+import { createFeedWorker, icsResponse, jsonResponse } from "@calendar-feeds/shared";
 import { computeZodiacSeasons, formatSeasonRange } from "./zodiac";
 import type { ZodiacEvent } from "./zodiac";
 import { generateICS } from "./ics";
 
-interface Env {
-  CALENDAR_TOKEN: string;
+function yearFromRequest(request: Request): number {
+  const url = new URL(request.url);
+  const requestedYear = url.searchParams.get("year");
+  return requestedYear ? parseInt(requestedYear) : new Date().getUTCFullYear();
 }
 
-const CACHE_VERSION = 1;
-
-export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-
-    if (url.pathname === "/") {
-      return new Response("Astrology Calendar\n", {
-        headers: { "Content-Type": "text/plain" },
-      });
-    }
-
-    if (url.pathname !== "/feeds/astrology.ics" && url.pathname !== "/feeds/astrology.json") {
-      return new Response("Not Found", { status: 404 });
-    }
-
-    if (!authenticateToken(url, env.CALENDAR_TOKEN)) {
-      return new Response("Unauthorized", { status: 401 });
-    }
-
-    const now = new Date();
-    const requestedYear = url.searchParams.get("year");
-    const year = requestedYear ? parseInt(requestedYear) : now.getUTCFullYear();
-
-    return withEdgeCache(
-      request,
-      ctx,
-      { version: CACHE_VERSION, extraParams: { _y: String(year) } },
-      async () => {
-        const events = computeZodiacSeasons(year);
-
-        if (url.pathname === "/feeds/astrology.ics") {
-          return icsResponse(generateICS(events));
-        }
-
-        return jsonResponse(JSON.stringify(buildJSON(events, now), null, 2));
-      }
-    );
-  },
-} satisfies ExportedHandler<Env>;
+export default createFeedWorker({
+  name: "Astrology Calendar",
+  cacheVersion: 1,
+  cacheParams: (request) => ({ _y: String(yearFromRequest(request)) }),
+  routes: [
+    {
+      path: "/feeds/astrology.ics",
+      handler: async (request) => {
+        const events = computeZodiacSeasons(yearFromRequest(request));
+        return icsResponse(generateICS(events));
+      },
+    },
+    {
+      path: "/feeds/astrology.json",
+      handler: async (request) => {
+        const events = computeZodiacSeasons(yearFromRequest(request));
+        return jsonResponse(JSON.stringify(buildJSON(events, new Date()), null, 2));
+      },
+    },
+  ],
+});
 
 interface ZodiacJSON {
   count: number;
