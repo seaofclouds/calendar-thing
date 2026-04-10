@@ -21,7 +21,7 @@ export function generateICS(phases: MoonPhase[], solarEvents: SolarEvent[]): str
 
   return wrapVCalendar({
     prodId: "-//Astronomy Calendar//EN",
-    calName: "\uD83C\uDF17 Moon Phases",
+    calName: "\uD83C\uDF17 Astronomy",
     events: [...moonEntries, ...solarEntries],
   });
 }
