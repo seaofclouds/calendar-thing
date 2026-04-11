@@ -112,6 +112,19 @@ ${formatPills}
 ${orientationPills}
         </div>
       </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Resolution</h3>
+        <div class="config-options">
+          <button class="config-option active" data-dpi="300">300dpi</button>
+          <button class="config-option" data-dpi="600">600dpi</button>
+        </div>
+      </section>
+
+      <section class="config-section config-export">
+        <button class="config-button" data-action="save">Save Image</button>
+        <button class="config-button" data-action="save-all">Save All Months</button>
+      </section>
     </aside>
 
     <main class="config-content">

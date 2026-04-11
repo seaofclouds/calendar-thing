@@ -940,6 +940,28 @@ body:has(.config) {
   background: var(--color-config-active);
 }
 
+.config-button {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.5em 0.8em;
+  background: var(--color-config-active);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  margin-bottom: 0.3em;
+  text-align: center;
+}
+
+.config-button:hover {
+  opacity: 0.8;
+}
+
+.config-export {
+  margin-top: 1.5em;
+}
+
 .config-content {
   flex: 1;
   display: flex;
