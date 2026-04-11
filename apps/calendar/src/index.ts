@@ -307,8 +307,16 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   const size = VALID_SIZES.has(sizeParam) ? sizeParam : "letter";
   const orientParam = url.searchParams.get("orientation") ?? "landscape";
   const orientation = (VALID_ORIENTATIONS.has(orientParam) ? orientParam : "landscape") as "portrait" | "landscape";
-  const include = parseIncludeParam(url.searchParams.get("include"), registry.getAll());
+  const includeParam = url.searchParams.get("include") ?? undefined;
+  const include = parseIncludeParam(includeParam ?? null, registry.getAll());
   const borders = url.searchParams.get("borders") !== "false";
+
+  // Build query string for calendar-internal links (preserves config state)
+  const configParams = new URLSearchParams();
+  configParams.set("size", size);
+  configParams.set("orientation", orientation);
+  if (includeParam) configParams.set("include", includeParam);
+  const configQs = `?${configParams.toString()}`;
 
   // Fetch events (same logic as main calendar routes)
   const token = env.CALENDAR_TOKEN;
@@ -349,6 +357,8 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       markers,
       borders,
       events: monthEvents,
+      queryString: configQs,
+      urlPrefix: "/config",
     });
   } else {
     calendarHtml = renderCalendarFragment({
@@ -359,6 +369,8 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       testing: false,
       forExport: true,
       markers,
+      queryString: configQs,
+      urlPrefix: "/config",
     });
   }
 
@@ -368,6 +380,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
     size,
     orientation,
     calendarHtml,
+    includeParam,
   });
 
   return new Response(html, {

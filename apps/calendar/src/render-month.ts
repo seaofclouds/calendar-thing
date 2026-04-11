@@ -30,6 +30,7 @@ export interface MonthViewOptions {
   events?: CalendarEvent[];
   queryString?: string;
   dataSource?: string;
+  urlPrefix?: string;
 }
 
 interface DayData {
@@ -71,9 +72,10 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
     : { year: opts.year, month: monthIndex + 1 };
 
   const qs = opts.queryString ?? "";
-  const prevUrl = `/${prev.year}/${String(prev.month + 1).padStart(2, "0")}${qs}`;
-  const nextUrl = `/${next.year}/${String(next.month + 1).padStart(2, "0")}${qs}`;
-  const yearUrl = `/${opts.year}${qs}`;
+  const prefix = opts.urlPrefix ?? "";
+  const prevUrl = `${prefix}/${prev.year}/${String(prev.month + 1).padStart(2, "0")}${qs}`;
+  const nextUrl = `${prefix}/${next.year}/${String(next.month + 1).padStart(2, "0")}${qs}`;
+  const yearUrl = `${prefix}/${opts.year}${qs}`;
 
   // Mini calendar grids (reuse exact same .month structure as year view)
   const prevMiniWeeks = generateWeeks(prev.year, prev.month, markersByDate, todayStr);

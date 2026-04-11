@@ -19,6 +19,7 @@ export interface RenderOptions {
   markers: CalendarEvent[];
   queryString?: string;
   dataSource?: string;
+  urlPrefix?: string;
 }
 
 interface DayData {
@@ -72,15 +73,17 @@ export function renderCalendarFragment(opts: RenderOptions): string {
     ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
     : "";
 
+  const prefix = opts.urlPrefix ?? "";
+
   return `<div id="root" class="${rootClasses}">
     <main class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
       ${opts.header ? `<header class="view-header">
-        <a href="/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
-        <h1><a href="/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>
-        <a href="/${opts.year + 1}${opts.queryString ?? ""}" class="year-nav next" aria-label="Next year"></a>
+        <a href="${prefix}/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
+        <h1><a href="${prefix}/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>
+        <a href="${prefix}/${opts.year + 1}${opts.queryString ?? ""}" class="year-nav next" aria-label="Next year"></a>
       </header>` : ""}
       <section class="year-grid">
-        ${months.map((m) => renderMonth(m, opts.queryString)).join("\n        ")}
+        ${months.map((m) => renderMonth(m, opts.queryString, prefix)).join("\n        ")}
       </section>
     </main>
   </div>`;
@@ -103,9 +106,9 @@ export function renderCalendar(opts: RenderOptions): string {
 </html>`;
 }
 
-function renderMonth(month: MonthData, queryString?: string): string {
+function renderMonth(month: MonthData, queryString?: string, urlPrefix?: string): string {
   const qs = queryString ?? "";
-  const monthUrl = `/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}${qs}`;
+  const monthUrl = `${urlPrefix ?? ""}/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}${qs}`;
   return `<a href="${monthUrl}" class="month-link">
           <article class="month">
           <header class="month-header"><h2>${month.name}</h2></header>

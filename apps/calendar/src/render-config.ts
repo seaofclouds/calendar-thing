@@ -38,10 +38,15 @@ export interface ConfigViewOptions {
   size: string;
   orientation: "portrait" | "landscape";
   calendarHtml: string;
+  includeParam?: string;
 }
 
 export function renderConfigView(opts: ConfigViewOptions): string {
-  const queryParams = `?size=${opts.size}&orientation=${opts.orientation}`;
+  const params = new URLSearchParams();
+  params.set("size", opts.size);
+  params.set("orientation", opts.orientation);
+  if (opts.includeParam) params.set("include", opts.includeParam);
+  const queryParams = `?${params.toString()}`;
 
   // Generate month nav for year +/- 1
   const years = [opts.year - 1, opts.year, opts.year + 1];

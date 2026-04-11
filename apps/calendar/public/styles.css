@@ -848,9 +848,13 @@ body {
    Config View
    =================== */
 
+body:has(.config) {
+  background: var(--color-config-bg);
+}
+
 .config {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   background: var(--color-config-bg);
 }
 
