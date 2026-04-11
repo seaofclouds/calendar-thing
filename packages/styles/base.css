@@ -10,6 +10,8 @@
   /* Config sidebar */
   --color-config-bg: #e8e0d8;
   --color-config-active: #c5b9a8;
+  --color-config-text: #3d3530;
+  --color-config-muted: #8a7e74;
   --config-sidebar-width: 7em;
 
   /* Typography */

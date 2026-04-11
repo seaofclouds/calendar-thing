@@ -856,6 +856,7 @@ body:has(.config) {
   display: flex;
   min-height: 100vh;
   background: var(--color-config-bg);
+  color: var(--color-config-text);
 }
 
 .config-sidebar {
@@ -930,6 +931,7 @@ body:has(.config) {
   cursor: pointer;
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
+  color: inherit;
 }
 
 .config-option:hover {
@@ -950,6 +952,7 @@ body:has(.config) {
   cursor: pointer;
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
+  color: inherit;
   margin-bottom: 0.3em;
   text-align: center;
 }
@@ -973,13 +976,14 @@ body:has(.config) {
 
 .config-status {
   font-size: var(--font-size-sm);
-  color: var(--color-border);
+  color: var(--color-config-muted);
   margin: 0 0 1em 0;
 }
 
-/* Calendar preview inside config — paper card on neutral background */
+/* Calendar preview inside config — sandboxed color scheme */
 .config-content #root {
   background: var(--color-bg);
+  color: var(--color-text);
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
