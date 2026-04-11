@@ -40,7 +40,7 @@ interface DayData {
   events?: CalendarEvent[];
 }
 
-export function renderMonthView(opts: MonthViewOptions): string {
+export function renderMonthViewFragment(opts: MonthViewOptions): string {
   const monthIndex = opts.month - 1;
   const isPreview = opts.forExport;
 
@@ -96,18 +96,7 @@ export function renderMonthView(opts: MonthViewOptions): string {
     ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
     : "";
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${MONTH_NAMES[monthIndex]} ${opts.year}</title>
-  <link rel="stylesheet" href="/base.css">
-  <link rel="stylesheet" href="/styles.css">
-  <script src="/client.js" type="module" defer></script>
-</head>
-<body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
-  <div id="root" class="${rootClasses}">
+  return `<div id="root" class="${rootClasses}">
     <main class="${containerClasses}"${dataAttrs}>
       <header class="view-header">
         <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>
@@ -133,7 +122,23 @@ ${renderWeeks(weeks)}
         </section>
       </section>
     </main>
-  </div>
+  </div>`;
+}
+
+export function renderMonthView(opts: MonthViewOptions): string {
+  const monthIndex = opts.month - 1;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${MONTH_NAMES[monthIndex]} ${opts.year}</title>
+  <link rel="stylesheet" href="/base.css">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/client.js" type="module" defer></script>
+</head>
+<body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
+  ${renderMonthViewFragment(opts)}
 </body>
 </html>`;
 }

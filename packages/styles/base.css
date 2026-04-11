@@ -7,6 +7,11 @@
   --color-border-light: #e0e0e0;
   --color-muted: #ccc;
 
+  /* Config sidebar */
+  --color-config-bg: #e8e0d8;
+  --color-config-active: #c5b9a8;
+  --config-sidebar-width: 7em;
+
   /* Typography */
   --font-family: system-ui, -apple-system, sans-serif;
   --font-size-base: 16px;

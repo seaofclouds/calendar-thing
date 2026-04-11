@@ -845,6 +845,120 @@ body {
 }
 
 /* ===================
+   Config View
+   =================== */
+
+.config {
+  display: flex;
+  height: 100vh;
+  background: var(--color-config-bg);
+}
+
+.config-sidebar {
+  width: var(--config-sidebar-width);
+  padding: 1em;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.config-nav {
+  margin-bottom: 1.5em;
+}
+
+.config-section {
+  margin-bottom: 1em;
+}
+
+.config-year {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0.3em;
+}
+
+.config-year a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.config-months {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em;
+}
+
+.config-month {
+  font-size: var(--font-size-sm);
+  color: inherit;
+  text-decoration: none;
+  padding: 0.15em 0.4em;
+  border-radius: 0.8em;
+}
+
+.config-month:hover {
+  background: var(--color-config-active);
+}
+
+.config-month.active {
+  background: var(--color-config-active);
+  font-weight: var(--font-weight-medium);
+}
+
+.config-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0.3em;
+}
+
+.config-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em;
+}
+
+.config-option {
+  border: none;
+  border-radius: 1em;
+  padding: 0.3em 0.8em;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+}
+
+.config-option:hover {
+  background: var(--color-config-active);
+}
+
+.config-option.active {
+  background: var(--color-config-active);
+}
+
+.config-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1em;
+  overflow: auto;
+}
+
+.config-status {
+  font-size: var(--font-size-sm);
+  color: var(--color-border);
+  margin: 0 0 1em 0;
+}
+
+/* Calendar preview inside config — paper card on neutral background */
+.config-content #root {
+  background: var(--color-bg);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ===================
    Testing Styles
    =================== */
 

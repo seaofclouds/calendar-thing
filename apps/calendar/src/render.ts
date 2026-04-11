@@ -41,7 +41,7 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-export function renderCalendar(opts: RenderOptions): string {
+export function renderCalendarFragment(opts: RenderOptions): string {
   const layout = getPageLayout(opts.size ?? "letter", opts.orientation);
   const actualRows = opts.rows ?? layout.rows;
   const totalMonths = actualRows * layout.columns;
@@ -72,6 +72,21 @@ export function renderCalendar(opts: RenderOptions): string {
     ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
     : "";
 
+  return `<div id="root" class="${rootClasses}">
+    <main class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
+      ${opts.header ? `<header class="view-header">
+        <a href="/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
+        <h1><a href="/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>
+        <a href="/${opts.year + 1}${opts.queryString ?? ""}" class="year-nav next" aria-label="Next year"></a>
+      </header>` : ""}
+      <section class="year-grid">
+        ${months.map((m) => renderMonth(m, opts.queryString)).join("\n        ")}
+      </section>
+    </main>
+  </div>`;
+}
+
+export function renderCalendar(opts: RenderOptions): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,18 +98,7 @@ export function renderCalendar(opts: RenderOptions): string {
   <script src="/client.js" type="module" defer></script>
 </head>
 <body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
-  <div id="root" class="${rootClasses}">
-    <main class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
-      ${opts.header ? `<header class="view-header">
-        <a href="/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
-        <h1><a href="/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>
-        <a href="/${opts.year + 1}${opts.queryString ?? ""}" class="year-nav next" aria-label="Next year"></a>
-      </header>` : ""}
-      <section class="year-grid">
-        ${months.map((m) => renderMonth(m, opts.queryString)).join("\n        ")}
-      </section>
-    </main>
-  </div>
+  ${renderCalendarFragment(opts)}
 </body>
 </html>`;
 }

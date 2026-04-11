@@ -53,3 +53,27 @@ async function maybeExportImage() {
 if (document.querySelector("[data-format]")) {
   setTimeout(maybeExportImage, 2000);
 }
+
+// Config sidebar — format/orientation pill clicks update URL params
+function initConfigPills() {
+  const sidebar = document.querySelector(".config-sidebar");
+  if (!sidebar) return;
+
+  sidebar.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains("config-option")) return;
+
+    const url = new URL(window.location.href);
+
+    if (target.dataset.size) {
+      url.searchParams.set("size", target.dataset.size);
+    }
+    if (target.dataset.orientation) {
+      url.searchParams.set("orientation", target.dataset.orientation);
+    }
+
+    window.location.href = url.toString();
+  });
+}
+
+initConfigPills();
