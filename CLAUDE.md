@@ -43,9 +43,14 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
    - Plugins can define `tokenAliases` to expand shorthand tokens (e.g. `lunar:phases` → `lunar:full,lunar:new,lunar:quarter`)
    - Fixtures in `feeds/*/fixtures/*.ics` — ICS data for offline dev fallback
 
-4. **Calendar app** (`apps/calendar/`) — CF Worker rendering printable year + month calendars as server-side HTML
+4. **Styles package** (`packages/styles/`) — `@calendar-feeds/styles`, CSS custom properties (design tokens) and reset
+   - `base.css` — color tokens, font weight scale, 4-step type scale (xl/lg/md/sm), minimal reset
+   - Copied to `apps/calendar/public/base.css` at build time
+
+5. **Calendar app** (`apps/calendar/`) — CF Worker rendering printable year + month calendars as server-side HTML
    - **Year view** (`/:year`) — 12-month grid with lunar/solar markers, clickable months
    - **Month view** (`/:year/:month`) — single month with day cells, events, mini prev/next calendars
+   - **Styleguide** (`/styleguide`) — live token reference with color swatches, type scale, font weights, component examples
    - **Feed loader** (`feed-loader.ts`) — registers all feed plugins, provides `getFeed()`/`getAllFeeds()`
    - **Feed fetcher** (`feed-fetcher.ts`) — four-tier fallback: service binding → prod URL + token → source URL (external ICS) → fixture ICS
    - **Include parser** (`include.ts`) — data-driven `?include=` param parsing from feed plugin manifests, with alias expansion
@@ -61,12 +66,37 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 - **Auth:** All feed endpoints require `?token=CALENDAR_TOKEN`. Service binding calls use `hostname === "internal"` to bypass auth (handled by `authenticateToken()` in shared).
 - **Feed worker factory:** Feed workers use `createFeedWorker()` from `@calendar-feeds/shared` — provides shared routing, auth, and caching. Each worker just defines its routes and handlers.
 - **Caching:** 24-hour edge caching via `withEdgeCache()` wrapper.
-- **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
+- **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`, `/styleguide`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
 - **Include param:** `?include=lunar:full,lunar:new,lunar:quarter,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults defined per-plugin via `defaultInclude` (lunar:full + lunar:new + lunar:quarter + solar:season on by default, others off). `movies` is shorthand for both `movies-theatrical` and `movies-digital`. `lunar:phases` is an alias for all lunar tokens.
 - **Feed proxy:** `/feeds/{id}.ics?token=` — proxies ICS feeds through the calendar app via service bindings (e.g. `/feeds/movies-theatrical.ics`, `/feeds/astronomy.ics`, `/feeds/astrology.ics`, `/feeds/busd.ics`). Routes are derived from the feed plugin registry.
 - **Feed param:** `?feed=https://example.com/cal.ics` — external ICS feed URL (fetched with 5s timeout).
 - **No test framework** — validation is `pnpm typecheck` only.
 - **Wrangler configs** are per-worker (`apps/calendar/wrangler.toml`, `feeds/*/wrangler.toml`). The root `wrangler.toml` is unused.
+
+## Design Tokens (`packages/styles/base.css`)
+
+All colors, font weights, and font sizes in `styles.css` use CSS custom properties defined in `base.css`. Never use hardcoded hex colors, numeric font-weights, or magic font-size values — always reference a token.
+
+**Type scale** — 4 steps, applied directly on elements (no container-level font-size inheritance):
+- `--font-size-xl` (3.6em) — view titles ("2026", "April")
+- `--font-size-lg` (1.8em) — month headings ("January")
+- `--font-size-md` (1.1em) — day numbers, mini calendar titles
+- `--font-size-sm` (0.75em) — weekday labels, events, mini calendar text
+
+**Font weights** — `--font-weight-thin` (100), `--font-weight-light` (200), `--font-weight-book` (300), `--font-weight-normal` (400), `--font-weight-medium` (500), `--font-weight-semibold` (600)
+
+**Colors** — `--color-text`, `--color-bg`, `--color-accent`, `--color-border`, `--color-border-light`, `--color-muted`
+
+When adding new styles, use existing tokens. If a new value is truly needed, add a token to `base.css` first — don't introduce one-off values. The `/styleguide` route shows all tokens visually.
+
+## Semantic HTML Conventions
+
+- Pages use `<main class="{x}-view">` (`.year-view`, `.month-view`)
+- Components use bare nouns: `.month`, `.week`, `.day`, `.event`
+- Modifiers use compound classes: `.month.mini`, `.day.today`, `.day.other-month`
+- Semantic elements: `<header>` for `.view-header`/`.month-header`/`.day-header`, `<nav>` for `.view-nav`, `<section>` for grids, `<article>` for `.month`, `<ul>`/`<li>` for events
+- Grid items (`.weekday`, `.day`) use `<div>` — they're layout containers, not semantic content
+- See the `/styleguide` Structure table for the full mapping
 
 ## Secrets (set via `npx wrangler secret put`)
 

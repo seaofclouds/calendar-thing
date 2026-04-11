@@ -6,6 +6,8 @@ A monorepo of Cloudflare Workers that generate calendar feeds (ICS/JSON) and ren
 
 ```
 calendar-thing/                   # Monorepo root
+├── packages/
+│   └── styles/                 # Design tokens (CSS custom properties) + reset
 ├── shared/                     # Shared types, ICS helpers, worker utils, feed factory
 ├── feeds/
 │   ├── astrology/              # CF Worker — zodiac seasons (tropical astrology)
@@ -51,6 +53,7 @@ A single shared package providing types, ICS generation, worker utilities, and t
 /:year/:size                        # Print preview (letter, a4, a6, etc.)
 /:year/:size/:orientation           # Print preview with orientation
 /:year/:size/:orientation/300dpi.png  # Export as image
+/styleguide                          # Design token reference
 ```
 
 Query params: `rows=N`, `header=false`, `test=true`, `include=lunar:full,lunar:new,lunar:quarter,solar:season,movies,movies-theatrical,movies-digital,busd,astrology`
