@@ -1,0 +1,50 @@
+:root {
+  /* Colors */
+  --color-text: #000;
+  --color-bg: #fff;
+  --color-accent: #c00;
+  --color-border: #aaa;
+  --color-border-light: #e0e0e0;
+  --color-muted: #ccc;
+
+  /* Typography */
+  --font-family: system-ui, -apple-system, sans-serif;
+  --font-size-base: 16px;
+  --line-height: 1.5;
+
+  /* Font weight scale */
+  --font-weight-thin: 100;
+  --font-weight-light: 200;
+  --font-weight-book: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Type scale */
+  --font-size-xl: 3.6em;
+  --font-size-lg: 1.8em;
+  --font-size-md: 1.1em;
+  --font-size-sm: 0.75em;
+}
+
+/* === Reset === */
+html { height: 100%; margin: 0; padding: 0; }
+
+:root {
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+  font-weight: var(--font-weight-normal);
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+h1, h2, h3 {
+  margin: 0;
+  padding: 0;
+}

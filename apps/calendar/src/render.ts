@@ -54,7 +54,7 @@ export function renderCalendar(opts: RenderOptions): string {
   const months = generateMonths(opts.year, totalMonths, markersByDate);
 
   const calendarClasses = [
-    "calendar",
+    "year-view",
     isPreview ? "print" : "",
     opts.testing ? "testing" : "",
   ].filter(Boolean).join(" ");
@@ -78,21 +78,22 @@ export function renderCalendar(opts: RenderOptions): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendar ${opts.year}</title>
+  <link rel="stylesheet" href="/base.css">
   <link rel="stylesheet" href="/styles.css">
   <script src="/client.js" type="module" defer></script>
 </head>
 <body${opts.dataSource ? ` data-source="${opts.dataSource}"` : ""}>
   <div id="root" class="${rootClasses}">
-    <div class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
-      ${opts.header ? `<div class="calendar-header">
+    <main class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
+      ${opts.header ? `<header class="view-header">
         <a href="/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
         <h1><a href="/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>
         <a href="/${opts.year + 1}${opts.queryString ?? ""}" class="year-nav next" aria-label="Next year"></a>
-      </div>` : ""}
-      <div class="calendar-grid">
+      </header>` : ""}
+      <section class="year-grid">
         ${months.map((m) => renderMonth(m, opts.queryString)).join("\n        ")}
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 </body>
 </html>`;
@@ -102,15 +103,15 @@ function renderMonth(month: MonthData, queryString?: string): string {
   const qs = queryString ?? "";
   const monthUrl = `/${month.year}/${String(month.monthIndex + 1).padStart(2, "0")}${qs}`;
   return `<a href="${monthUrl}" class="month-link">
-          <div class="month">
-          <div class="month-header"><h2>${month.name}</h2></div>
-          <div class="week-days">
-            ${WEEK_DAYS.map((d) => `<h3 class="week-day">${d}</h3>`).join("")}
+          <article class="month">
+          <header class="month-header"><h2>${month.name}</h2></header>
+          <div class="weekdays">
+            ${WEEK_DAYS.map((d) => `<div class="weekday">${d}</div>`).join("")}
           </div>
-          <div class="month-grid">
-            ${month.weeks.flat().map(renderDay).join("")}
-          </div>
-        </div></a>`;
+          <section class="month-grid">
+            ${month.weeks.map((week) => `<div class="week">${week.map(renderDay).join("")}</div>`).join("\n            ")}
+          </section>
+        </article></a>`;
 }
 
 function formatDate(date: number): string {
@@ -119,7 +120,7 @@ function formatDate(date: number): string {
 }
 
 function renderDay(day: DayData): string {
-  const classes = `calendar-day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
+  const classes = `day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
 
   let content: string;
   if (!day.currentMonth) {

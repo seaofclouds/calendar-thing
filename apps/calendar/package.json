@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/client.ts --bundle --outfile=public/client.js --format=esm --target=es2020",
+    "build": "cp ../../packages/styles/base.css public/base.css && esbuild src/client.ts --bundle --outfile=public/client.js --format=esm --target=es2020",
     "build:client": "pnpm build",
     "dev": "pnpm build && wrangler dev",
     "deploy": "pnpm build && wrangler deploy",

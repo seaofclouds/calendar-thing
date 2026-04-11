@@ -6,7 +6,7 @@
 
 // Responsive column count for non-print view
 function updateColumns() {
-  const calendar = document.querySelector(".calendar") as HTMLElement | null;
+  const calendar = document.querySelector(".year-view") as HTMLElement | null;
   if (!calendar || calendar.classList.contains("print")) return;
 
   const w = window.innerWidth;
@@ -17,10 +17,10 @@ function updateColumns() {
 window.addEventListener("resize", updateColumns);
 updateColumns();
 
-// Image export — triggered when server sets data-format on .calendar
+// Image export — triggered when server sets data-format on .year-view or .month-view
 async function maybeExportImage() {
-  const calendar = document.querySelector(".calendar") as HTMLElement | null;
-  if (!calendar?.dataset.format) return;
+  const calendar = document.querySelector(".year-view[data-format], .month-view[data-format]") as HTMLElement | null;
+  if (!calendar) return;
 
   const format = calendar.dataset.format as "png" | "jpg";
   const dpi = parseInt(calendar.dataset.dpi || "300");
@@ -50,6 +50,6 @@ async function maybeExportImage() {
 }
 
 // Wait for fonts and layout to settle before exporting
-if (document.querySelector(".calendar[data-format]")) {
+if (document.querySelector("[data-format]")) {
   setTimeout(maybeExportImage, 2000);
 }

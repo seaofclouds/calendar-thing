@@ -6,6 +6,7 @@
 
 import { renderCalendar } from "./render";
 import { renderMonthView } from "./render-month";
+import { renderStyleguide } from "./render-styleguide";
 import {
   createFeedRegistry,
   fetchFeedEvents,
@@ -63,6 +64,13 @@ export default {
     // Favicon
     if (path === "/favicon.ico") {
       return new Response(null, { status: 204 });
+    }
+
+    // Styleguide
+    if (path === "/styleguide") {
+      return new Response(renderStyleguide(), {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
     }
 
     // Feed proxy: /feeds/*.ics → service binding
