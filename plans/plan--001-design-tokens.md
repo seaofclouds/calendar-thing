@@ -1,4 +1,6 @@
-# Phase 1: Design Tokens + Calendar CSS Refactor
+# Phase 1: Design Tokens + Calendar CSS Refactor ✓
+
+> **Status: Complete** — merged in PR #26. Final type scale simplified to 4 tokens (xl/lg/md/sm), no em compounding. See `/styleguide` for live reference.
 
 ## Context
 
