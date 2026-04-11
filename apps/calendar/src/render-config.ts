@@ -1,7 +1,7 @@
 /**
  * Config view renderer.
  * Wraps calendar views with a sidebar for month navigation,
- * paper format, and orientation controls.
+ * paper format, orientation, margin, and feed controls.
  */
 
 import { PAGE_TYPES } from "./config";
@@ -17,11 +17,18 @@ const FORMAT_OPTIONS = [
   { value: "tabloid", label: "Tabloid" },
   { value: "a5", label: "A5" },
   { value: "a4", label: "A4" },
+  { value: "a6", label: "A6" },
 ];
 
 const ORIENTATION_OPTIONS = [
   { value: "portrait", label: "Portrait" },
   { value: "landscape", label: "Landscape" },
+];
+
+const MARGIN_OPTIONS = [
+  { value: "0.25in", label: '1/4"' },
+  { value: "0.5in", label: '1/2"' },
+  { value: "1in", label: '1"' },
 ];
 
 const DISPLAY_NAMES: Record<string, string> = {
@@ -30,6 +37,7 @@ const DISPLAY_NAMES: Record<string, string> = {
   tabloid: "Tabloid",
   a5: "A5",
   a4: "A4",
+  a6: "A6",
 };
 
 const FEED_OPTIONS = [
@@ -47,6 +55,7 @@ export interface ConfigViewOptions {
   month?: number;
   size: string;
   orientation: "portrait" | "landscape";
+  margin: string;
   calendarHtml: string;
   includeParam?: string;
 }
@@ -55,6 +64,7 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   const params = new URLSearchParams();
   params.set("size", opts.size);
   params.set("orientation", opts.orientation);
+  params.set("margin", opts.margin);
   if (opts.includeParam) params.set("include", opts.includeParam);
   const queryParams = `?${params.toString()}`;
 
@@ -87,6 +97,12 @@ ${monthLinks}
   const orientationPills = ORIENTATION_OPTIONS.map((opt) => {
     const isActive = opt.value === opts.orientation;
     return `          <button class="config-option${isActive ? " active" : ""}" data-orientation="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+
+  // Margin pills
+  const marginPills = MARGIN_OPTIONS.map((opt) => {
+    const isActive = opt.value === opts.margin;
+    return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
   }).join("\n");
 
   // Feed toggles
@@ -126,6 +142,13 @@ ${formatPills}
         <h3 class="config-label">Orientation</h3>
         <div class="config-options">
 ${orientationPills}
+        </div>
+      </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Margin</h3>
+        <div class="config-options">
+${marginPills}
         </div>
       </section>
 

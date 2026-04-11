@@ -20,6 +20,7 @@ export interface RenderOptions {
   queryString?: string;
   dataSource?: string;
   urlPrefix?: string;
+  margin?: string;
 }
 
 interface DayData {
@@ -76,7 +77,7 @@ export function renderCalendarFragment(opts: RenderOptions): string {
   const prefix = opts.urlPrefix ?? "";
 
   return `<div id="root" class="${rootClasses}">
-    <main class="${calendarClasses}" style="--print-columns: ${printColumns}"${dataAttrs}>
+    <main class="${calendarClasses}" style="--print-columns: ${printColumns}${opts.margin ? `; padding: ${opts.margin}` : ""}"${dataAttrs}>
       ${opts.header ? `<header class="view-header">
         <a href="${prefix}/${opts.year - 1}${opts.queryString ?? ""}" class="year-nav prev" aria-label="Previous year"></a>
         <h1><a href="${prefix}/${new Date().getFullYear()}${opts.queryString ?? ""}">${opts.year}</a></h1>

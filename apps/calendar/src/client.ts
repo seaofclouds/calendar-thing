@@ -64,10 +64,11 @@ function initConfigSidebar() {
 
     // Format/orientation pills — update URL and reload
     if (target.classList.contains("config-option")) {
-      if (target.dataset.size || target.dataset.orientation) {
+      if (target.dataset.size || target.dataset.orientation || target.dataset.margin !== undefined) {
         const url = new URL(window.location.href);
         if (target.dataset.size) url.searchParams.set("size", target.dataset.size);
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
+        if (target.dataset.margin !== undefined) url.searchParams.set("margin", target.dataset.margin);
         window.location.href = url.toString();
         return;
       }
@@ -140,6 +141,7 @@ function getConfigParams() {
     size: url.searchParams.get("size") ?? "letter",
     orientation: url.searchParams.get("orientation") ?? "landscape",
     include: url.searchParams.get("include") ?? "",
+    margin: url.searchParams.get("margin") ?? "0.25in",
   };
 }
 
@@ -204,6 +206,7 @@ async function exportAllMonths() {
       const fetchParams = new URLSearchParams();
       fetchParams.set("size", params.size);
       fetchParams.set("orientation", params.orientation);
+      fetchParams.set("margin", params.margin);
       if (params.include) fetchParams.set("include", params.include);
 
       const response = await fetch(`/config/${params.year}/${monthStr}?${fetchParams.toString()}`);

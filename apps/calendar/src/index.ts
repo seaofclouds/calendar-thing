@@ -56,6 +56,7 @@ interface CalendarParams {
 
 const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-tabloid", "a4", "a5", "a6"]);
 const VALID_ORIENTATIONS = new Set(["portrait", "landscape"]);
+const VALID_MARGINS = new Set(["0.25in", "0.5in", "1in"]);
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -310,11 +311,14 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   const includeParam = url.searchParams.get("include") ?? undefined;
   const include = parseIncludeParam(includeParam ?? null, registry.getAll());
   const borders = url.searchParams.get("borders") !== "false";
+  const marginParam = url.searchParams.get("margin") ?? "0.25in";
+  const margin = VALID_MARGINS.has(marginParam) ? marginParam : "0.25in";
 
   // Build query string for calendar-internal links (preserves config state)
   const configParams = new URLSearchParams();
   configParams.set("size", size);
   configParams.set("orientation", orientation);
+  configParams.set("margin", margin);
   if (includeParam) configParams.set("include", includeParam);
   const configQs = `?${configParams.toString()}`;
 
@@ -359,6 +363,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       events: monthEvents,
       queryString: configQs,
       urlPrefix: "/config",
+      margin,
     });
   } else {
     calendarHtml = renderCalendarFragment({
@@ -371,6 +376,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       markers,
       queryString: configQs,
       urlPrefix: "/config",
+      margin,
     });
   }
 
@@ -379,6 +385,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
     month,
     size,
     orientation,
+    margin,
     calendarHtml,
     includeParam,
   });

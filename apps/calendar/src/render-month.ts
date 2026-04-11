@@ -31,6 +31,7 @@ export interface MonthViewOptions {
   queryString?: string;
   dataSource?: string;
   urlPrefix?: string;
+  margin?: string;
 }
 
 interface DayData {
@@ -99,7 +100,7 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
     : "";
 
   return `<div id="root" class="${rootClasses}">
-    <main class="${containerClasses}"${dataAttrs}>
+    <main class="${containerClasses}"${opts.margin ? ` style="padding: ${opts.margin}"` : ""}${dataAttrs}>
       <header class="view-header">
         <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>
         <nav class="view-nav">
