@@ -78,6 +78,44 @@ function initConfigSidebar() {
         target.classList.add("active");
         return;
       }
+
+      // Feed toggles — update include param and reload
+      if (target.dataset.feed) {
+        const url = new URL(window.location.href);
+        const includeParam = url.searchParams.get("include");
+        const defaults = ["lunar:phases", "solar:season"];
+        let tokens: string[];
+        if (includeParam !== null) {
+          tokens = includeParam ? includeParam.split(",") : [];
+        } else {
+          tokens = [...defaults];
+        }
+
+        const feed = target.dataset.feed;
+        const isActive = tokens.includes(feed)
+          || (feed === "lunar:phases" && tokens.some((t) => t.startsWith("lunar:")))
+          || (feed === "movies" && tokens.some((t) => t.startsWith("movies")));
+
+        if (isActive) {
+          if (feed === "lunar:phases") {
+            tokens = tokens.filter((t) => !t.startsWith("lunar:"));
+          } else if (feed === "movies") {
+            tokens = tokens.filter((t) => !t.startsWith("movies"));
+          } else {
+            tokens = tokens.filter((t) => t !== feed);
+          }
+        } else {
+          tokens.push(feed);
+        }
+
+        if (tokens.length) {
+          url.searchParams.set("include", tokens.join(","));
+        } else {
+          url.searchParams.set("include", "");
+        }
+        window.location.href = url.toString();
+        return;
+      }
     }
 
     // Export buttons

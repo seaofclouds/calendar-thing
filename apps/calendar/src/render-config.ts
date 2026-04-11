@@ -32,6 +32,16 @@ const DISPLAY_NAMES: Record<string, string> = {
   a4: "A4",
 };
 
+const FEED_OPTIONS = [
+  { token: "lunar:phases", label: "Lunar" },
+  { token: "solar:season", label: "Solar" },
+  { token: "movies", label: "Movies" },
+  { token: "busd", label: "School" },
+  { token: "astrology", label: "Astrology" },
+];
+
+const DEFAULT_INCLUDE = ["lunar:phases", "solar:season"];
+
 export interface ConfigViewOptions {
   year: number;
   month?: number;
@@ -48,8 +58,8 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   if (opts.includeParam) params.set("include", opts.includeParam);
   const queryParams = `?${params.toString()}`;
 
-  // Generate month nav for year +/- 1
-  const years = [opts.year - 1, opts.year, opts.year + 1];
+  // Generate month nav for current year only
+  const years = [opts.year];
 
   const monthNav = years.map((year) => {
     const monthLinks = MONTH_ABBRS.map((abbr, i) => {
@@ -77,6 +87,12 @@ ${monthLinks}
   const orientationPills = ORIENTATION_OPTIONS.map((opt) => {
     const isActive = opt.value === opts.orientation;
     return `          <button class="config-option${isActive ? " active" : ""}" data-orientation="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+
+  // Feed toggles
+  const feedPills = FEED_OPTIONS.map((opt) => {
+    const isActive = isFeedActive(opt.token, opts.includeParam);
+    return `          <button class="config-option${isActive ? " active" : ""}" data-feed="${opt.token}">${opt.label}</button>`;
   }).join("\n");
 
   // Status line
@@ -110,6 +126,13 @@ ${formatPills}
         <h3 class="config-label">Orientation</h3>
         <div class="config-options">
 ${orientationPills}
+        </div>
+      </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Feeds</h3>
+        <div class="config-options">
+${feedPills}
         </div>
       </section>
 
@@ -149,4 +172,16 @@ function getStatusText(size: string, orientation: string): string {
   const formatDim = (d: { value: number; unit: string }) => `${d.value}${d.unit}`;
 
   return `${name}, ${orientation.charAt(0).toUpperCase() + orientation.slice(1)}, ${formatDim(w)} \u00d7 ${formatDim(h)}`;
+}
+
+function isFeedActive(token: string, includeParam?: string): boolean {
+  if (includeParam === undefined) {
+    return DEFAULT_INCLUDE.includes(token);
+  }
+  if (!includeParam) return false;
+  const tokens = includeParam.split(",");
+  if (tokens.includes(token)) return true;
+  if (token === "lunar:phases") return tokens.some((t) => t.startsWith("lunar:"));
+  if (token === "movies") return tokens.some((t) => t.startsWith("movies"));
+  return false;
 }
