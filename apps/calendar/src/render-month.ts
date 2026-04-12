@@ -37,7 +37,7 @@ export interface MonthViewOptions {
 interface DayData {
   date: number;
   currentMonth: boolean;
-  marker?: CalendarEvent;
+  markers?: CalendarEvent[];
   isToday?: boolean;
   events?: CalendarEvent[];
 }
@@ -50,9 +50,11 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   // Build marker and event maps by date
-  const markersByDate = new Map<string, CalendarEvent>();
+  const markersByDate = new Map<string, CalendarEvent[]>();
   for (const m of opts.markers) {
-    if (!markersByDate.has(m.date)) markersByDate.set(m.date, m);
+    const existing = markersByDate.get(m.date);
+    if (existing) existing.push(m);
+    else markersByDate.set(m.date, [m]);
   }
   const eventsByDate = new Map<string, CalendarEvent[]>();
   for (const e of opts.events ?? []) {
@@ -164,8 +166,8 @@ function renderDay(day: DayData): string {
   let content: string;
   if (!day.currentMonth) {
     content = formatDate(day.date);
-  } else if (day.marker?.emoji) {
-    content = day.marker.emoji;
+  } else if (day.markers && day.markers.length > 0) {
+    content = day.markers.map((m) => m.emoji).filter(Boolean).join("");
   } else {
     content = formatDate(day.date);
   }
@@ -197,8 +199,8 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
 
   const dayNum = `<span class="day-number">${day.date}</span>`;
 
-  // Right-aligned indicator (day-marker events like moon phase or solar event)
-  const indicator = day.marker?.emoji ?? "";
+  // Right-aligned indicators (day-marker events like moon phase or solar event)
+  const indicator = (day.markers ?? []).map((m) => m.emoji).filter(Boolean).join("");
 
   // Event text (left-aligned, max 3)
   const eventItems = (day.events ?? [])
@@ -225,7 +227,7 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
 function generateWeeks(
   year: number,
   monthIndex: number,
-  markersByDate: Map<string, CalendarEvent>,
+  markersByDate: Map<string, CalendarEvent[]>,
   todayStr: string,
   eventsByDate?: Map<string, CalendarEvent[]>,
 ): DayData[][] {
@@ -252,7 +254,7 @@ function generateWeeks(
     currentWeek.push({
       date: day,
       currentMonth: true,
-      marker: markersByDate.get(dateStr),
+      markers: markersByDate.get(dateStr),
       isToday: dateStr === todayStr,
       events: eventsByDate?.get(dateStr),
     });

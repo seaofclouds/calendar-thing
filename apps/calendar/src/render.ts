@@ -26,7 +26,7 @@ export interface RenderOptions {
 interface DayData {
   date: number;
   currentMonth: boolean;
-  marker?: CalendarEvent;
+  markers?: CalendarEvent[];
   isToday?: boolean;
 }
 
@@ -49,9 +49,11 @@ export function renderCalendarFragment(opts: RenderOptions): string {
   const totalMonths = actualRows * layout.columns;
   const isPreview = opts.forExport;
 
-  const markersByDate = new Map<string, CalendarEvent>();
+  const markersByDate = new Map<string, CalendarEvent[]>();
   for (const m of opts.markers) {
-    if (!markersByDate.has(m.date)) markersByDate.set(m.date, m);
+    const existing = markersByDate.get(m.date);
+    if (existing) existing.push(m);
+    else markersByDate.set(m.date, [m]);
   }
   const months = generateMonths(opts.year, totalMonths, markersByDate);
 
@@ -133,8 +135,8 @@ function renderDay(day: DayData): string {
   let content: string;
   if (!day.currentMonth) {
     content = formatDate(day.date);
-  } else if (day.marker?.emoji) {
-    content = day.marker.emoji;
+  } else if (day.markers && day.markers.length > 0) {
+    content = day.markers.map((m) => m.emoji).filter(Boolean).join("");
   } else {
     content = formatDate(day.date);
   }
@@ -145,7 +147,7 @@ function renderDay(day: DayData): string {
 function generateMonths(
   baseYear: number,
   totalMonths: number,
-  markersByDate: Map<string, CalendarEvent>,
+  markersByDate: Map<string, CalendarEvent[]>,
 ): MonthData[] {
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -181,7 +183,7 @@ function generateMonths(
       currentWeek.push({
         date: day,
         currentMonth: true,
-        marker: markersByDate.get(dateStr),
+        markers: markersByDate.get(dateStr),
         isToday: dateStr === todayStr,
       });
 
