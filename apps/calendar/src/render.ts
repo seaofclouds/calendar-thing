@@ -49,12 +49,7 @@ export function renderCalendarFragment(opts: RenderOptions): string {
   const totalMonths = actualRows * layout.columns;
   const isPreview = opts.forExport;
 
-  const markersByDate = new Map<string, CalendarEvent[]>();
-  for (const m of opts.markers) {
-    const existing = markersByDate.get(m.date);
-    if (existing) existing.push(m);
-    else markersByDate.set(m.date, [m]);
-  }
+  const markersByDate = buildMarkerMap(opts.markers);
   const months = generateMonths(opts.year, totalMonths, markersByDate);
 
   const calendarClasses = [
@@ -136,12 +131,30 @@ function renderDay(day: DayData): string {
   if (!day.currentMonth) {
     content = formatDate(day.date);
   } else if (day.markers && day.markers.length > 0) {
-    content = day.markers.map((m) => m.emoji).filter(Boolean).join("");
+    content = day.markers[0].emoji || formatDate(day.date);
   } else {
     content = formatDate(day.date);
   }
 
   return `<div class="${classes}">${content}</div>`;
+}
+
+/** Solar events are rarer and more significant — prioritize them over lunar in compact views */
+function markerPriority(e: CalendarEvent): number {
+  return e.uid.startsWith("solar-") ? 0 : 1;
+}
+
+function buildMarkerMap(markers: CalendarEvent[]): Map<string, CalendarEvent[]> {
+  const map = new Map<string, CalendarEvent[]>();
+  for (const m of markers) {
+    const existing = map.get(m.date);
+    if (existing) existing.push(m);
+    else map.set(m.date, [m]);
+  }
+  for (const arr of map.values()) {
+    if (arr.length > 1) arr.sort((a, b) => markerPriority(a) - markerPriority(b));
+  }
+  return map;
 }
 
 function generateMonths(
