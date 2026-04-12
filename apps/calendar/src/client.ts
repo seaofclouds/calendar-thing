@@ -1,10 +1,18 @@
 /**
  * Client-side JS for the calendar app.
- * Handles responsive column layout and image export.
+ * Handles responsive column layout, config sidebar, image upload,
+ * and image/PDF export.
  * Built by esbuild into public/client.js.
  */
 
-// Responsive column count for non-print view
+import {
+  storeImage,
+  loadImageUrl,
+  listImages,
+} from "./store-images";
+
+// ─── Responsive columns (year view) ────────────────────────────────
+
 function updateColumns() {
   const calendar = document.querySelector(".year-view") as HTMLElement | null;
   if (!calendar || calendar.classList.contains("print")) return;
@@ -17,9 +25,12 @@ function updateColumns() {
 window.addEventListener("resize", updateColumns);
 updateColumns();
 
-// Image export — triggered when server sets data-format on .year-view or .month-view
+// ─── URL-triggered image export ────────────────────────────────────
+
 async function maybeExportImage() {
-  const calendar = document.querySelector(".year-view[data-format], .month-view[data-format]") as HTMLElement | null;
+  const calendar = document.querySelector(
+    ".year-view[data-format], .month-view[data-format]",
+  ) as HTMLElement | null;
   if (!calendar) return;
 
   const format = calendar.dataset.format as "png" | "jpg";
@@ -41,7 +52,7 @@ async function maybeExportImage() {
     const dataUrl = await fn(calendar, opts);
 
     const link = document.createElement("a");
-    link.download = `calendar-${year}-${size}-${orientation}.${format}`;
+    link.download = `calendar--${year}--${size}--${orientation}.${format}`;
     link.href = dataUrl;
     link.click();
   } catch (err) {
@@ -49,12 +60,12 @@ async function maybeExportImage() {
   }
 }
 
-// Wait for fonts and layout to settle before exporting
 if (document.querySelector("[data-format]")) {
   setTimeout(maybeExportImage, 2000);
 }
 
-// Config sidebar — pill clicks and export buttons
+// ─── Config sidebar ────────────────────────────────────────────────
+
 function initConfigSidebar() {
   const sidebar = document.querySelector(".config-sidebar");
   if (!sidebar) return;
@@ -62,18 +73,28 @@ function initConfigSidebar() {
   sidebar.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
 
-    // Format/orientation pills — update URL and reload
     if (target.classList.contains("config-option")) {
-      if (target.dataset.size || target.dataset.orientation || target.dataset.margin !== undefined) {
+      // URL-reloading options: size, orientation, margin, layout, length, scaling
+      if (
+        target.dataset.size ||
+        target.dataset.orientation ||
+        target.dataset.margin !== undefined ||
+        target.dataset.layout ||
+        target.dataset.length ||
+        target.dataset.scaling
+      ) {
         const url = new URL(window.location.href);
         if (target.dataset.size) url.searchParams.set("size", target.dataset.size);
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
         if (target.dataset.margin !== undefined) url.searchParams.set("margin", target.dataset.margin);
+        if (target.dataset.layout) url.searchParams.set("layout", target.dataset.layout);
+        if (target.dataset.length) url.searchParams.set("length", target.dataset.length);
+        if (target.dataset.scaling) url.searchParams.set("scaling", target.dataset.scaling);
         window.location.href = url.toString();
         return;
       }
 
-      // DPI pills — client-side toggle only (no reload)
+      // DPI pills — client-side toggle only
       if (target.dataset.dpi) {
         sidebar.querySelectorAll("[data-dpi]").forEach((el) => el.classList.remove("active"));
         target.classList.add("active");
@@ -93,9 +114,10 @@ function initConfigSidebar() {
         }
 
         const feed = target.dataset.feed;
-        const isActive = tokens.includes(feed)
-          || (feed === "lunar:phases" && tokens.some((t) => t.startsWith("lunar:")))
-          || (feed === "movies" && tokens.some((t) => t.startsWith("movies")));
+        const isActive =
+          tokens.includes(feed) ||
+          (feed === "lunar:phases" && tokens.some((t) => t.startsWith("lunar:"))) ||
+          (feed === "movies" && tokens.some((t) => t.startsWith("movies")));
 
         if (isActive) {
           if (feed === "lunar:phases") {
@@ -123,49 +145,237 @@ function initConfigSidebar() {
     if (target.classList.contains("config-button")) {
       if (target.dataset.action === "save") exportCurrentView();
       if (target.dataset.action === "save-all") exportAllMonths();
+      if (target.dataset.action === "save-pdf") exportPDF();
     }
   });
 }
 
+// ─── Config helpers ────────────────────────────────────────────────
+
 function getActiveDpi(): number {
-  const active = document.querySelector(".config-option[data-dpi].active") as HTMLElement | null;
+  const active = document.querySelector(
+    ".config-option[data-dpi].active",
+  ) as HTMLElement | null;
   return parseInt(active?.dataset.dpi ?? "300");
 }
 
 function getConfigParams() {
   const url = new URL(window.location.href);
-  const match = url.pathname.match(/\/config\/(\d+)(?:\/(\d+))?/);
+  const match = url.pathname.match(/\/config\/(\d+)/);
   return {
     year: match?.[1] ?? String(new Date().getFullYear()),
-    month: match?.[2] ?? "",
     size: url.searchParams.get("size") ?? "letter",
     orientation: url.searchParams.get("orientation") ?? "landscape",
     include: url.searchParams.get("include") ?? "",
     margin: url.searchParams.get("margin") ?? "0.25in",
+    layout: url.searchParams.get("layout") ?? "calendar",
+    length: url.searchParams.get("length") ?? "12",
+    scaling: url.searchParams.get("scaling") ?? "fit",
   };
 }
 
+// ─── Scroll-to-month ───────────────────────────────────────────────
+
+function initScrollToMonth() {
+  const content = document.querySelector(".config-content") as HTMLElement | null;
+  if (!content) return;
+
+  const scrollTo = content.dataset.scrollTo;
+  if (scrollTo) {
+    const target = document.querySelector(
+      `.scroll-month[data-month="${scrollTo}"]`,
+    ) as HTMLElement | null;
+    if (target) {
+      // Delay to allow layout to settle
+      requestAnimationFrame(() => {
+        target.scrollIntoView({ block: "start" });
+      });
+    }
+  }
+}
+
+// ─── Image upload for spread layout ────────────────────────────────
+
+/** Hidden file input, reused for all image slots */
+let fileInput: HTMLInputElement | null = null;
+let pendingSlot: { year: number; month: string } | null = null;
+
+function getFileInput(): HTMLInputElement {
+  if (!fileInput) {
+    fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.style.display = "none";
+    document.body.appendChild(fileInput);
+
+    fileInput.addEventListener("change", async () => {
+      if (!fileInput?.files?.[0] || !pendingSlot) return;
+      const file = fileInput.files[0];
+      const { year, month } = pendingSlot;
+      pendingSlot = null;
+
+      await storeImage(year, month, file);
+      await refreshSpreadImage(year, month);
+      fileInput.value = "";
+    });
+  }
+  return fileInput;
+}
+
+function triggerImageUpload(year: number, month: string) {
+  pendingSlot = { year, month };
+  getFileInput().click();
+}
+
+async function refreshSpreadImage(year: number, month: string) {
+  const container = document.querySelector(
+    `.scroll-month[data-year="${year}"][data-month="${month}"] .spread-image`,
+  ) as HTMLElement | null;
+  if (!container) return;
+
+  const url = await loadImageUrl(year, month);
+  if (url) {
+    const scaling = getConfigParams().scaling;
+    container.classList.remove("empty");
+    container.classList.remove("scaling-fit", "scaling-crop");
+    container.classList.add(`scaling-${scaling}`);
+    container.innerHTML = `<img src="${url}" alt="Photo for month ${month}">`;
+  } else {
+    container.classList.add("empty");
+    container.classList.remove("scaling-fit", "scaling-crop");
+    container.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
+  }
+}
+
+/** Inject spread image containers above each calendar month when in photo-calendar layout */
+async function initSpreadLayout() {
+  const config = document.querySelector(".config") as HTMLElement | null;
+  if (!config || config.dataset.layout !== "photo-calendar") return;
+
+  const scrollMonths = document.querySelectorAll(".scroll-month");
+  const scaling = getConfigParams().scaling;
+
+  // Collect all years referenced by the scroll months
+  const yearsInView = new Set<number>();
+  for (const el of scrollMonths) {
+    yearsInView.add(parseInt(el.getAttribute("data-year") ?? "0"));
+  }
+
+  // Build a set of all slots that have images across relevant years
+  const imageSet = new Set<string>();
+  for (const y of yearsInView) {
+    if (!y) continue;
+    const imgs = await listImages(y);
+    for (const img of imgs) {
+      imageSet.add(`${y}-${img.slot}`);
+    }
+  }
+
+  for (const el of scrollMonths) {
+    const month = el.getAttribute("data-month") ?? "";
+    const elYear = parseInt(el.getAttribute("data-year") ?? "0");
+    const page = el.querySelector(".page") as HTMLElement | null;
+    if (!page || !elYear) continue;
+
+    // Create image container sized to match the page
+    const imageDiv = document.createElement("div");
+    imageDiv.className = "spread-image";
+    // Copy page dimensions
+    imageDiv.style.width = page.offsetWidth + "px";
+    imageDiv.style.height = page.offsetHeight + "px";
+
+    if (imageSet.has(`${elYear}-${month}`)) {
+      const url = await loadImageUrl(elYear, month);
+      if (url) {
+        imageDiv.classList.add(`scaling-${scaling}`);
+        imageDiv.innerHTML = `<img src="${url}" alt="Photo for month ${month}">`;
+      } else {
+        imageDiv.classList.add("empty");
+        imageDiv.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
+      }
+    } else {
+      imageDiv.classList.add("empty");
+      imageDiv.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
+    }
+
+    // Insert before the page element
+    el.insertBefore(imageDiv, page);
+  }
+
+  // Handle clicks on spread images (uses per-element year)
+  document.querySelector(".config-scroll")?.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+
+    // Add image button
+    if (target.classList.contains("spread-add-btn")) {
+      const scrollMonth = target.closest(".scroll-month") as HTMLElement | null;
+      const month = scrollMonth?.dataset.month ?? "";
+      const elYear = parseInt(scrollMonth?.dataset.year ?? "0");
+      if (month && elYear) triggerImageUpload(elYear, month);
+      return;
+    }
+
+    // Click on existing image to replace
+    if (target.tagName === "IMG" && target.closest(".spread-image")) {
+      const scrollMonth = target.closest(".scroll-month") as HTMLElement | null;
+      const month = scrollMonth?.dataset.month ?? "";
+      const elYear = parseInt(scrollMonth?.dataset.year ?? "0");
+      if (month && elYear) triggerImageUpload(elYear, month);
+    }
+  });
+}
+
+// ─── Export: current view ──────────────────────────────────────────
+
 async function exportCurrentView() {
-  const root = document.querySelector(".config-content #root") as HTMLElement;
-  if (!root) return;
+  // Find the most centered visible month in the scroll view
+  const scrollMonths = document.querySelectorAll(".scroll-month .page") as NodeListOf<HTMLElement>;
+  let targetPage: HTMLElement | null = null;
+
+  if (scrollMonths.length === 1) {
+    targetPage = scrollMonths[0];
+  } else if (scrollMonths.length > 1) {
+    // Find the page closest to the center of the viewport
+    const viewportCenter = window.innerHeight / 2;
+    let bestDist = Infinity;
+    for (const page of scrollMonths) {
+      const rect = page.getBoundingClientRect();
+      const center = (rect.top + rect.bottom) / 2;
+      const dist = Math.abs(center - viewportCenter);
+      if (dist < bestDist) {
+        bestDist = dist;
+        targetPage = page;
+      }
+    }
+  }
+
+  // Fallback to old behavior for non-scroll views
+  if (!targetPage) {
+    targetPage = document.querySelector(".config-content #root") as HTMLElement;
+  }
+  if (!targetPage) return;
 
   const status = document.querySelector(".config-status") as HTMLElement | null;
   const originalStatus = status?.textContent ?? "";
   const dpi = getActiveDpi();
   const params = getConfigParams();
 
+  // Determine which month this is
+  const scrollMonth = targetPage.closest(".scroll-month") as HTMLElement | null;
+  const monthNum = scrollMonth?.dataset.month ?? "";
+
   if (status) status.textContent = "Exporting\u2026";
 
   try {
     const { toPng } = await import("html-to-image");
-    const dataUrl = await toPng(root, {
+    const dataUrl = await toPng(targetPage, {
       pixelRatio: dpi / 96,
       backgroundColor: "#FFFFFF",
     });
 
-    const monthPart = params.month ? `-${params.month}` : "";
+    const monthPart = monthNum ? `--${monthNum.padStart(2, "0")}` : "";
     const link = document.createElement("a");
-    link.download = `calendar-${params.year}${monthPart}-${params.size}-${params.orientation}-${dpi}dpi.png`;
+    link.download = `calendar--${params.year}${monthPart}--${params.size}--${params.orientation}--${dpi}dpi.png`;
     link.href = dataUrl;
     link.click();
 
@@ -173,64 +383,53 @@ async function exportCurrentView() {
   } catch (err) {
     console.error("Export failed:", err);
     if (status) status.textContent = "Export failed";
-    setTimeout(() => { if (status) status.textContent = originalStatus; }, 3000);
+    setTimeout(() => {
+      if (status) status.textContent = originalStatus;
+    }, 3000);
   }
 }
+
+// ─── Export: all months ────────────────────────────────────────────
 
 async function exportAllMonths() {
   const status = document.querySelector(".config-status") as HTMLElement | null;
   const originalStatus = status?.textContent ?? "";
   const dpi = getActiveDpi();
   const params = getConfigParams();
-  const months = [
-    "jan", "feb", "mar", "apr", "may", "jun",
+  const monthNames = [
+    "", "jan", "feb", "mar", "apr", "may", "jun",
     "jul", "aug", "sep", "oct", "nov", "dec",
   ];
 
-  // Create off-screen container for rendering fetched months
-  const container = document.createElement("div");
-  container.style.position = "fixed";
-  container.style.left = "-9999px";
-  container.style.top = "0";
-  document.body.appendChild(container);
+  // Export all months already rendered in the scroll view
+  const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
+  if (scrollMonths.length === 0) return;
 
   try {
     const { toPng } = await import("html-to-image");
     const pixelRatio = dpi / 96;
 
-    for (let month = 1; month <= 12; month++) {
-      const monthStr = String(month).padStart(2, "0");
-      if (status) status.textContent = `Exporting ${months[month - 1]}\u2026 (${month}/12)`;
+    for (let i = 0; i < scrollMonths.length; i++) {
+      const scrollMonth = scrollMonths[i];
+      const page = scrollMonth.querySelector(".page") as HTMLElement | null;
+      if (!page) continue;
 
-      // Fetch month page and extract #root
-      const fetchParams = new URLSearchParams();
-      fetchParams.set("size", params.size);
-      fetchParams.set("orientation", params.orientation);
-      fetchParams.set("margin", params.margin);
-      if (params.include) fetchParams.set("include", params.include);
+      const monthNum = parseInt(scrollMonth.dataset.month ?? "0");
+      const yearNum = scrollMonth.dataset.year ?? params.year;
+      const monthStr = String(monthNum).padStart(2, "0");
+      const label = monthNames[monthNum] || monthStr;
 
-      const response = await fetch(`/config/${params.year}/${monthStr}?${fetchParams.toString()}`);
-      const html = await response.text();
+      if (status) {
+        status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
+      }
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const rootEl = doc.getElementById("root");
-      if (!rootEl) continue;
-
-      container.innerHTML = "";
-      container.appendChild(document.importNode(rootEl, true));
-
-      // Wait for layout
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-      await new Promise((r) => setTimeout(r, 300));
-
-      const dataUrl = await toPng(container.firstElementChild as HTMLElement, {
+      const dataUrl = await toPng(page, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });
 
       const link = document.createElement("a");
-      link.download = `calendar-${params.year}-${monthStr}-${params.size}-${params.orientation}-${dpi}dpi.png`;
+      link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
       link.href = dataUrl;
       link.click();
 
@@ -239,14 +438,49 @@ async function exportAllMonths() {
     }
 
     if (status) status.textContent = "All months exported!";
-    setTimeout(() => { if (status) status.textContent = originalStatus; }, 3000);
+    setTimeout(() => {
+      if (status) status.textContent = originalStatus;
+    }, 3000);
   } catch (err) {
     console.error("Batch export failed:", err);
     if (status) status.textContent = "Export failed";
-    setTimeout(() => { if (status) status.textContent = originalStatus; }, 3000);
-  } finally {
-    document.body.removeChild(container);
+    setTimeout(() => {
+      if (status) status.textContent = originalStatus;
+    }, 3000);
   }
 }
 
+// ─── Export: PDF for print ─────────────────────────────────────────
+
+async function exportPDF() {
+  const status = document.querySelector(".config-status") as HTMLElement | null;
+  const originalStatus = status?.textContent ?? "";
+
+  if (status) status.textContent = "Preparing PDF export\u2026";
+
+  try {
+    const { exportCalendarPDF } = await import("./export-pdf");
+    await exportCalendarPDF({
+      getStatus: () => status,
+      getOriginalStatus: () => originalStatus,
+    });
+  } catch (err) {
+    console.error("PDF export failed:", err);
+    if (status) status.textContent = "PDF export failed";
+    setTimeout(() => {
+      if (status) status.textContent = originalStatus;
+    }, 3000);
+  }
+}
+
+// ─── Init ──────────────────────────────────────────────────────────
+
 initConfigSidebar();
+initScrollToMonth();
+
+// Initialize spread layout after a brief delay for rendering
+if (document.querySelector('.config[data-layout="photo-calendar"]')) {
+  requestAnimationFrame(() => {
+    initSpreadLayout();
+  });
+}

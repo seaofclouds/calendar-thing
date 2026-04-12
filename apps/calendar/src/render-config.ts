@@ -1,15 +1,10 @@
 /**
  * Config view renderer.
- * Wraps calendar views with a sidebar for month navigation,
- * paper format, orientation, margin, and feed controls.
+ * Sidebar for calendar layout, paper format, feeds, and export controls.
+ * Right side is a scrollable preview of all calendar months.
  */
 
 import { PAGE_TYPES } from "./config";
-
-const MONTH_ABBRS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
 
 const FORMAT_OPTIONS = [
   { value: "letter", label: "Letter" },
@@ -31,6 +26,22 @@ const MARGIN_OPTIONS = [
   { value: "1in", label: '1"' },
 ];
 
+const LAYOUT_OPTIONS = [
+  { value: "calendar", label: "Calendar" },
+  { value: "photo-calendar", label: "Photo + Calendar" },
+];
+
+const LENGTH_OPTIONS = [
+  { value: "12", label: "12 mo" },
+  { value: "14", label: "14 mo" },
+  { value: "16", label: "16 mo" },
+];
+
+const SCALING_OPTIONS = [
+  { value: "fit", label: "Fit" },
+  { value: "crop", label: "Crop" },
+];
+
 const DISPLAY_NAMES: Record<string, string> = {
   letter: "US Letter",
   legal: "US Legal",
@@ -50,43 +61,26 @@ const FEED_OPTIONS = [
 
 const DEFAULT_INCLUDE = ["lunar:phases", "solar:season"];
 
+export interface MonthFragment {
+  year: number;
+  month: number; // 1-12
+  html: string;
+}
+
 export interface ConfigViewOptions {
   year: number;
-  month?: number;
+  scrollToMonth?: number; // 1-12, initial scroll target
   size: string;
   orientation: "portrait" | "landscape";
   margin: string;
-  calendarHtml: string;
+  monthFragments: MonthFragment[];
   includeParam?: string;
+  calendarLength: number; // 12, 14, or 16
+  layout: "calendar" | "photo-calendar";
+  scaling: "fit" | "crop";
 }
 
 export function renderConfigView(opts: ConfigViewOptions): string {
-  const params = new URLSearchParams();
-  params.set("size", opts.size);
-  params.set("orientation", opts.orientation);
-  params.set("margin", opts.margin);
-  if (opts.includeParam) params.set("include", opts.includeParam);
-  const queryParams = `?${params.toString()}`;
-
-  // Generate month nav for current year only
-  const years = [opts.year];
-
-  const monthNav = years.map((year) => {
-    const monthLinks = MONTH_ABBRS.map((abbr, i) => {
-      const monthNum = String(i + 1).padStart(2, "0");
-      const isActive = year === opts.year && (i + 1) === opts.month;
-      const activeClass = isActive ? " active" : "";
-      return `            <li><a href="/config/${year}/${monthNum}${queryParams}" class="config-month${activeClass}">${abbr}</a></li>`;
-    }).join("\n");
-
-    return `        <section class="config-section">
-          <h3 class="config-year"><a href="/config/${year}${queryParams}">${year}</a></h3>
-          <ul class="config-months">
-${monthLinks}
-          </ul>
-        </section>`;
-  }).join("\n");
-
   // Format pills
   const formatPills = FORMAT_OPTIONS.map((opt) => {
     const isActive = opt.value === opts.size;
@@ -105,6 +99,24 @@ ${monthLinks}
     return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
   }).join("\n");
 
+  // Layout toggle
+  const layoutPills = LAYOUT_OPTIONS.map((opt) => {
+    const isActive = opt.value === opts.layout;
+    return `          <button class="config-option${isActive ? " active" : ""}" data-layout="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+
+  // Calendar length
+  const lengthPills = LENGTH_OPTIONS.map((opt) => {
+    const isActive = opt.value === String(opts.calendarLength);
+    return `          <button class="config-option${isActive ? " active" : ""}" data-length="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+
+  // Image scaling (only visible when photo-calendar layout)
+  const scalingPills = SCALING_OPTIONS.map((opt) => {
+    const isActive = opt.value === opts.scaling;
+    return `          <button class="config-option${isActive ? " active" : ""}" data-scaling="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+
   // Feed toggles
   const feedPills = FEED_OPTIONS.map((opt) => {
     const isActive = isFeedActive(opt.token, opts.includeParam);
@@ -114,22 +126,48 @@ ${monthLinks}
   // Status line
   const statusText = getStatusText(opts.size, opts.orientation);
 
+  // Scalng section visibility
+  const scalingDisplay = opts.layout === "photo-calendar" ? "" : ' style="display:none"';
+
+  // Render scrollable month list
+  const monthCards = opts.monthFragments.map((frag) => {
+    // Replace id="root" with class="page" to avoid duplicate IDs
+    const pageHtml = frag.html.replace('id="root"', 'class="page"');
+    return `      <div class="scroll-month" data-year="${frag.year}" data-month="${frag.month}">
+        ${pageHtml}
+      </div>`;
+  }).join("\n");
+
+  const scrollData = opts.scrollToMonth
+    ? ` data-scroll-to="${opts.scrollToMonth}"`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendar Config ${opts.year}${opts.month ? ` / ${MONTH_ABBRS[opts.month - 1]}` : ""}</title>
+  <title>Calendar ${opts.year}</title>
   <link rel="stylesheet" href="/base.css">
   <link rel="stylesheet" href="/styles.css">
   <script src="/client.js" type="module" defer></script>
 </head>
 <body>
-  <div class="config">
+  <div class="config" data-year="${opts.year}" data-layout="${opts.layout}" data-scaling="${opts.scaling}" data-length="${opts.calendarLength}">
     <aside class="config-sidebar">
-      <nav class="config-nav">
-${monthNav}
-      </nav>
+      <section class="config-section">
+        <h3 class="config-label">Layout</h3>
+        <div class="config-options">
+${layoutPills}
+        </div>
+      </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Length</h3>
+        <div class="config-options">
+${lengthPills}
+        </div>
+      </section>
 
       <section class="config-section">
         <h3 class="config-label">Format</h3>
@@ -159,6 +197,13 @@ ${feedPills}
         </div>
       </section>
 
+      <section class="config-section config-scaling"${scalingDisplay}>
+        <h3 class="config-label">Image Scaling</h3>
+        <div class="config-options">
+${scalingPills}
+        </div>
+      </section>
+
       <section class="config-section">
         <h3 class="config-label">Resolution</h3>
         <div class="config-options">
@@ -170,12 +215,15 @@ ${feedPills}
       <section class="config-section config-export">
         <button class="config-button" data-action="save">Save Image</button>
         <button class="config-button" data-action="save-all">Save All Months</button>
+        <button class="config-button" data-action="save-pdf">Save PDF for Print</button>
       </section>
     </aside>
 
-    <main class="config-content">
+    <main class="config-content"${scrollData}>
       <p class="config-status">${statusText}</p>
-      ${opts.calendarHtml}
+      <div class="config-scroll">
+${monthCards}
+      </div>
     </main>
   </div>
 </body>

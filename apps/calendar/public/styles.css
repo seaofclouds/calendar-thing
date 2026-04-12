@@ -1017,14 +1017,125 @@ body:has(.config) {
   color: var(--color-config-muted);
   margin: 0 0 1em 0;
   align-self: flex-start;
+  flex-shrink: 0;
 }
 
 /* Calendar preview inside config — sandboxed color scheme */
-.config-content #root {
+.config-content #root,
+.config-content .page {
   background: var(--color-bg);
   color: var(--color-text);
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ===================
+   Scrollable Config Preview
+   =================== */
+
+.config-scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2em;
+  padding-bottom: 2em;
+}
+
+.scroll-month {
+  flex-shrink: 0;
+}
+
+/* .page mirrors #root sizing for config scroll view (avoids duplicate IDs) */
+.page {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Paper size dimensions for .page (mirrors #root.size-* selectors) */
+.page.size-a6 { width: 105mm; height: 148mm; }
+.page.size-a6.orientation-landscape { width: 148mm; height: 105mm; }
+.page.size-a5 { width: 148mm; height: 210mm; }
+.page.size-a5.orientation-landscape { width: 210mm; height: 148mm; }
+.page.size-a4 { width: 210mm; height: 297mm; }
+.page.size-a4.orientation-landscape { width: 297mm; height: 210mm; }
+.page.size-letter, .page.size-letter.orientation-portrait { width: 215.9mm; height: 279.4mm; }
+.page.size-letter.orientation-landscape { width: 279.4mm; height: 215.9mm; }
+.page.size-legal, .page.size-legal.orientation-portrait { width: 215.9mm; height: 355.6mm; }
+.page.size-legal.orientation-landscape { width: 355.6mm; height: 215.9mm; }
+.page.size-tabloid, .page.size-tabloid.orientation-portrait { width: 279.4mm; height: 431.8mm; }
+.page.size-tabloid.orientation-landscape { width: 431.8mm; height: 279.4mm; }
+.page.size-half-letter, .page.size-half-letter.orientation-portrait { width: 139.7mm; height: 215.9mm; }
+.page.size-half-letter.orientation-landscape { width: 215.9mm; height: 139.7mm; }
+
+/* Print font sizes for .page (mirrors .size-* .print selectors) */
+.size-a6 .month-view.print,
+.page.size-a6 .month-view.print { font-size: 0.5rem; }
+.size-a5 .month-view.print,
+.page.size-a5 .month-view.print { font-size: 0.6rem; }
+.size-a4 .month-view.print,
+.size-letter .month-view.print,
+.page.size-a4 .month-view.print,
+.page.size-letter .month-view.print { font-size: 0.8rem; }
+.size-legal .month-view.print,
+.page.size-legal .month-view.print { font-size: 0.8rem; }
+.size-tabloid .month-view.print,
+.page.size-tabloid .month-view.print { font-size: 1rem; }
+.size-half-letter .month-view.print,
+.page.size-half-letter .month-view.print { font-size: 0.55rem; }
+
+/* ===================
+   Spread Layout (Photo + Calendar)
+   =================== */
+
+.spread-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.spread-image.empty {
+  border: 2px dashed var(--color-border-light);
+  cursor: pointer;
+}
+
+.spread-image img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.spread-image.scaling-fit img {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+.spread-image.scaling-crop img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.spread-add-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+  padding: 1em;
+}
+
+.spread-add-btn:hover {
+  color: var(--color-text);
 }
 
 /* ===================
