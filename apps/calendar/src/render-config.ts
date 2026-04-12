@@ -66,7 +66,7 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   params.set("orientation", opts.orientation);
   params.set("margin", opts.margin);
   if (opts.includeParam) params.set("include", opts.includeParam);
-  const queryParams = `?${params.toString()}`;
+  const queryParams = `?${params.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",")}`;
 
   // Generate month nav for current year only
   const years = [opts.year];

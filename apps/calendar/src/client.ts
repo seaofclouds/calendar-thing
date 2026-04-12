@@ -4,6 +4,11 @@
  * Built by esbuild into public/client.js.
  */
 
+/** Decode colons/commas that URLSearchParams over-encodes (safe in query values per RFC 3986) */
+function cleanUrl(url: URL): string {
+  return url.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",");
+}
+
 // Responsive column count for non-print view
 function updateColumns() {
   const calendar = document.querySelector(".year-view") as HTMLElement | null;
@@ -69,7 +74,7 @@ function initConfigSidebar() {
         if (target.dataset.size) url.searchParams.set("size", target.dataset.size);
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
         if (target.dataset.margin !== undefined) url.searchParams.set("margin", target.dataset.margin);
-        window.location.href = url.toString();
+        window.location.href = cleanUrl(url);
         return;
       }
 
@@ -114,7 +119,7 @@ function initConfigSidebar() {
         } else {
           url.searchParams.set("include", "");
         }
-        window.location.href = url.toString();
+        window.location.href = cleanUrl(url);
         return;
       }
     }
@@ -209,7 +214,7 @@ async function exportAllMonths() {
       fetchParams.set("margin", params.margin);
       if (params.include) fetchParams.set("include", params.include);
 
-      const response = await fetch(`/config/${params.year}/${monthStr}?${fetchParams.toString()}`);
+      const response = await fetch(`/config/${params.year}/${monthStr}?${fetchParams.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",")}`);
       const html = await response.text();
 
       const parser = new DOMParser();
