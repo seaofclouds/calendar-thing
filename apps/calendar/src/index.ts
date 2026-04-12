@@ -23,8 +23,12 @@ import { theatrical, digital } from "../../../feeds/movies/feed.plugin";
 import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
 
-/** Decode colons/commas that URLSearchParams over-encodes (safe in query values per RFC 3986) */
-const cleanQs = (s: string) => s.replace(/%3A/gi, ":").replace(/%2C/gi, ",");
+/** Serialize URLSearchParams without over-encoding safe chars like : and , */
+function serializeParams(params: URLSearchParams): string {
+  const parts: string[] = [];
+  params.forEach((v, k) => parts.push(`${k}=${v}`));
+  return parts.join("&");
+}
 
 const registry = createFeedRegistry([
   astronomyPlugin,
@@ -138,14 +142,14 @@ export default {
         markers,
         borders: params.borders,
         events: monthEvents,
-        queryString: cleanQs(url.search),
+        queryString: `?${serializeParams(url.searchParams)}`,
       });
     } else {
       html = renderCalendar({
         ...params,
         header: params.header,
         forExport,
-        queryString: cleanQs(url.search),
+        queryString: `?${serializeParams(url.searchParams)}`,
         markers,
       });
     }
@@ -323,7 +327,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   configParams.set("orientation", orientation);
   configParams.set("margin", margin);
   if (includeParam) configParams.set("include", includeParam);
-  const configQs = `?${cleanQs(configParams.toString())}`;
+  const configQs = `?${serializeParams(configParams)}`;
 
   // Fetch events (same logic as main calendar routes)
   const token = env.CALENDAR_TOKEN;
