@@ -1038,12 +1038,10 @@ body:has(.config) {
 
 .config-scroll {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
 .scroll-month {
@@ -1053,6 +1051,7 @@ body:has(.config) {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  padding: 3em 0;
 }
 
 /* .page mirrors #root sizing for config scroll view (avoids duplicate IDs) */
@@ -1100,14 +1099,26 @@ body:has(.config) {
    Spread Layout (Photo + Calendar)
    =================== */
 
+/* Wrapper around spread-image + page — single shadow for the pair */
+.spread-pair {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.spread-pair > .page {
+  box-shadow: none;
+}
+
 .spread-image {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--color-bg) 85%, var(--color-config-bg) 15%);
+  background: color-mix(in srgb, var(--color-bg) 90%, var(--color-config-bg) 10%);
   box-sizing: border-box;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.spread-image:not(.empty) {
+  background: var(--color-bg);
 }
 
 .spread-image.empty {
