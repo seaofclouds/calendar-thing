@@ -27,6 +27,8 @@ export interface CalendarEvent {
   url?: string;
   allDay: boolean;
   category: string;
+  /** Canonical key for cross-feed deduplication (e.g. "us-labor-day") */
+  dedupeKey?: string;
 }
 
 /**
@@ -61,4 +63,6 @@ export interface FeedPlugin {
   stripSummarySuffix?: string;
   icon?: string;
   signIcons?: Record<string, string>;
+  /** Maps event summary text → canonical dedupe key for cross-feed deduplication */
+  dedupeKeys?: Record<string, string>;
 }

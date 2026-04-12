@@ -11,6 +11,19 @@ import {
   listImages,
 } from "./store-images";
 
+/** Serialize URL search params without over-encoding safe chars like : and , */
+function serializeParams(params: URLSearchParams): string {
+  const parts: string[] = [];
+  params.forEach((v, k) => parts.push(`${k}=${v}`));
+  return parts.join("&");
+}
+
+/** Build full href from URL using our clean serializer */
+function buildHref(url: URL): string {
+  const qs = serializeParams(url.searchParams);
+  return url.origin + url.pathname + (qs ? `?${qs}` : "");
+}
+
 // ─── Responsive columns (year view) ────────────────────────────────
 
 function updateColumns() {
@@ -150,7 +163,7 @@ function initConfigSidebar() {
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
         if (target.dataset.margin !== undefined) url.searchParams.set("margin", target.dataset.margin);
         if (target.dataset.length) url.searchParams.set("length", target.dataset.length);
-        window.location.href = url.toString();
+        window.location.href = buildHref(url);
         return;
       }
 
@@ -198,7 +211,7 @@ function initConfigSidebar() {
         } else {
           url.searchParams.set("include", "");
         }
-        window.location.href = url.toString();
+        window.location.href = buildHref(url);
         return;
       }
     }

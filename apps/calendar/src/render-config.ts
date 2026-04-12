@@ -55,11 +55,12 @@ const FEED_OPTIONS = [
   { token: "lunar:phases", label: "Lunar" },
   { token: "solar:season", label: "Solar" },
   { token: "movies", label: "Movies" },
+  { token: "holidays-us", label: "Holidays" },
   { token: "busd", label: "School" },
   { token: "astrology", label: "Astrology" },
 ];
 
-const DEFAULT_INCLUDE = ["lunar:phases", "solar:season", "busd", "astrology"];
+const DEFAULT_INCLUDE = ["lunar:phases", "solar:season", "holidays-us", "busd", "astrology"];
 
 export interface MonthFragment {
   year: number;
