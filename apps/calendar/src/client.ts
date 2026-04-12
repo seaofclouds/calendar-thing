@@ -259,7 +259,11 @@ function restoreScrollPosition() {
 
 // ─── Page scaling ──────────────────────────────────────────────────
 
-/** Scale .page elements to fit within the viewport, maintaining paper proportions */
+/**
+ * Scale .page elements to fit within the viewport, maintaining paper proportions.
+ * Uses transform: scale() (preserves correct PDF export) with negative margins
+ * to collapse the unused layout space so elements sit adjacent.
+ */
 function scalePages() {
   const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
   if (!scroll) return;
@@ -267,8 +271,8 @@ function scalePages() {
   const scrollWidth = scroll.clientWidth;
   const scrollHeight = scroll.clientHeight;
   const padding = 24;
-  const gap = 12; // gap between spread-image and page in spread mode
   const availableWidth = scrollWidth - padding * 2;
+  const margin = getConfigParams().margin;
 
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
@@ -279,50 +283,45 @@ function scalePages() {
     const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
     const hasSpread = spreadImage !== null;
 
-    // Temporarily remove transforms to measure natural dimensions
+    // Reset transforms and margins to measure natural dimensions
     page.style.transform = "";
-    if (spreadImage) spreadImage.style.transform = "";
+    page.style.marginBottom = "";
+    if (spreadImage) {
+      spreadImage.style.transform = "";
+      spreadImage.style.marginBottom = "";
+    }
 
     const pageWidth = page.offsetWidth;
     const pageHeight = page.offsetHeight;
     if (pageWidth <= 0 || pageHeight <= 0) continue;
 
-    // In spread mode, both image and calendar need to fit stacked vertically
-    // Total natural height = 2 * pageHeight (image + calendar, same aspect ratio)
-    const totalNaturalH = hasSpread ? pageHeight * 2 + gap : pageHeight;
-    const availableHeight = scrollHeight - 20; // leave 20px peek
+    // Scale to fit: account for 2 pages stacked in spread mode
+    const totalNaturalH = hasSpread ? pageHeight * 2 : pageHeight;
+    const maxContentH = scrollHeight - 40;
+    const scale = Math.min(availableWidth / pageWidth, maxContentH / totalNaturalH);
 
-    const scale = Math.min(
-      availableWidth / pageWidth,
-      availableHeight / totalNaturalH,
-    );
+    // transform: scale() doesn't change layout box.
+    // Negative margin collapses the unused space below each element
+    // so the next element sits flush against the visual boundary.
+    const unusedSpace = pageHeight * (1 - scale);
 
-    // Apply scale to page
     page.style.transform = `scale(${scale})`;
-
-    const scaledW = pageWidth * scale;
-    const scaledPageH = pageHeight * scale;
+    page.style.marginBottom = `${-unusedSpace}px`;
 
     if (hasSpread && spreadImage) {
-      // Size spread-image to match natural page dimensions, then scale
       spreadImage.style.width = `${pageWidth}px`;
       spreadImage.style.height = `${pageHeight}px`;
+      spreadImage.style.padding = margin;
+      spreadImage.style.boxSizing = "border-box";
       spreadImage.style.transform = `scale(${scale})`;
-
-      const scaledSpreadH = pageHeight * scale;
-      const totalScaledH = scaledSpreadH + gap + scaledPageH;
-
-      // scroll-month wraps both elements
-      scrollMonth.style.width = `${scaledW}px`;
-      scrollMonth.style.height = `${scrollHeight}px`;
-      scrollMonth.style.paddingTop = `${Math.max(0, (scrollHeight - totalScaledH) / 2)}px`;
-      scrollMonth.style.gap = `${gap}px`;
-    } else {
-      // Calendar only — page fills the snap region
-      scrollMonth.style.width = `${scaledW}px`;
-      scrollMonth.style.height = `${scrollHeight}px`;
-      scrollMonth.style.paddingTop = `${Math.max(0, (scrollHeight - scaledPageH) / 2)}px`;
+      spreadImage.style.marginBottom = `${-unusedSpace}px`;
     }
+
+    // Don't force scroll-month dimensions — let content flow naturally
+    scrollMonth.style.width = "";
+    scrollMonth.style.height = "";
+    scrollMonth.style.paddingTop = "";
+    scrollMonth.style.gap = "";
   }
 }
 
@@ -435,8 +434,12 @@ async function initSpreadLayout() {
       imageDiv.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
     }
 
-    // Insert before the page element
-    el.insertBefore(imageDiv, page);
+    // Wrap image + page in .spread-pair for single box-shadow
+    const pair = document.createElement("div");
+    pair.className = "spread-pair";
+    el.insertBefore(pair, page);
+    pair.appendChild(imageDiv);
+    pair.appendChild(page);
   }
 
   // Handle clicks on spread images (uses per-element year)
@@ -502,9 +505,11 @@ async function exportCurrentView() {
 
   if (status) status.textContent = "Exporting\u2026";
 
-  // Temporarily remove transform for clean export
+  // Temporarily remove transform + margin for clean export at natural dimensions
   const origTransform = targetPage.style.transform;
+  const origMargin = targetPage.style.marginBottom;
   targetPage.style.transform = "";
+  targetPage.style.marginBottom = "";
 
   try {
     const { toPng } = await import("html-to-image");
@@ -528,6 +533,7 @@ async function exportCurrentView() {
     }, 3000);
   } finally {
     targetPage.style.transform = origTransform;
+    targetPage.style.marginBottom = origMargin;
   }
 }
 
@@ -564,9 +570,11 @@ async function exportAllMonths() {
         status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
       }
 
-      // Temporarily remove transform for clean export
+      // Temporarily remove transform + margin for clean export
       const origTransform = page.style.transform;
+      const origMargin = page.style.marginBottom;
       page.style.transform = "";
+      page.style.marginBottom = "";
 
       const dataUrl = await toPng(page, {
         pixelRatio,
@@ -574,6 +582,7 @@ async function exportAllMonths() {
       });
 
       page.style.transform = origTransform;
+      page.style.marginBottom = origMargin;
 
       const link = document.createElement("a");
       link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
