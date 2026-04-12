@@ -441,6 +441,18 @@ function triggerImageUpload(year: number, month: string) {
   getFileInput().click();
 }
 
+/** SVG icons for fit/crop toggle */
+const ICON_FIT = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/><rect x="4" y="5.5" width="8" height="5" rx="0.5" stroke-dasharray="2 1"/></svg>`;
+const ICON_CROP = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/><line x1="2" y1="4" x2="14" y2="12"/><line x1="14" y1="4" x2="2" y2="12"/></svg>`;
+
+function buildImageContent(url: string, scaling: string): string {
+  const isCrop = scaling === "crop";
+  const nextMode = isCrop ? "fit" : "crop";
+  const icon = isCrop ? ICON_FIT : ICON_CROP;
+  const title = isCrop ? "Switch to Fit" : "Switch to Crop";
+  return `<img src="${url}"><button class="spread-scaling-toggle" data-next-scaling="${nextMode}" title="${title}">${icon}</button>`;
+}
+
 async function refreshSpreadImage(year: number, month: string) {
   const container = document.querySelector(
     `.scroll-month[data-year="${year}"][data-month="${month}"] .spread-image`,
@@ -453,7 +465,7 @@ async function refreshSpreadImage(year: number, month: string) {
     container.classList.remove("empty");
     container.classList.remove("scaling-fit", "scaling-crop");
     container.classList.add(`scaling-${scaling}`);
-    container.innerHTML = `<img src="${url}" alt="Photo for month ${month}">`;
+    container.innerHTML = buildImageContent(url, scaling);
   } else {
     container.classList.add("empty");
     container.classList.remove("scaling-fit", "scaling-crop");
@@ -499,7 +511,7 @@ async function initSpreadLayout() {
       const url = await loadImageUrl(elYear, month);
       if (url) {
         imageDiv.classList.add(`scaling-${scaling}`);
-        imageDiv.innerHTML = `<img src="${url}" alt="Photo for month ${month}">`;
+        imageDiv.innerHTML = buildImageContent(url, scaling);
       } else {
         imageDiv.classList.add("empty");
         imageDiv.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
@@ -527,6 +539,24 @@ async function initSpreadLayout() {
       const month = scrollMonth?.dataset.month ?? "";
       const elYear = parseInt(scrollMonth?.dataset.year ?? "0");
       if (month && elYear) triggerImageUpload(elYear, month);
+      return;
+    }
+
+    // Per-image fit/crop toggle
+    const toggleBtn = target.closest(".spread-scaling-toggle") as HTMLElement | null;
+    if (toggleBtn) {
+      const spreadImage = toggleBtn.closest(".spread-image") as HTMLElement | null;
+      if (!spreadImage) return;
+      const nextScaling = toggleBtn.dataset.nextScaling ?? "fit";
+      spreadImage.classList.remove("scaling-fit", "scaling-crop");
+      spreadImage.classList.add(`scaling-${nextScaling}`);
+      // Update button to show the opposite toggle
+      const newNext = nextScaling === "crop" ? "fit" : "crop";
+      const icon = nextScaling === "crop" ? ICON_FIT : ICON_CROP;
+      const title = nextScaling === "crop" ? "Switch to Fit" : "Switch to Crop";
+      toggleBtn.dataset.nextScaling = newNext;
+      toggleBtn.title = title;
+      toggleBtn.innerHTML = icon;
       return;
     }
 

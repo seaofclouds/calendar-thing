@@ -1162,6 +1162,42 @@ body:has(.config) {
   color: var(--color-text);
 }
 
+/* Per-image fit/crop toggle — overlaid icon, not printed */
+.spread-image {
+  position: relative;
+}
+
+.spread-scaling-toggle {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 1;
+}
+
+.spread-scaling-toggle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.spread-image:hover .spread-scaling-toggle {
+  opacity: 1;
+}
+
+.spread-scaling-toggle:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
 /* ===================
    Testing Styles
    =================== */
