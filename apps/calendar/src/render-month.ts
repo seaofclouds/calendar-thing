@@ -37,7 +37,7 @@ export interface MonthViewOptions {
 interface DayData {
   date: number;
   currentMonth: boolean;
-  marker?: CalendarEvent;
+  markers?: CalendarEvent[];
   isToday?: boolean;
   events?: CalendarEvent[];
 }
@@ -50,10 +50,7 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   // Build marker and event maps by date
-  const markersByDate = new Map<string, CalendarEvent>();
-  for (const m of opts.markers) {
-    if (!markersByDate.has(m.date)) markersByDate.set(m.date, m);
-  }
+  const markersByDate = buildMarkerMap(opts.markers);
   const eventsByDate = new Map<string, CalendarEvent[]>();
   for (const e of opts.events ?? []) {
     const existing = eventsByDate.get(e.date) ?? [];
@@ -157,15 +154,15 @@ function renderMiniMonth(title: string, weeks: DayData[][]): string {
             </section>`;
 }
 
-/** Year-view style day cell (used in mini calendars) */
+/** Year-view style day cell (used in mini calendars) — shows only highest-priority marker */
 function renderDay(day: DayData): string {
   const classes = `day${!day.currentMonth ? " other-month" : ""}${day.isToday ? " today" : ""}`;
 
   let content: string;
   if (!day.currentMonth) {
     content = formatDate(day.date);
-  } else if (day.marker?.emoji) {
-    content = day.marker.emoji;
+  } else if (day.markers && day.markers.length > 0) {
+    content = day.markers[0].emoji || formatDate(day.date);
   } else {
     content = formatDate(day.date);
   }
@@ -197,8 +194,8 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
 
   const dayNum = `<span class="day-number">${day.date}</span>`;
 
-  // Right-aligned indicator (day-marker events like moon phase or solar event)
-  const indicator = day.marker?.emoji ?? "";
+  // Right-aligned indicators (day-marker events like moon phase or solar event)
+  const indicator = (day.markers ?? []).map((m) => m.emoji).filter(Boolean).join("");
 
   // Event text (left-aligned, max 3)
   const eventItems = (day.events ?? [])
@@ -225,7 +222,7 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
 function generateWeeks(
   year: number,
   monthIndex: number,
-  markersByDate: Map<string, CalendarEvent>,
+  markersByDate: Map<string, CalendarEvent[]>,
   todayStr: string,
   eventsByDate?: Map<string, CalendarEvent[]>,
 ): DayData[][] {
@@ -252,7 +249,7 @@ function generateWeeks(
     currentWeek.push({
       date: day,
       currentMonth: true,
-      marker: markersByDate.get(dateStr),
+      markers: markersByDate.get(dateStr),
       isToday: dateStr === todayStr,
       events: eventsByDate?.get(dateStr),
     });
@@ -279,6 +276,24 @@ function generateWeeks(
   }
 
   return weeks;
+}
+
+/** Solar events are rarer and more significant — prioritize them over lunar in compact views */
+function markerPriority(e: CalendarEvent): number {
+  return e.uid.startsWith("solar-") ? 0 : 1;
+}
+
+function buildMarkerMap(markers: CalendarEvent[]): Map<string, CalendarEvent[]> {
+  const map = new Map<string, CalendarEvent[]>();
+  for (const m of markers) {
+    const existing = map.get(m.date);
+    if (existing) existing.push(m);
+    else map.set(m.date, [m]);
+  }
+  for (const arr of map.values()) {
+    if (arr.length > 1) arr.sort((a, b) => markerPriority(a) - markerPriority(b));
+  }
+  return map;
 }
 
 function escapeHtml(str: string): string {
