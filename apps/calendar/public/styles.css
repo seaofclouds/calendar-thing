@@ -762,6 +762,18 @@ body {
 }
 
 /* Month view print */
+.month-view.print .month-expanded {
+  min-height: 0;
+}
+
+.month-view.print .month-days {
+  min-height: 0;
+}
+
+.month-view.print .month-days .day {
+  min-height: 0;
+}
+
 .month-view.print .day.today .day-number {
   font-weight: var(--font-weight-book);
   color: inherit;
@@ -842,6 +854,151 @@ body {
   .month-days .day {
     min-height: 5em;
   }
+}
+
+/* ===================
+   Config View
+   =================== */
+
+body:has(.config) {
+  background: var(--color-config-bg);
+}
+
+.config {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-config-bg);
+  color: var(--color-config-text);
+}
+
+.config-sidebar {
+  width: var(--config-sidebar-width);
+  padding: 1em;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.config-nav {
+  margin-bottom: 1.5em;
+}
+
+.config-section {
+  margin-bottom: 1em;
+}
+
+.config-year {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0.3em;
+}
+
+.config-year a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.config-months {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em;
+}
+
+.config-month {
+  font-size: var(--font-size-sm);
+  color: inherit;
+  text-decoration: none;
+  padding: 0.15em 0.4em;
+  border-radius: 0.8em;
+}
+
+.config-month:hover {
+  background: var(--color-config-active);
+}
+
+.config-month.active {
+  background: var(--color-config-active);
+  font-weight: var(--font-weight-medium);
+}
+
+.config-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0.3em;
+}
+
+.config-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em;
+}
+
+.config-option {
+  border: none;
+  border-radius: 1em;
+  padding: 0.3em 0.8em;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: inherit;
+}
+
+.config-option:hover {
+  background: var(--color-config-active);
+}
+
+.config-option.active {
+  background: var(--color-config-active);
+}
+
+.config-button {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.5em 0.8em;
+  background: var(--color-config-active);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: inherit;
+  margin-bottom: 0.3em;
+  text-align: center;
+}
+
+.config-button:hover {
+  opacity: 0.8;
+}
+
+.config-export {
+  margin-top: 1.5em;
+}
+
+.config-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1em;
+  overflow: auto;
+}
+
+.config-status {
+  font-size: var(--font-size-sm);
+  color: var(--color-config-muted);
+  margin: 0 0 1em 0;
+  align-self: flex-start;
+}
+
+/* Calendar preview inside config — sandboxed color scheme */
+.config-content #root {
+  background: var(--color-bg);
+  color: var(--color-text);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* ===================

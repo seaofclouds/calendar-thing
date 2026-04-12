@@ -4,8 +4,9 @@
  * Fetches event data from feed plugins via service bindings.
  */
 
-import { renderCalendar } from "./render";
-import { renderMonthView } from "./render-month";
+import { renderCalendar, renderCalendarFragment } from "./render";
+import { renderMonthView, renderMonthViewFragment } from "./render-month";
+import { renderConfigView } from "./render-config";
 import { renderStyleguide } from "./render-styleguide";
 import {
   createFeedRegistry,
@@ -55,6 +56,7 @@ interface CalendarParams {
 
 const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-tabloid", "a4", "a5", "a6"]);
 const VALID_ORIENTATIONS = new Set(["portrait", "landscape"]);
+const VALID_MARGINS = new Set(["0.25in", "0.5in", "1in"]);
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -76,6 +78,11 @@ export default {
     // Feed proxy: /feeds/*.ics → service binding
     if (path.startsWith("/feeds/")) {
       return handleFeedProxy(path, url, env);
+    }
+
+    // Config view: /config/:year, /config/:year/:month
+    if (path.startsWith("/config/")) {
+      return handleConfigRoute(path, url, env);
     }
 
     // Parse URL
@@ -275,5 +282,115 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
   return new Response(response.body, {
     status: response.status,
     headers: response.headers,
+  });
+}
+
+async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Response> {
+  const segments = path.replace(/^\/config\//, "").split("/").filter(Boolean);
+  if (segments.length === 0) {
+    return Response.redirect(`${url.origin}/config/${new Date().getFullYear()}`, 302);
+  }
+
+  const yearNum = parseInt(segments[0]);
+  if (isNaN(yearNum)) {
+    return Response.redirect(`${url.origin}/config/${new Date().getFullYear()}`, 302);
+  }
+
+  let month: number | undefined;
+  if (segments[1]) {
+    const monthNum = parseInt(segments[1]);
+    if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
+      month = monthNum;
+    }
+  }
+
+  const sizeParam = url.searchParams.get("size") ?? "letter";
+  const size = VALID_SIZES.has(sizeParam) ? sizeParam : "letter";
+  const orientParam = url.searchParams.get("orientation") ?? "landscape";
+  const orientation = (VALID_ORIENTATIONS.has(orientParam) ? orientParam : "landscape") as "portrait" | "landscape";
+  const includeParam = url.searchParams.get("include") ?? undefined;
+  const include = parseIncludeParam(includeParam ?? null, registry.getAll());
+  const borders = url.searchParams.get("borders") !== "false";
+  const marginParam = url.searchParams.get("margin") ?? "0.25in";
+  const margin = VALID_MARGINS.has(marginParam) ? marginParam : "0.25in";
+
+  // Build query string for calendar-internal links (preserves config state)
+  const configParams = new URLSearchParams();
+  configParams.set("size", size);
+  configParams.set("orientation", orientation);
+  configParams.set("margin", margin);
+  if (includeParam) configParams.set("include", includeParam);
+  const configQs = `?${configParams.toString()}`;
+
+  // Fetch events (same logic as main calendar routes)
+  const token = env.CALENDAR_TOKEN;
+  const feedUrls = url.searchParams.getAll("feed");
+  const allFeeds = registry.getAll();
+
+  const feedResults = await Promise.all([
+    ...allFeeds
+      .filter((feed) => isFeedEnabled(include, feed.id))
+      .map((feed) =>
+        fetchFeedEvents(feed, env, token, getActiveTokens(include, feed.id))
+      ),
+    ...feedUrls.map((u) => fetchExternalFeed(u)),
+  ]);
+  const allEvents = feedResults.flat();
+
+  const markerIds = new Set(
+    allFeeds.filter((f) => f.renderMode === "day-marker").map((f) => f.category),
+  );
+  const markers = allEvents.filter((e) => markerIds.has(e.category));
+  const events = allEvents.filter((e) => !markerIds.has(e.category));
+
+  // Render calendar fragment in print mode at selected paper size
+  let calendarHtml: string;
+  if (month != null) {
+    const monthStr = String(month).padStart(2, "0");
+    const prefix = `${yearNum}-${monthStr}-`;
+    const monthEvents = events.filter((e) => e.date.startsWith(prefix));
+
+    calendarHtml = renderMonthViewFragment({
+      year: yearNum,
+      month,
+      size,
+      orientation,
+      header: true,
+      testing: false,
+      forExport: true,
+      markers,
+      borders,
+      events: monthEvents,
+      queryString: configQs,
+      urlPrefix: "/config",
+      margin,
+    });
+  } else {
+    calendarHtml = renderCalendarFragment({
+      year: yearNum,
+      size,
+      orientation,
+      header: true,
+      testing: false,
+      forExport: true,
+      markers,
+      queryString: configQs,
+      urlPrefix: "/config",
+      margin,
+    });
+  }
+
+  const html = renderConfigView({
+    year: yearNum,
+    month,
+    size,
+    orientation,
+    margin,
+    calendarHtml,
+    includeParam,
+  });
+
+  return new Response(html, {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
