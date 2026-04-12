@@ -1062,7 +1062,7 @@ body:has(.config) {
   text-align: center;
   display: flex;
   flex-direction: column;
-  transform-origin: top center;
+  transform-origin: top left;
 }
 
 /* Paper size dimensions for .page (mirrors #root.size-* selectors) */
@@ -1117,7 +1117,7 @@ body:has(.config) {
   background: color-mix(in srgb, var(--color-bg) 90%, var(--color-config-bg) 10%);
   box-sizing: border-box;
   overflow: hidden;
-  transform-origin: top center;
+  transform-origin: top left;
 }
 
 .spread-image:not(.empty) {

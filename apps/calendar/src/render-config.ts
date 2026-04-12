@@ -213,6 +213,7 @@ ${feedPills}
       </section>
 
       <section class="config-section config-export">
+        <p class="config-status"></p>
         <button class="config-button" data-action="save">Save Image</button>
         <button class="config-button" data-action="save-all">Save All Months</button>
         <button class="config-button" data-action="save-pdf">Save PDF for Print</button>
@@ -220,7 +221,6 @@ ${feedPills}
     </aside>
 
     <main class="config-content"${scrollData}>
-      <p class="config-status">${statusText}</p>
       <div class="config-scroll">
 ${monthCards}
       </div>

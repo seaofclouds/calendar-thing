@@ -74,14 +74,73 @@ function initConfigSidebar() {
     const target = e.target as HTMLElement;
 
     if (target.classList.contains("config-option")) {
-      // URL-reloading options: size, orientation, margin, layout, length, scaling
+      // Layout toggle — client-side only, no reload
+      if (target.dataset.layout) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("layout", target.dataset.layout);
+        history.replaceState(null, "", url.toString());
+
+        // Toggle active pill
+        const section = target.closest(".config-section")!;
+        section.querySelectorAll(".config-option").forEach((el) => el.classList.remove("active"));
+        target.classList.add("active");
+
+        // Update data attribute
+        const config = document.querySelector(".config") as HTMLElement;
+        config.dataset.layout = target.dataset.layout;
+
+        // Show/hide scaling section
+        const scalingSection = document.querySelector(".config-scaling") as HTMLElement | null;
+        if (scalingSection) {
+          scalingSection.style.display = target.dataset.layout === "photo-calendar" ? "" : "none";
+        }
+
+        // Toggle spread layout
+        if (target.dataset.layout === "photo-calendar") {
+          initSpreadLayout().then(() => scalePages());
+        } else {
+          // Remove spread elements, restore pages
+          document.querySelectorAll(".spread-pair").forEach((pair) => {
+            const parent = pair.parentElement!;
+            const page = pair.querySelector(".page");
+            if (page) parent.appendChild(page);
+            pair.remove();
+          });
+          document.querySelectorAll(".spread-image").forEach((el) => el.remove());
+          scalePages();
+        }
+        return;
+      }
+
+      // Scaling toggle — client-side only, no reload
+      if (target.dataset.scaling) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("scaling", target.dataset.scaling);
+        history.replaceState(null, "", url.toString());
+
+        // Toggle active pill
+        const section = target.closest(".config-section")!;
+        section.querySelectorAll(".config-option").forEach((el) => el.classList.remove("active"));
+        target.classList.add("active");
+
+        // Update data attribute
+        const config = document.querySelector(".config") as HTMLElement;
+        config.dataset.scaling = target.dataset.scaling;
+
+        // Update all spread-image scaling classes
+        document.querySelectorAll(".spread-image:not(.empty)").forEach((el) => {
+          el.classList.remove("scaling-fit", "scaling-crop");
+          el.classList.add(`scaling-${target.dataset.scaling}`);
+        });
+        return;
+      }
+
+      // URL-reloading options: size, orientation, margin, length
       if (
         target.dataset.size ||
         target.dataset.orientation ||
         target.dataset.margin !== undefined ||
-        target.dataset.layout ||
-        target.dataset.length ||
-        target.dataset.scaling
+        target.dataset.length
       ) {
         // Save current visible month before navigating
         saveVisibleMonth();
@@ -90,9 +149,7 @@ function initConfigSidebar() {
         if (target.dataset.size) url.searchParams.set("size", target.dataset.size);
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
         if (target.dataset.margin !== undefined) url.searchParams.set("margin", target.dataset.margin);
-        if (target.dataset.layout) url.searchParams.set("layout", target.dataset.layout);
         if (target.dataset.length) url.searchParams.set("length", target.dataset.length);
-        if (target.dataset.scaling) url.searchParams.set("scaling", target.dataset.scaling);
         window.location.href = url.toString();
         return;
       }
@@ -315,13 +372,18 @@ function scalePages() {
       spreadImage.style.boxSizing = "border-box";
       spreadImage.style.transform = `scale(${scale})`;
       spreadImage.style.marginBottom = `${-unusedSpace}px`;
+      // Also collapse horizontal unused space
+      spreadImage.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
     }
 
-    // Don't force scroll-month dimensions — let content flow naturally
-    scrollMonth.style.width = "";
-    scrollMonth.style.height = "";
-    scrollMonth.style.paddingTop = "";
-    scrollMonth.style.gap = "";
+    // Collapse horizontal unused space on the page too
+    page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
+
+    // Constrain spread-pair width so shadow doesn't go wide
+    const pair = scrollMonth.querySelector(".spread-pair") as HTMLElement | null;
+    if (pair) {
+      pair.style.width = `${pageWidth * scale}px`;
+    }
   }
 }
 
