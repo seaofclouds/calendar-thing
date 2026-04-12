@@ -25,5 +25,9 @@ binding = "MOVIE_RELEASE"
 service = "calendar-movies"
 
 [[services]]
+binding = "HOLIDAYS_US"
+service = "calendar-holidays-us"
+
+[[services]]
 binding = "ASTROLOGY"
 service = "calendar-astrology"

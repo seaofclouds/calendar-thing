@@ -1,0 +1,29 @@
+import type { FeedPlugin } from "../../shared/src/types";
+import fixture from "./fixtures/holidays-us.ics";
+
+const plugin: FeedPlugin = {
+  id: "holidays-us",
+  name: "US Holidays",
+  binding: "HOLIDAYS_US",
+  endpoint: "/feeds/holidays-us.ics",
+  prodUrl: "https://calendar-holidays-us.seaofclouds.workers.dev",
+  category: "holidays",
+  renderMode: "event-list",
+  fixture,
+  dedupeKeys: {
+    "New Year's Day": "us-new-years-day",
+    "Martin Luther King Jr. Day": "us-mlk-day",
+    "Presidents' Day": "us-presidents-day",
+    "Memorial Day": "us-memorial-day",
+    "Juneteenth": "us-juneteenth",
+    "Independence Day": "us-independence-day",
+    "Labor Day": "us-labor-day",
+    "Indigenous Peoples' Day": "us-indigenous-peoples-day",
+    "Veterans Day": "us-veterans-day",
+    "Thanksgiving": "us-thanksgiving",
+    "Christmas Day": "us-christmas",
+  },
+  icon: `<svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M7 0C3.134 0 0 3.134 0 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7Zm0 1.5c1.13 0 2.176.345 3.05.93L3.43 10.05A5.47 5.47 0 0 1 1.5 7c0-3.038 2.462-5.5 5.5-5.5Zm0 11c-1.13 0-2.176-.345-3.05-.93l6.62-7.62A5.47 5.47 0 0 1 12.5 7c0 3.038-2.462 5.5-5.5 5.5Z"/></svg>`,
+};
+
+export default plugin;

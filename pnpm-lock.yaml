@@ -65,6 +65,22 @@ importers:
         specifier: ^4.81.0
         version: 4.81.0(@cloudflare/workers-types@4.20260408.1)
 
+  feeds/holidays-us:
+    dependencies:
+      '@calendar-feeds/shared':
+        specifier: workspace:*
+        version: link:../../shared
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20241127.0
+        version: 4.20260408.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      wrangler:
+        specifier: ^4.81.0
+        version: 4.81.0(@cloudflare/workers-types@4.20260408.1)
+
   feeds/movies:
     dependencies:
       '@calendar-feeds/shared':
