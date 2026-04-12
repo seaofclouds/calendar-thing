@@ -970,6 +970,8 @@ body:has(.config) {
   font-family: var(--font-family);
   font-size: var(--font-size-sm);
   color: inherit;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .config-option:hover {
@@ -1046,11 +1048,10 @@ body:has(.config) {
 
 .scroll-month {
   flex-shrink: 0;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   box-sizing: border-box;
 }
 

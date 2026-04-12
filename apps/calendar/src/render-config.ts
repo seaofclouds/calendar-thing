@@ -59,7 +59,7 @@ const FEED_OPTIONS = [
   { token: "astrology", label: "Astrology" },
 ];
 
-const DEFAULT_INCLUDE = ["lunar:phases", "solar:season"];
+const DEFAULT_INCLUDE = ["lunar:phases", "solar:season", "busd", "astrology"];
 
 export interface MonthFragment {
   year: number;
