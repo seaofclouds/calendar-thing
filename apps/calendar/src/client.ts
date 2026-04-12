@@ -353,9 +353,10 @@ function scalePages() {
     const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
     const hasSpread = spreadImage !== null;
 
-    // Reset transforms and margins to measure natural dimensions
+    // Reset transforms, margins, and spread-specific padding
     page.style.transform = "";
     page.style.marginBottom = "";
+    page.style.paddingTop = "";
     if (spreadImage) {
       spreadImage.style.transform = "";
       spreadImage.style.marginBottom = "";
@@ -365,37 +366,56 @@ function scalePages() {
     const pageHeight = page.offsetHeight;
     if (pageWidth <= 0 || pageHeight <= 0) continue;
 
-    // Scale to fit: account for 2 pages stacked in spread mode
-    const totalNaturalH = hasSpread ? pageHeight * 2 : pageHeight;
-    const maxContentH = scrollHeight - 40;
-    const scale = Math.min(availableWidth / pageWidth, maxContentH / totalNaturalH);
-
-    // transform: scale() doesn't change layout box.
-    // Negative margin collapses the unused space below each element
-    // so the next element sits flush against the visual boundary.
-    const unusedSpace = pageHeight * (1 - scale);
-
-    page.style.transform = `scale(${scale})`;
-    page.style.marginBottom = `${-unusedSpace}px`;
-
     if (hasSpread && spreadImage) {
+      // Binding gutter: add 0.5in to the configured margin at the
+      // edges where image and calendar meet the spiral binding.
+      // Image gets extra bottom padding, calendar gets extra top padding.
+      const marginVal = parseFloat(margin);
+      const marginUnit = margin.replace(/[\d.]/g, "");
+      const bindingMargin = `${marginVal + 0.5}${marginUnit}`;
+
+      // Spread-image: standard margin on 3 sides, binding gutter at bottom
       spreadImage.style.width = `${pageWidth}px`;
       spreadImage.style.height = `${pageHeight}px`;
-      spreadImage.style.padding = margin;
+      spreadImage.style.padding = `${margin} ${margin} ${bindingMargin} ${margin}`;
       spreadImage.style.boxSizing = "border-box";
+
+      // Calendar page: binding gutter at top
+      page.style.paddingTop = bindingMargin;
+
+      // Remeasure page height after padding change
+      const pageHeightWithGutter = page.offsetHeight;
+      const spreadHeightWithGutter = pageHeight; // spread-image natural height stays the same (box-sizing: border-box)
+
+      // Scale to fit both pages stacked
+      const totalNaturalH = spreadHeightWithGutter + pageHeightWithGutter;
+      const maxContentH = scrollHeight - 40;
+      const scale = Math.min(availableWidth / pageWidth, maxContentH / totalNaturalH);
+      const unusedSpread = spreadHeightWithGutter * (1 - scale);
+      const unusedPage = pageHeightWithGutter * (1 - scale);
+
       spreadImage.style.transform = `scale(${scale})`;
-      spreadImage.style.marginBottom = `${-unusedSpace}px`;
-      // Also collapse horizontal unused space
+      spreadImage.style.marginBottom = `${-unusedSpread}px`;
       spreadImage.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
-    }
 
-    // Collapse horizontal unused space on the page too
-    page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
+      page.style.transform = `scale(${scale})`;
+      page.style.marginBottom = `${-unusedPage}px`;
+      page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
 
-    // Constrain spread-pair width so shadow doesn't go wide
-    const pair = scrollMonth.querySelector(".spread-pair") as HTMLElement | null;
-    if (pair) {
-      pair.style.width = `${pageWidth * scale}px`;
+      // Constrain spread-pair width so shadow doesn't go wide
+      const pair = scrollMonth.querySelector(".spread-pair") as HTMLElement | null;
+      if (pair) {
+        pair.style.width = `${pageWidth * scale}px`;
+      }
+    } else {
+      // Calendar-only mode: no gutter
+      const maxContentH = scrollHeight - 40;
+      const scale = Math.min(availableWidth / pageWidth, maxContentH / pageHeight);
+      const unusedSpace = pageHeight * (1 - scale);
+
+      page.style.transform = `scale(${scale})`;
+      page.style.marginBottom = `${-unusedSpace}px`;
+      page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
     }
   }
 }
