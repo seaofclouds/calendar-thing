@@ -762,6 +762,18 @@ body {
 }
 
 /* Month view print */
+.month-view.print .month-expanded {
+  min-height: 0;
+}
+
+.month-view.print .month-days {
+  min-height: 0;
+}
+
+.month-view.print .month-days .day {
+  min-height: 0;
+}
+
 .month-view.print .day.today .day-number {
   font-weight: var(--font-weight-book);
   color: inherit;
