@@ -4,9 +4,7 @@ import fixture from "./fixtures/holidays-us.ics";
 const plugin: FeedPlugin = {
   id: "holidays-us",
   name: "US Holidays",
-  binding: "HOLIDAYS_US",
   endpoint: "/feeds/holidays-us.ics",
-  prodUrl: "https://calendar-holidays-us.seaofclouds.workers.dev",
   category: "holidays",
   renderMode: "event-list",
   fixture,

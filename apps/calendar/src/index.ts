@@ -44,7 +44,6 @@ const registry = createFeedRegistry([
 interface Env {
   ASTRONOMY: Fetcher;
   MOVIE_RELEASE: Fetcher;
-  HOLIDAYS_US: Fetcher;
   ASTROLOGY: Fetcher;
   CALENDAR_TOKEN?: string;
   [key: string]: unknown;
