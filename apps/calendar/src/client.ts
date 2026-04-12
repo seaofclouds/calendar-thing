@@ -186,14 +186,15 @@ function saveVisibleMonth() {
   const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
   if (!scroll) return;
 
-  // Find the month whose top is closest to the scroll container's top
-  const scrollTop = scroll.scrollTop;
+  // Use getBoundingClientRect for reliable position detection
+  const scrollRect = scroll.getBoundingClientRect();
   const months = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
   let best: HTMLElement | null = null;
   let bestDist = Infinity;
   for (const m of months) {
-    const dist = Math.abs(m.offsetTop - scrollTop);
+    const rect = m.getBoundingClientRect();
+    const dist = Math.abs(rect.top - scrollRect.top);
     if (dist < bestDist) {
       bestDist = dist;
       best = m;
@@ -471,10 +472,11 @@ async function exportCurrentView() {
   let targetMonth: HTMLElement | null = null;
 
   if (scroll && scrollMonths.length > 0) {
-    const scrollTop = scroll.scrollTop;
+    const scrollRect = scroll.getBoundingClientRect();
     let bestDist = Infinity;
     for (const m of scrollMonths) {
-      const dist = Math.abs(m.offsetTop - scrollTop);
+      const rect = m.getBoundingClientRect();
+      const dist = Math.abs(rect.top - scrollRect.top);
       if (dist < bestDist) {
         bestDist = dist;
         targetMonth = m;

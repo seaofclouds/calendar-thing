@@ -892,7 +892,7 @@ body:has(.config) {
 
 .config {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--color-config-bg);
   color: var(--color-config-text);
 }
@@ -1009,9 +1009,9 @@ body:has(.config) {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 0;
   overflow: hidden;
+  min-height: 0;
 }
 
 .config-status {
@@ -1038,12 +1038,11 @@ body:has(.config) {
 
 .config-scroll {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  min-height: 0;
 }
 
 .scroll-month {
