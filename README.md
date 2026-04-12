@@ -60,14 +60,17 @@ Query params: `rows=N`, `header=false`, `test=true`, `include=lunar:full,lunar:n
 
 ### Default Layouts
 
-| Size    | Portrait | Landscape |
-|---------|----------|-----------|
-| A6      | 4 × 3   | 3 × 4    |
-| A5      | 4 × 3   | 3 × 4    |
-| A4      | 4 × 3   | 3 × 4    |
-| Letter  | 4 × 3   | 3 × 4    |
-| Legal   | 5 × 3   | 3 × 5    |
-| Tabloid | 5 × 3   | 3 × 5    |
+All sizes use a 4 × 3 (portrait) or 3 × 4 (landscape) month grid, except half-letter which uses 3 × 2 / 2 × 3. The rendered page matches each paper's actual dimensions.
+
+| Size        | Dimensions        | Aspect Ratio |
+|-------------|-------------------|--------------|
+| A6          | 105 × 148 mm      | 1 : √2      |
+| A5          | 148 × 210 mm      | 1 : √2      |
+| A4          | 210 × 297 mm      | 1 : √2      |
+| Half-letter | 5.5 × 8.5 in      | 1 : 1.55     |
+| Letter      | 8.5 × 11 in       | 1 : 1.29     |
+| Legal       | 8.5 × 14 in       | 1 : 1.65     |
+| Tabloid     | 11 × 17 in        | 1 : 1.55     |
 
 ### Feed Endpoints
 

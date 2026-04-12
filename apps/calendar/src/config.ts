@@ -43,8 +43,8 @@ export const PAGE_TYPES: Record<string, PageTypeConfig> = {
       height: { value: 14, unit: "in" },
     },
     layout: {
-      portrait: { rows: 5, columns: 3 },
-      landscape: { rows: 3, columns: 5 },
+      portrait: { rows: 4, columns: 3 },
+      landscape: { rows: 3, columns: 4 },
     },
   },
   tabloid: {
@@ -53,11 +53,11 @@ export const PAGE_TYPES: Record<string, PageTypeConfig> = {
       height: { value: 17, unit: "in" },
     },
     layout: {
-      portrait: { rows: 5, columns: 3 },
-      landscape: { rows: 3, columns: 5 },
+      portrait: { rows: 4, columns: 3 },
+      landscape: { rows: 3, columns: 4 },
     },
   },
-  "half-tabloid": {
+  "half-letter": {
     dimensions: {
       width: { value: 5.5, unit: "in" },
       height: { value: 8.5, unit: "in" },
