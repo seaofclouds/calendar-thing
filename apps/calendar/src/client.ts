@@ -258,7 +258,11 @@ function restoreScrollPosition() {
 
 // ─── Page scaling ──────────────────────────────────────────────────
 
-/** Scale .page elements to fit within the viewport, maintaining paper proportions */
+/**
+ * Scale .page elements to fit within the viewport using CSS zoom.
+ * zoom (unlike transform: scale) changes the actual layout box,
+ * so elements stack naturally without manual height compensation.
+ */
 function scalePages() {
   const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
   if (!scroll) return;
@@ -266,8 +270,9 @@ function scalePages() {
   const scrollWidth = scroll.clientWidth;
   const scrollHeight = scroll.clientHeight;
   const padding = 24;
-  const gap = 12; // gap between spread-image and page in spread mode
+  const peekHeight = 20; // pixels of adjacent month visible
   const availableWidth = scrollWidth - padding * 2;
+  const margin = getConfigParams().margin;
 
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
@@ -278,50 +283,39 @@ function scalePages() {
     const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
     const hasSpread = spreadImage !== null;
 
-    // Temporarily remove transforms to measure natural dimensions
-    page.style.transform = "";
-    if (spreadImage) spreadImage.style.transform = "";
+    // Reset zoom to measure natural dimensions
+    page.style.zoom = "1";
 
     const pageWidth = page.offsetWidth;
     const pageHeight = page.offsetHeight;
     if (pageWidth <= 0 || pageHeight <= 0) continue;
 
-    // In spread mode, both image and calendar need to fit stacked vertically
-    // Total natural height = 2 * pageHeight (image + calendar, same aspect ratio)
-    const totalNaturalH = hasSpread ? pageHeight * 2 + gap : pageHeight;
-    const availableHeight = scrollHeight - 20; // leave 20px peek
+    // Total natural height: image + calendar in spread mode, just calendar otherwise
+    const totalNaturalH = hasSpread ? pageHeight * 2 : pageHeight;
+    const maxContentH = scrollHeight - peekHeight;
 
     const scale = Math.min(
       availableWidth / pageWidth,
-      availableHeight / totalNaturalH,
+      maxContentH / totalNaturalH,
     );
 
-    // Apply scale to page
-    page.style.transform = `scale(${scale})`;
-
-    const scaledW = pageWidth * scale;
-    const scaledPageH = pageHeight * scale;
+    // Apply zoom to page — changes layout box, no gaps
+    page.style.zoom = String(scale);
 
     if (hasSpread && spreadImage) {
-      // Size spread-image to match natural page dimensions, then scale
+      // Spread-image matches page's natural dimensions and zoom
       spreadImage.style.width = `${pageWidth}px`;
       spreadImage.style.height = `${pageHeight}px`;
-      spreadImage.style.transform = `scale(${scale})`;
-
-      const scaledSpreadH = pageHeight * scale;
-      const totalScaledH = scaledSpreadH + gap + scaledPageH;
-
-      // scroll-month wraps both elements
-      scrollMonth.style.width = `${scaledW}px`;
-      scrollMonth.style.height = `${scrollHeight}px`;
-      scrollMonth.style.paddingTop = `${Math.max(0, (scrollHeight - totalScaledH) / 2)}px`;
-      scrollMonth.style.gap = `${gap}px`;
-    } else {
-      // Calendar only — page fills the snap region
-      scrollMonth.style.width = `${scaledW}px`;
-      scrollMonth.style.height = `${scrollHeight}px`;
-      scrollMonth.style.paddingTop = `${Math.max(0, (scrollHeight - scaledPageH) / 2)}px`;
+      spreadImage.style.zoom = String(scale);
+      spreadImage.style.padding = margin;
+      spreadImage.style.boxSizing = "border-box";
     }
+
+    // Let content determine scroll-month height naturally (enables peek)
+    scrollMonth.style.width = "";
+    scrollMonth.style.height = "";
+    scrollMonth.style.paddingTop = "";
+    scrollMonth.style.gap = "";
   }
 }
 
@@ -500,9 +494,9 @@ async function exportCurrentView() {
 
   if (status) status.textContent = "Exporting\u2026";
 
-  // Temporarily remove transform for clean export
-  const origTransform = targetPage.style.transform;
-  targetPage.style.transform = "";
+  // Temporarily reset zoom for clean export at natural dimensions
+  const origZoom = targetPage.style.zoom;
+  targetPage.style.zoom = "1";
 
   try {
     const { toPng } = await import("html-to-image");
@@ -525,7 +519,7 @@ async function exportCurrentView() {
       if (status) status.textContent = originalStatus;
     }, 3000);
   } finally {
-    targetPage.style.transform = origTransform;
+    targetPage.style.zoom = origZoom;
   }
 }
 
@@ -562,16 +556,16 @@ async function exportAllMonths() {
         status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
       }
 
-      // Temporarily remove transform for clean export
-      const origTransform = page.style.transform;
-      page.style.transform = "";
+      // Temporarily reset zoom for clean export at natural dimensions
+      const origZoom = page.style.zoom;
+      page.style.zoom = "1";
 
       const dataUrl = await toPng(page, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });
 
-      page.style.transform = origTransform;
+      page.style.zoom = origZoom;
 
       const link = document.createElement("a");
       link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;

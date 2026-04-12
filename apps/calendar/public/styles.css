@@ -1062,7 +1062,6 @@ body:has(.config) {
   text-align: center;
   display: flex;
   flex-direction: column;
-  transform-origin: top center;
 }
 
 /* Paper size dimensions for .page (mirrors #root.size-* selectors) */
@@ -1109,7 +1108,6 @@ body:has(.config) {
   box-sizing: border-box;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform-origin: top center;
 }
 
 .spread-image.empty {

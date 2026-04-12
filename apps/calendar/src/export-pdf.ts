@@ -177,11 +177,16 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   }
 
   async function renderCalendarToJpeg(el: HTMLElement): Promise<string> {
-    return toJpeg(el, {
+    // Reset zoom to capture at natural dimensions
+    const origZoom = el.style.zoom;
+    el.style.zoom = "1";
+    const result = await toJpeg(el, {
       pixelRatio,
       backgroundColor: "#FFFFFF",
       quality: 0.92,
     });
+    el.style.zoom = origZoom;
+    return result;
   }
 
   const totalMonths = months.length;
