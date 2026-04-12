@@ -4,6 +4,19 @@
  * Built by esbuild into public/client.js.
  */
 
+/** Serialize URL search params without over-encoding safe chars like : and , */
+function serializeParams(params: URLSearchParams): string {
+  const parts: string[] = [];
+  params.forEach((v, k) => parts.push(`${k}=${v}`));
+  return parts.join("&");
+}
+
+/** Build full href from URL using our clean serializer */
+function buildHref(url: URL): string {
+  const qs = serializeParams(url.searchParams);
+  return url.origin + url.pathname + (qs ? `?${qs}` : "");
+}
+
 // Responsive column count for non-print view
 function updateColumns() {
   const calendar = document.querySelector(".year-view") as HTMLElement | null;
@@ -69,7 +82,7 @@ function initConfigSidebar() {
         if (target.dataset.size) url.searchParams.set("size", target.dataset.size);
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
         if (target.dataset.margin !== undefined) url.searchParams.set("margin", target.dataset.margin);
-        window.location.href = url.toString();
+        window.location.href = buildHref(url);
         return;
       }
 
@@ -114,7 +127,7 @@ function initConfigSidebar() {
         } else {
           url.searchParams.set("include", "");
         }
-        window.location.href = url.toString();
+        window.location.href = buildHref(url);
         return;
       }
     }
@@ -209,7 +222,7 @@ async function exportAllMonths() {
       fetchParams.set("margin", params.margin);
       if (params.include) fetchParams.set("include", params.include);
 
-      const response = await fetch(`/config/${params.year}/${monthStr}?${fetchParams.toString()}`);
+      const response = await fetch(`/config/${params.year}/${monthStr}?${serializeParams(fetchParams)}`);
       const html = await response.text();
 
       const parser = new DOMParser();

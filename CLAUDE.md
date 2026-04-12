@@ -98,6 +98,17 @@ When adding new styles, use existing tokens. If a new value is truly needed, add
 - Grid items (`.weekday`, `.day`) use `<div>` — they're layout containers, not semantic content
 - See the `/styleguide` Structure table for the full mapping
 
+## Visual Testing with Playwright
+
+A Playwright MCP server is configured in `.mcp.json` for browser-based visual testing. When running in the cloud environment (claude.ai/code), Chromium is pre-installed but needs to be symlinked for the Playwright MCP server to find it. A `SessionStart` hook in `.claude/settings.local.json` handles this automatically.
+
+If Playwright tools fail with "Chromium distribution 'chrome' is not found", run:
+```bash
+sudo mkdir -p /opt/google/chrome && sudo ln -sf /opt/pw-browsers/chromium-1194/chrome-linux/chrome /opt/google/chrome/chrome
+```
+
+When starting the dev server, note the port in the wrangler output (`Ready on http://localhost:XXXX`) — it may vary between sessions.
+
 ## Secrets (set via `npx wrangler secret put`)
 
 - `CALENDAR_TOKEN` — required by all feed workers (astronomy, movies, astrology)
