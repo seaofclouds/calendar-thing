@@ -28,13 +28,13 @@ const MARGIN_OPTIONS = [
 
 const LAYOUT_OPTIONS = [
   { value: "calendar", label: "Calendar" },
-  { value: "photo-calendar", label: "Photo + Calendar" },
+  { value: "photo-calendar", label: "Calendar + Photos" },
 ];
 
 const LENGTH_OPTIONS = [
-  { value: "12", label: "12 mo" },
-  { value: "14", label: "14 mo" },
-  { value: "16", label: "16 mo" },
+  { value: "12", label: "12mo" },
+  { value: "14", label: "14mo" },
+  { value: "16", label: "16mo" },
 ];
 
 const SCALING_OPTIONS = [
@@ -126,13 +126,13 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   // Status line
   const statusText = getStatusText(opts.size, opts.orientation);
 
-  // Scalng section visibility
+  // Scaling section visibility
   const scalingDisplay = opts.layout === "photo-calendar" ? "" : ' style="display:none"';
 
   // Render scrollable month list
   const monthCards = opts.monthFragments.map((frag) => {
-    // Replace id="root" with class="page" to avoid duplicate IDs
-    const pageHtml = frag.html.replace('id="root"', 'class="page"');
+    // Merge "page" class into existing class attribute (avoid duplicate class attrs)
+    const pageHtml = frag.html.replace('id="root" class="', 'class="page ');
     return `      <div class="scroll-month" data-year="${frag.year}" data-month="${frag.month}">
         ${pageHtml}
       </div>`;
@@ -159,6 +159,13 @@ export function renderConfigView(opts: ConfigViewOptions): string {
         <h3 class="config-label">Layout</h3>
         <div class="config-options">
 ${layoutPills}
+        </div>
+      </section>
+
+      <section class="config-section config-scaling"${scalingDisplay}>
+        <h3 class="config-label">Image Scaling</h3>
+        <div class="config-options">
+${scalingPills}
         </div>
       </section>
 
@@ -197,15 +204,8 @@ ${feedPills}
         </div>
       </section>
 
-      <section class="config-section config-scaling"${scalingDisplay}>
-        <h3 class="config-label">Image Scaling</h3>
-        <div class="config-options">
-${scalingPills}
-        </div>
-      </section>
-
       <section class="config-section">
-        <h3 class="config-label">Resolution</h3>
+        <h3 class="config-label">Export Resolution</h3>
         <div class="config-options">
           <button class="config-option active" data-dpi="300">300dpi</button>
           <button class="config-option" data-dpi="600">600dpi</button>

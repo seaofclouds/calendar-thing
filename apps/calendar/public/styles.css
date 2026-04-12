@@ -1008,14 +1008,15 @@ body:has(.config) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1em;
-  overflow: auto;
+  padding: 0;
+  overflow: hidden;
 }
 
 .config-status {
   font-size: var(--font-size-sm);
   color: var(--color-config-muted);
-  margin: 0 0 1em 0;
+  margin: 0;
+  padding: 0.8em 1em;
   align-self: flex-start;
   flex-shrink: 0;
 }
@@ -1034,25 +1035,33 @@ body:has(.config) {
    =================== */
 
 .config-scroll {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2em;
-  padding-bottom: 2em;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
 }
 
 .scroll-month {
   flex-shrink: 0;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 /* .page mirrors #root sizing for config scroll view (avoids duplicate IDs) */
 .page {
-  width: 100%;
   margin: 0;
   padding: 0;
   text-align: center;
   display: flex;
   flex-direction: column;
+  transform-origin: top center;
 }
 
 /* Paper size dimensions for .page (mirrors #root.size-* selectors) */
@@ -1095,14 +1104,14 @@ body:has(.config) {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
+  background: color-mix(in srgb, var(--color-bg) 85%, var(--color-config-bg) 15%);
   box-sizing: border-box;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform-origin: top center;
 }
 
 .spread-image.empty {
-  border: 2px dashed var(--color-border-light);
   cursor: pointer;
 }
 

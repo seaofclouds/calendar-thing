@@ -83,6 +83,9 @@ function initConfigSidebar() {
         target.dataset.length ||
         target.dataset.scaling
       ) {
+        // Save current visible month before navigating
+        saveVisibleMonth();
+
         const url = new URL(window.location.href);
         if (target.dataset.size) url.searchParams.set("size", target.dataset.size);
         if (target.dataset.orientation) url.searchParams.set("orientation", target.dataset.orientation);
@@ -103,6 +106,8 @@ function initConfigSidebar() {
 
       // Feed toggles — update include param and reload
       if (target.dataset.feed) {
+        saveVisibleMonth();
+
         const url = new URL(window.location.href);
         const includeParam = url.searchParams.get("include");
         const defaults = ["lunar:phases", "solar:season"];
@@ -174,24 +179,144 @@ function getConfigParams() {
   };
 }
 
-// ─── Scroll-to-month ───────────────────────────────────────────────
+// ─── Scroll position preservation ──────────────────────────────────
 
-function initScrollToMonth() {
+/** Save the currently visible month to sessionStorage so config changes don't lose position */
+function saveVisibleMonth() {
+  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  if (!scroll) return;
+
+  const scrollCenter = scroll.scrollTop + scroll.clientHeight / 2;
+  const months = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
+
+  let best: HTMLElement | null = null;
+  let bestDist = Infinity;
+  for (const m of months) {
+    const center = m.offsetTop + m.offsetHeight / 2;
+    const dist = Math.abs(center - scrollCenter);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = m;
+    }
+  }
+
+  if (best) {
+    const key = `${best.dataset.year}-${best.dataset.month}`;
+    sessionStorage.setItem("config-scroll-month", key);
+  }
+}
+
+/** Scroll to a specific month, or restore from sessionStorage */
+function restoreScrollPosition() {
   const content = document.querySelector(".config-content") as HTMLElement | null;
-  if (!content) return;
+  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  if (!content || !scroll) return;
+
+  // Priority: data-scroll-to (from URL), then sessionStorage
+  let targetYear: string | null = null;
+  let targetMonth: string | null = null;
 
   const scrollTo = content.dataset.scrollTo;
   if (scrollTo) {
-    const target = document.querySelector(
-      `.scroll-month[data-month="${scrollTo}"]`,
-    ) as HTMLElement | null;
-    if (target) {
-      // Delay to allow layout to settle
-      requestAnimationFrame(() => {
-        target.scrollIntoView({ block: "start" });
-      });
+    const params = getConfigParams();
+    targetYear = params.year;
+    targetMonth = scrollTo;
+  } else {
+    const saved = sessionStorage.getItem("config-scroll-month");
+    if (saved) {
+      const [y, m] = saved.split("-");
+      targetYear = y;
+      targetMonth = m;
+      sessionStorage.removeItem("config-scroll-month");
     }
   }
+
+  if (targetYear && targetMonth) {
+    const target = scroll.querySelector(
+      `.scroll-month[data-year="${targetYear}"][data-month="${targetMonth}"]`,
+    ) as HTMLElement | null;
+    if (target) {
+      // Scroll immediately without animation
+      requestAnimationFrame(() => {
+        target.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+      });
+      return;
+    }
+  }
+
+  // Default: scroll to first month of the target year
+  const params = getConfigParams();
+  const firstMonth = scroll.querySelector(
+    `.scroll-month[data-year="${params.year}"][data-month="1"]`,
+  ) as HTMLElement | null;
+  if (firstMonth) {
+    requestAnimationFrame(() => {
+      firstMonth.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
+    });
+  }
+}
+
+// ─── Page scaling ──────────────────────────────────────────────────
+
+/** Scale .page elements to fit within the viewport, maintaining paper proportions */
+function scalePages() {
+  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  if (!scroll) return;
+
+  const scrollWidth = scroll.clientWidth;
+  const scrollHeight = scroll.clientHeight;
+  const padding = 24; // horizontal padding
+  const availableWidth = scrollWidth - padding * 2;
+  // Leave room for ~20px peek of adjacent months
+  const availableHeight = scrollHeight - 40;
+
+  const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
+
+  for (const scrollMonth of scrollMonths) {
+    const page = scrollMonth.querySelector(".page") as HTMLElement | null;
+    if (!page) continue;
+
+    // Get the natural (unscaled) dimensions of the page
+    // Temporarily remove any existing transform to measure
+    page.style.transform = "";
+    const pageWidth = page.offsetWidth;
+    const pageHeight = page.offsetHeight;
+
+    if (pageWidth <= 0 || pageHeight <= 0) continue;
+
+    // Scale to fit within available space
+    const scale = Math.min(
+      availableWidth / pageWidth,
+      availableHeight / pageHeight,
+    );
+
+    page.style.transform = `scale(${scale})`;
+
+    // Set scroll-month size to match scaled dimensions
+    const scaledW = pageWidth * scale;
+    const scaledH = pageHeight * scale;
+    scrollMonth.style.width = `${scaledW}px`;
+    scrollMonth.style.height = `${scrollHeight}px`;
+    scrollMonth.style.paddingTop = `${(scrollHeight - scaledH) / 2}px`;
+    scrollMonth.style.paddingBottom = `${(scrollHeight - scaledH) / 2}px`;
+    scrollMonth.style.boxSizing = "border-box";
+
+    // Also scale any spread-image to match
+    const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
+    if (spreadImage) {
+      spreadImage.style.width = `${pageWidth}px`;
+      spreadImage.style.height = `${pageHeight}px`;
+      spreadImage.style.transform = `scale(${scale})`;
+    }
+  }
+}
+
+let resizeTimer: ReturnType<typeof setTimeout>;
+function onResize() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    scalePages();
+  }, 100);
 }
 
 // ─── Image upload for spread layout ────────────────────────────────
@@ -277,12 +402,9 @@ async function initSpreadLayout() {
     const page = el.querySelector(".page") as HTMLElement | null;
     if (!page || !elYear) continue;
 
-    // Create image container sized to match the page
+    // Create image container sized to match the page's natural dimensions
     const imageDiv = document.createElement("div");
     imageDiv.className = "spread-image";
-    // Copy page dimensions
-    imageDiv.style.width = page.offsetWidth + "px";
-    imageDiv.style.height = page.offsetHeight + "px";
 
     if (imageSet.has(`${elYear}-${month}`)) {
       const url = await loadImageUrl(elYear, month);
@@ -329,23 +451,24 @@ async function initSpreadLayout() {
 
 async function exportCurrentView() {
   // Find the most centered visible month in the scroll view
-  const scrollMonths = document.querySelectorAll(".scroll-month .page") as NodeListOf<HTMLElement>;
+  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   let targetPage: HTMLElement | null = null;
+  let targetMonth: HTMLElement | null = null;
 
-  if (scrollMonths.length === 1) {
-    targetPage = scrollMonths[0];
-  } else if (scrollMonths.length > 1) {
-    // Find the page closest to the center of the viewport
-    const viewportCenter = window.innerHeight / 2;
+  if (scroll && scrollMonths.length > 0) {
+    const scrollCenter = scroll.scrollTop + scroll.clientHeight / 2;
     let bestDist = Infinity;
-    for (const page of scrollMonths) {
-      const rect = page.getBoundingClientRect();
-      const center = (rect.top + rect.bottom) / 2;
-      const dist = Math.abs(center - viewportCenter);
+    for (const m of scrollMonths) {
+      const center = m.offsetTop + m.offsetHeight / 2;
+      const dist = Math.abs(center - scrollCenter);
       if (dist < bestDist) {
         bestDist = dist;
-        targetPage = page;
+        targetMonth = m;
       }
+    }
+    if (targetMonth) {
+      targetPage = targetMonth.querySelector(".page") as HTMLElement;
     }
   }
 
@@ -360,11 +483,13 @@ async function exportCurrentView() {
   const dpi = getActiveDpi();
   const params = getConfigParams();
 
-  // Determine which month this is
-  const scrollMonth = targetPage.closest(".scroll-month") as HTMLElement | null;
-  const monthNum = scrollMonth?.dataset.month ?? "";
+  const monthNum = targetMonth?.dataset.month ?? "";
 
   if (status) status.textContent = "Exporting\u2026";
+
+  // Temporarily remove transform for clean export
+  const origTransform = targetPage.style.transform;
+  targetPage.style.transform = "";
 
   try {
     const { toPng } = await import("html-to-image");
@@ -386,6 +511,8 @@ async function exportCurrentView() {
     setTimeout(() => {
       if (status) status.textContent = originalStatus;
     }, 3000);
+  } finally {
+    targetPage.style.transform = origTransform;
   }
 }
 
@@ -401,7 +528,6 @@ async function exportAllMonths() {
     "jul", "aug", "sep", "oct", "nov", "dec",
   ];
 
-  // Export all months already rendered in the scroll view
   const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   if (scrollMonths.length === 0) return;
 
@@ -423,17 +549,22 @@ async function exportAllMonths() {
         status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
       }
 
+      // Temporarily remove transform for clean export
+      const origTransform = page.style.transform;
+      page.style.transform = "";
+
       const dataUrl = await toPng(page, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });
+
+      page.style.transform = origTransform;
 
       const link = document.createElement("a");
       link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
       link.href = dataUrl;
       link.click();
 
-      // Brief pause between downloads
       await new Promise((r) => setTimeout(r, 500));
     }
 
@@ -476,11 +607,21 @@ async function exportPDF() {
 // ─── Init ──────────────────────────────────────────────────────────
 
 initConfigSidebar();
-initScrollToMonth();
 
-// Initialize spread layout after a brief delay for rendering
-if (document.querySelector('.config[data-layout="photo-calendar"]')) {
-  requestAnimationFrame(() => {
-    initSpreadLayout();
-  });
+// Config scroll view setup
+if (document.querySelector(".config-scroll")) {
+  const isPhotoLayout = document.querySelector('.config[data-layout="photo-calendar"]');
+
+  if (isPhotoLayout) {
+    // Init spread layout first (adds spread-image divs), then scale, then scroll
+    initSpreadLayout().then(() => {
+      scalePages();
+      restoreScrollPosition();
+    });
+  } else {
+    scalePages();
+    restoreScrollPosition();
+  }
+
+  window.addEventListener("resize", onResize);
 }
