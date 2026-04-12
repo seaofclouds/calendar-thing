@@ -186,15 +186,14 @@ function saveVisibleMonth() {
   const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
   if (!scroll) return;
 
-  // Use getBoundingClientRect for reliable position detection
-  const scrollRect = scroll.getBoundingClientRect();
+  // Find the month whose top is closest to the scroll container's top
+  const scrollTop = scroll.scrollTop;
   const months = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
   let best: HTMLElement | null = null;
   let bestDist = Infinity;
   for (const m of months) {
-    const rect = m.getBoundingClientRect();
-    const dist = Math.abs(rect.top - scrollRect.top);
+    const dist = Math.abs(m.offsetTop - scrollTop);
     if (dist < bestDist) {
       bestDist = dist;
       best = m;
@@ -259,14 +258,7 @@ function restoreScrollPosition() {
 
 // ─── Page scaling ──────────────────────────────────────────────────
 
-/**
- * Scale .page elements to fit within the viewport using CSS zoom.
- * zoom (unlike transform: scale) changes the actual layout box,
- * so elements stack naturally without manual height compensation.
- *
- * In spread mode, zoom is applied to the .spread-pair wrapper so
- * both image and calendar scale as a unit with a single box-shadow.
- */
+/** Scale .page elements to fit within the viewport, maintaining paper proportions */
 function scalePages() {
   const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
   if (!scroll) return;
@@ -274,8 +266,8 @@ function scalePages() {
   const scrollWidth = scroll.clientWidth;
   const scrollHeight = scroll.clientHeight;
   const padding = 24;
+  const gap = 12; // gap between spread-image and page in spread mode
   const availableWidth = scrollWidth - padding * 2;
-  const margin = getConfigParams().margin;
 
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
@@ -283,42 +275,52 @@ function scalePages() {
     const page = scrollMonth.querySelector(".page") as HTMLElement | null;
     if (!page) continue;
 
-    const spreadPair = scrollMonth.querySelector(".spread-pair") as HTMLElement | null;
+    const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
+    const hasSpread = spreadImage !== null;
 
-    if (spreadPair) {
-      // Spread mode: zoom the wrapper so image + page scale as a unit
-      spreadPair.style.zoom = "1";
-      page.style.zoom = "";
+    // Temporarily remove transforms to measure natural dimensions
+    page.style.transform = "";
+    if (spreadImage) spreadImage.style.transform = "";
 
-      const pageWidth = page.offsetWidth;
-      const pageHeight = page.offsetHeight;
-      if (pageWidth <= 0 || pageHeight <= 0) continue;
+    const pageWidth = page.offsetWidth;
+    const pageHeight = page.offsetHeight;
+    if (pageWidth <= 0 || pageHeight <= 0) continue;
 
-      // Spread-image should match page's natural dimensions
-      const spreadImage = spreadPair.querySelector(".spread-image") as HTMLElement | null;
-      if (spreadImage) {
-        spreadImage.style.width = `${pageWidth}px`;
-        spreadImage.style.height = `${pageHeight}px`;
-        spreadImage.style.padding = margin;
-        spreadImage.style.boxSizing = "border-box";
-      }
+    // In spread mode, both image and calendar need to fit stacked vertically
+    // Total natural height = 2 * pageHeight (image + calendar, same aspect ratio)
+    const totalNaturalH = hasSpread ? pageHeight * 2 + gap : pageHeight;
+    const availableHeight = scrollHeight - 20; // leave 20px peek
 
-      // Total natural = 2 page heights (image + calendar)
-      const totalNaturalH = pageHeight * 2;
-      const maxContentH = scrollHeight - 40;
-      const scale = Math.min(availableWidth / pageWidth, maxContentH / totalNaturalH);
+    const scale = Math.min(
+      availableWidth / pageWidth,
+      availableHeight / totalNaturalH,
+    );
 
-      spreadPair.style.zoom = String(scale);
+    // Apply scale to page
+    page.style.transform = `scale(${scale})`;
+
+    const scaledW = pageWidth * scale;
+    const scaledPageH = pageHeight * scale;
+
+    if (hasSpread && spreadImage) {
+      // Size spread-image to match natural page dimensions, then scale
+      spreadImage.style.width = `${pageWidth}px`;
+      spreadImage.style.height = `${pageHeight}px`;
+      spreadImage.style.transform = `scale(${scale})`;
+
+      const scaledSpreadH = pageHeight * scale;
+      const totalScaledH = scaledSpreadH + gap + scaledPageH;
+
+      // scroll-month wraps both elements
+      scrollMonth.style.width = `${scaledW}px`;
+      scrollMonth.style.height = `${scrollHeight}px`;
+      scrollMonth.style.paddingTop = `${Math.max(0, (scrollHeight - totalScaledH) / 2)}px`;
+      scrollMonth.style.gap = `${gap}px`;
     } else {
-      // Calendar-only mode: zoom the page directly
-      page.style.zoom = "1";
-      const pageWidth = page.offsetWidth;
-      const pageHeight = page.offsetHeight;
-      if (pageWidth <= 0 || pageHeight <= 0) continue;
-
-      const maxContentH = scrollHeight - 40;
-      const scale = Math.min(availableWidth / pageWidth, maxContentH / pageHeight);
-      page.style.zoom = String(scale);
+      // Calendar only — page fills the snap region
+      scrollMonth.style.width = `${scaledW}px`;
+      scrollMonth.style.height = `${scrollHeight}px`;
+      scrollMonth.style.paddingTop = `${Math.max(0, (scrollHeight - scaledPageH) / 2)}px`;
     }
   }
 }
@@ -365,10 +367,9 @@ function triggerImageUpload(year: number, month: string) {
 }
 
 async function refreshSpreadImage(year: number, month: string) {
-  const scrollMonth = document.querySelector(
-    `.scroll-month[data-year="${year}"][data-month="${month}"]`,
+  const container = document.querySelector(
+    `.scroll-month[data-year="${year}"][data-month="${month}"] .spread-image`,
   ) as HTMLElement | null;
-  const container = scrollMonth?.querySelector(".spread-image") as HTMLElement | null;
   if (!container) return;
 
   const url = await loadImageUrl(year, month);
@@ -415,7 +416,7 @@ async function initSpreadLayout() {
     const page = el.querySelector(".page") as HTMLElement | null;
     if (!page || !elYear) continue;
 
-    // Create image container
+    // Create image container sized to match the page's natural dimensions
     const imageDiv = document.createElement("div");
     imageDiv.className = "spread-image";
 
@@ -433,12 +434,8 @@ async function initSpreadLayout() {
       imageDiv.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
     }
 
-    // Wrap image + page in .spread-pair for single box-shadow
-    const pair = document.createElement("div");
-    pair.className = "spread-pair";
-    el.insertBefore(pair, page);
-    pair.appendChild(imageDiv);
-    pair.appendChild(page);
+    // Insert before the page element
+    el.insertBefore(imageDiv, page);
   }
 
   // Handle clicks on spread images (uses per-element year)
@@ -474,11 +471,10 @@ async function exportCurrentView() {
   let targetMonth: HTMLElement | null = null;
 
   if (scroll && scrollMonths.length > 0) {
-    const scrollRect = scroll.getBoundingClientRect();
+    const scrollTop = scroll.scrollTop;
     let bestDist = Infinity;
     for (const m of scrollMonths) {
-      const rect = m.getBoundingClientRect();
-      const dist = Math.abs(rect.top - scrollRect.top);
+      const dist = Math.abs(m.offsetTop - scrollTop);
       if (dist < bestDist) {
         bestDist = dist;
         targetMonth = m;
@@ -504,11 +500,9 @@ async function exportCurrentView() {
 
   if (status) status.textContent = "Exporting\u2026";
 
-  // Temporarily reset zoom for clean export at natural dimensions
-  const spreadPair = targetPage.closest(".spread-pair") as HTMLElement | null;
-  const zoomTarget = spreadPair || targetPage;
-  const origZoom = zoomTarget.style.zoom;
-  zoomTarget.style.zoom = "1";
+  // Temporarily remove transform for clean export
+  const origTransform = targetPage.style.transform;
+  targetPage.style.transform = "";
 
   try {
     const { toPng } = await import("html-to-image");
@@ -531,7 +525,7 @@ async function exportCurrentView() {
       if (status) status.textContent = originalStatus;
     }, 3000);
   } finally {
-    zoomTarget.style.zoom = origZoom;
+    targetPage.style.transform = origTransform;
   }
 }
 
@@ -568,18 +562,16 @@ async function exportAllMonths() {
         status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
       }
 
-      // Temporarily reset zoom for clean export at natural dimensions
-      const pair = page.closest(".spread-pair") as HTMLElement | null;
-      const zoomEl = pair || page;
-      const origZoom = zoomEl.style.zoom;
-      zoomEl.style.zoom = "1";
+      // Temporarily remove transform for clean export
+      const origTransform = page.style.transform;
+      page.style.transform = "";
 
       const dataUrl = await toPng(page, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });
 
-      zoomEl.style.zoom = origZoom;
+      page.style.transform = origTransform;
 
       const link = document.createElement("a");
       link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
