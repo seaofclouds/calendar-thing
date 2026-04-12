@@ -892,6 +892,7 @@ body:has(.config) {
 
 .config {
   display: flex;
+  width: 100%;
   height: 100vh;
   background: var(--color-config-bg);
   color: var(--color-config-text);
@@ -1007,10 +1008,9 @@ body:has(.config) {
 
 .config-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
   min-height: 0;
 }
 
@@ -1037,12 +1037,10 @@ body:has(.config) {
    =================== */
 
 .config-scroll {
-  flex: 1;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 2em;
 }
 
 .scroll-month {
@@ -1052,7 +1050,11 @@ body:has(.config) {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding: 2em 0;
+  padding: 1em 0 2em;
+}
+
+.scroll-month:first-child {
+  padding-top: 0.5em;
 }
 
 /* .page mirrors #root sizing for config scroll view (avoids duplicate IDs) */

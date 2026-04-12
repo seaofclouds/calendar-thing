@@ -253,7 +253,7 @@ function getConfigParams() {
 
 /** Save the currently visible month to sessionStorage so config changes don't lose position */
 function saveVisibleMonth() {
-  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  const scroll = document.querySelector(".config-content") as HTMLElement | null;
   if (!scroll) return;
 
   // Use getBoundingClientRect for reliable position detection
@@ -335,7 +335,7 @@ function restoreScrollPosition() {
  * to collapse the unused layout space so elements sit adjacent.
  */
 function scalePages() {
-  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  const scroll = document.querySelector(".config-content") as HTMLElement | null;
   if (!scroll) return;
 
   const scrollWidth = scroll.clientWidth;
@@ -544,7 +544,7 @@ async function initSpreadLayout() {
 
 async function exportCurrentView() {
   // Find the most centered visible month in the scroll view
-  const scroll = document.querySelector(".config-scroll") as HTMLElement | null;
+  const scroll = document.querySelector(".config-content") as HTMLElement | null;
   const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   let targetPage: HTMLElement | null = null;
   let targetMonth: HTMLElement | null = null;
