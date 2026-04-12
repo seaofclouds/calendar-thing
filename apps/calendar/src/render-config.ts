@@ -44,6 +44,7 @@ const FEED_OPTIONS = [
   { token: "lunar:phases", label: "Lunar" },
   { token: "solar:season", label: "Solar" },
   { token: "movies", label: "Movies" },
+  { token: "holidays-us", label: "Holidays" },
   { token: "busd", label: "School" },
   { token: "astrology", label: "Astrology" },
 ];

@@ -12,6 +12,7 @@ import {
   createFeedRegistry,
   fetchFeedEvents,
   fetchExternalFeed,
+  deduplicateEvents,
   parseIncludeParam,
   isFeedEnabled,
   getActiveTokens,
@@ -22,6 +23,7 @@ import astronomyPlugin from "../../../feeds/astronomy/feed.plugin";
 import { theatrical, digital } from "../../../feeds/movies/feed.plugin";
 import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
+import holidaysUSPlugin from "../../../feeds/holidays-us/feed.plugin";
 
 /** Serialize URLSearchParams without over-encoding safe chars like : and , */
 function serializeParams(params: URLSearchParams): string {
@@ -34,6 +36,7 @@ const registry = createFeedRegistry([
   astronomyPlugin,
   theatrical,
   digital,
+  holidaysUSPlugin,
   busdPlugin,
   astrologyPlugin,
 ]);
@@ -111,7 +114,7 @@ export default {
         ),
       ...feedUrls.map((u) => fetchExternalFeed(u)),
     ]);
-    const allEvents = feedResults.flat();
+    const allEvents = deduplicateEvents(feedResults.flat());
 
     // Split by render mode: day-markers vs event-list
     const markerIds = new Set(
@@ -342,7 +345,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       ),
     ...feedUrls.map((u) => fetchExternalFeed(u)),
   ]);
-  const allEvents = feedResults.flat();
+  const allEvents = deduplicateEvents(feedResults.flat());
 
   const markerIds = new Set(
     allFeeds.filter((f) => f.renderMode === "day-marker").map((f) => f.category),

@@ -25,6 +25,22 @@ export async function fetchFeedEvents(
   return events;
 }
 
+/**
+ * Remove duplicate events across feeds using dedupeKey + date.
+ * When multiple events share the same (dedupeKey, date), only the first is kept.
+ * Feed order in the registry determines priority.
+ */
+export function deduplicateEvents(events: CalendarEvent[]): CalendarEvent[] {
+  const seen = new Set<string>();
+  return events.filter((e) => {
+    if (!e.dedupeKey) return true;
+    const key = `${e.date}:${e.dedupeKey}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {
   try {
     const response = await fetch(url, {
@@ -125,7 +141,12 @@ function cleanEvents(events: CalendarEvent[], feed: FeedPlugin): CalendarEvent[]
         }
       }
     }
-    return { ...e, summary, emoji: icon };
+    // Apply dedupeKey from plugin's dedupeKeys map (matches against cleaned summary)
+    let dedupeKey = e.dedupeKey;
+    if (!dedupeKey && feed.dedupeKeys) {
+      dedupeKey = feed.dedupeKeys[summary];
+    }
+    return { ...e, summary, emoji: icon, dedupeKey };
   });
 }
 
