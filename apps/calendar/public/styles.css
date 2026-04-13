@@ -1100,7 +1100,7 @@ body:has(.config) {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding: 1em 0 2em;
+  padding: 1.5em 0;
 }
 
 .scroll-month:first-child {
@@ -1164,6 +1164,7 @@ body:has(.config) {
 /* Wrapper around spread-image + page — single shadow for the pair */
 .spread-pair {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
 
 .spread-gutter {
@@ -1346,14 +1347,18 @@ body:has(.config) {
    Mini calendar width for small sizes
    =================== */
 
-/* A6: wider mini cal columns + header grid */
+/* A5/A6: wider mini cal columns + header grid */
 .page.size-a6 .month-view .view-header,
-#root.size-a6 .month-view .view-header {
+.page.size-a5 .month-view .view-header,
+#root.size-a6 .month-view .view-header,
+#root.size-a5 .month-view .view-header {
   grid-template-columns: 1.5fr 4fr 1.5fr;
 }
 
 .page.size-a6 .view-nav .month.mini,
-#root.size-a6 .view-nav .month.mini {
+.page.size-a5 .view-nav .month.mini,
+#root.size-a6 .view-nav .month.mini,
+#root.size-a5 .view-nav .month.mini {
   min-width: 0;
   letter-spacing: -0.02em;
 }
