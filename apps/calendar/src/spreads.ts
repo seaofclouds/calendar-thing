@@ -93,17 +93,23 @@ export function clearSpreads() {
       pg.style.marginRight = "";
       pg.classList.remove("month-facing", "narrow-content");
 
-      // Find the scroll-month this page belongs to (by data-month match)
-      const allScrollMonths = document.querySelectorAll(".scroll-month");
-      for (const sm of allScrollMonths) {
-        if (sm.querySelector(".page") === null && (sm as HTMLElement).style.display === "none") {
-          // This is a hidden scroll-month that lost its page
-          (sm as HTMLElement).style.display = "";
-          sm.appendChild(pg);
+      // Find the scroll-month this page belongs to by matching source tags
+      const srcYear = pg.dataset.sourceYear;
+      const srcMonth = pg.dataset.sourceMonth;
+      delete pg.dataset.sourceYear;
+      delete pg.dataset.sourceMonth;
+
+      if (srcYear && srcMonth) {
+        const target = document.querySelector(
+          `.scroll-month[data-year="${srcYear}"][data-month="${srcMonth}"]`,
+        ) as HTMLElement | null;
+        if (target) {
+          target.style.display = "";
+          target.appendChild(pg);
           return;
         }
       }
-      // Otherwise put it back in the current parent
+      // Fallback: put it back in the current parent
       parent.appendChild(pg);
     });
 
@@ -160,6 +166,10 @@ export async function initSpreadLayout() {
       imageDiv.classList.add("empty");
       imageDiv.innerHTML = `<button class="spread-add-btn">+ Add Image</button>`;
     }
+
+    // Tag page with source scroll-month so clearSpreads can restore it
+    page.dataset.sourceYear = String(elYear);
+    page.dataset.sourceMonth = month;
 
     // Wrap image + page in .spread-pair for single box-shadow
     const pair = document.createElement("div");
@@ -224,6 +234,12 @@ export async function initMonthSpreadLayout() {
     const firstPage = firstEl.querySelector(".page") as HTMLElement | null;
     const secondPage = secondEl?.querySelector(".page") as HTMLElement | null;
     if (!firstPage || !secondPage) continue;
+
+    // Tag pages with their source scroll-month so clearSpreads can restore them
+    firstPage.dataset.sourceYear = firstEl.dataset.year ?? "";
+    firstPage.dataset.sourceMonth = firstEl.dataset.month ?? "";
+    secondPage.dataset.sourceYear = secondEl.dataset.year ?? "";
+    secondPage.dataset.sourceMonth = secondEl.dataset.month ?? "";
 
     // Move second month's page into first scroll-month as a spread-pair
     secondPage.classList.add("month-facing");
