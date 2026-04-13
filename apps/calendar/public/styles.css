@@ -1017,8 +1017,9 @@ body:has(.config) {
   opacity: 1;
 }
 
-/* Format options: one per line */
-.config-options-format {
+/* Format and feeds options: one per line */
+.config-options-format,
+.config-options-feeds {
   flex-direction: column;
 }
 
@@ -1162,6 +1163,8 @@ body:has(.config) {
 
 /* Wrapper around spread-image + page — single shadow for the pair */
 .spread-pair {
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 

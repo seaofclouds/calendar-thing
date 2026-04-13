@@ -298,6 +298,7 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
 const VALID_LENGTHS = new Set(["12", "14", "16"]);
 const VALID_LAYOUTS = new Set(["single", "facing-photo", "facing-month"]);
 const VALID_SCALINGS = new Set(["fit", "crop"]);
+const VALID_GUTTERS = new Set(["0", "0.5in", "0.75in", "1in"]);
 
 /**
  * Calculate the month range for a calendar of a given length centered on a year.
@@ -366,6 +367,8 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   const layout = (VALID_LAYOUTS.has(layoutParam) ? layoutParam : "single") as "single" | "facing-photo" | "facing-month";
   const scalingParam = url.searchParams.get("scaling") ?? "fit";
   const scaling = (VALID_SCALINGS.has(scalingParam) ? scalingParam : "fit") as "fit" | "crop";
+  const gutterParam = url.searchParams.get("gutter") ?? "0.5in";
+  const gutter = VALID_GUTTERS.has(gutterParam) ? gutterParam : "0.5in";
 
   // Build query string for calendar-internal links (preserves config state)
   const configParams = new URLSearchParams();
@@ -375,6 +378,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   configParams.set("layout", layout);
   configParams.set("length", String(calendarLength));
   configParams.set("scaling", scaling);
+  configParams.set("gutter", gutter);
   if (includeParam) configParams.set("include", includeParam);
   const configQs = `?${serializeParams(configParams)}`;
 
@@ -436,6 +440,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
     calendarLength,
     layout,
     scaling,
+    gutter,
   });
 
   return new Response(html, {

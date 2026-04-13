@@ -66,6 +66,13 @@ const SCALING_OPTIONS = [
   { value: "crop", label: "Crop" },
 ];
 
+const GUTTER_OPTIONS = [
+  { value: "0", label: "None" },
+  { value: "0.5in", label: '1/2"' },
+  { value: "0.75in", label: '3/4"' },
+  { value: "1in", label: '1"' },
+];
+
 const DISPLAY_NAMES: Record<string, string> = {
   letter: "US Letter",
   legal: "US Legal",
@@ -105,6 +112,7 @@ export interface ConfigViewOptions {
   calendarLength: number;
   layout: "single" | "facing-photo" | "facing-month";
   scaling: "fit" | "crop";
+  gutter: string;
 }
 
 export function renderConfigView(opts: ConfigViewOptions): string {
@@ -152,6 +160,13 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   }).join("\n");
   const scalingDisplay = isPhoto ? "" : ' style="display:none"';
 
+  // Gutter pills (only when facing pages)
+  const gutterPills = GUTTER_OPTIONS.map((opt) => {
+    const isActive = opt.value === opts.gutter;
+    return `          <button class="config-option${isActive ? " active" : ""}" data-gutter="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+  const gutterDisplay = isFacing ? "" : ' style="display:none"';
+
   // Calendar length
   const lengthPills = ["12", "14", "16"].map((v) => {
     const isActive = v === String(opts.calendarLength);
@@ -193,8 +208,29 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   <script src="/client.js" type="module" defer></script>
 </head>
 <body>
-  <div class="config" data-year="${opts.year}" data-layout="${opts.layout}" data-scaling="${opts.scaling}" data-length="${opts.calendarLength}">
+  <div class="config" data-year="${opts.year}" data-layout="${opts.layout}" data-scaling="${opts.scaling}" data-length="${opts.calendarLength}" data-gutter="${opts.gutter}">
     <aside class="config-sidebar">
+      <section class="config-section">
+        <h3 class="config-label">Feeds</h3>
+        <div class="config-options config-options-feeds">
+${feedPills}
+        </div>
+      </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Format</h3>
+        <div class="config-options config-options-format">
+${formatPills}
+        </div>
+      </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Orientation</h3>
+        <div class="config-options">
+${orientationPills}
+        </div>
+      </section>
+
       <section class="config-section">
         <h3 class="config-label">Layout</h3>
         <div class="config-options">
@@ -218,20 +254,6 @@ ${scalingPills}
       </section>
 
       <section class="config-section">
-        <h3 class="config-label">Format</h3>
-        <div class="config-options config-options-format">
-${formatPills}
-        </div>
-      </section>
-
-      <section class="config-section">
-        <h3 class="config-label">Orientation</h3>
-        <div class="config-options">
-${orientationPills}
-        </div>
-      </section>
-
-      <section class="config-section">
         <h3 class="config-label">Length</h3>
         <div class="config-options">
 ${lengthPills}
@@ -245,10 +267,10 @@ ${marginPills}
         </div>
       </section>
 
-      <section class="config-section">
-        <h3 class="config-label">Feeds</h3>
+      <section class="config-section config-gutter"${gutterDisplay}>
+        <h3 class="config-label">Gutter</h3>
         <div class="config-options">
-${feedPills}
+${gutterPills}
         </div>
       </section>
 

@@ -103,10 +103,14 @@ function applyLayout(config: HTMLElement, layout: string) {
   history.replaceState(null, "", buildHref(url));
   config.dataset.layout = layout;
 
-  // Show/hide scaling section
+  // Show/hide scaling and gutter sections
   const scalingSection = document.querySelector(".config-scaling") as HTMLElement | null;
   if (scalingSection) {
     scalingSection.style.display = layout === "facing-photo" ? "" : "none";
+  }
+  const gutterSection = document.querySelector(".config-gutter") as HTMLElement | null;
+  if (gutterSection) {
+    gutterSection.style.display = (layout === "facing-photo" || layout === "facing-month") ? "" : "none";
   }
 
   // Clear existing spreads first
@@ -210,6 +214,22 @@ function initConfigSidebar() {
         return;
       }
 
+      // Gutter toggle — client-side only
+      if (target.dataset.gutter !== undefined) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("gutter", target.dataset.gutter);
+        history.replaceState(null, "", buildHref(url));
+
+        const section = target.closest(".config-section")!;
+        section.querySelectorAll(".config-option").forEach((el) => el.classList.remove("active"));
+        target.classList.add("active");
+
+        const config = document.querySelector(".config") as HTMLElement;
+        config.dataset.gutter = target.dataset.gutter;
+        scalePages();
+        return;
+      }
+
       // DPI pills — client-side toggle only
       if (target.dataset.dpi) {
         sidebar.querySelectorAll("[data-dpi]").forEach((el) => el.classList.remove("active"));
@@ -289,6 +309,7 @@ function getConfigParams() {
     layout: url.searchParams.get("layout") ?? "calendar",
     length: url.searchParams.get("length") ?? "12",
     scaling: url.searchParams.get("scaling") ?? "fit",
+    gutter: url.searchParams.get("gutter") ?? "0.5in",
   };
 }
 
@@ -435,10 +456,12 @@ function scalePages() {
       page.style.marginBottom = `${-unusedH}px`;
       page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
 
-      // Constrain spread-pair width so shadow doesn't go wide
+      // Constrain spread-pair width and apply gutter gap
       const pair = scrollMonth.querySelector(".spread-pair") as HTMLElement | null;
       if (pair) {
         pair.style.width = `${pageWidth * scale}px`;
+        const gutter = getConfigParams().gutter;
+        pair.style.gap = gutter === "0" ? "0" : gutter;
       }
     } else {
       // Calendar-only mode: no gutter
