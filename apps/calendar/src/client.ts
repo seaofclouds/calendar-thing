@@ -119,13 +119,17 @@ function applyLayout(config: HTMLElement, layout: string) {
   // Clear existing spreads first
   clearSpreads();
 
-  if (layout === "facing-photo") {
-    initSpreadLayout().then(() => { scalePages(); restoreScrollPosition(); });
-  } else if (layout === "facing-month") {
-    initMonthSpreadLayout().then(() => { scalePages(); restoreScrollPosition(); });
-  } else {
+  const afterLayout = () => {
     scalePages();
-    restoreScrollPosition();
+    requestAnimationFrame(() => restoreScrollPosition());
+  };
+
+  if (layout === "facing-photo") {
+    initSpreadLayout().then(afterLayout);
+  } else if (layout === "facing-month") {
+    initMonthSpreadLayout().then(afterLayout);
+  } else {
+    afterLayout();
   }
 }
 
@@ -497,6 +501,17 @@ function scalePages() {
       page.style.marginBottom = `${-unusedSpace}px`;
       page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
     }
+
+    // Dynamic mini cal width: if content area is narrow, use wider mini cal columns
+    const marginVal = parseFloat(margin);
+    const marginUnit = margin.replace(/[\d.]/g, "");
+    const marginPx = marginUnit === "mm" ? marginVal * 96 / 25.4 : marginVal * 96;
+    const contentWidth = pageWidth - 2 * marginPx;
+    page.classList.toggle("narrow-content", contentWidth < 480);
+
+    // Also apply to facing clone if present
+    const facingClone = scrollMonth.querySelector(".page.month-facing") as HTMLElement | null;
+    if (facingClone) facingClone.classList.toggle("narrow-content", contentWidth < 480);
   }
 }
 

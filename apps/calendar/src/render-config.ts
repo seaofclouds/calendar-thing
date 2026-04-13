@@ -136,12 +136,28 @@ export function renderConfigView(opts: ConfigViewOptions): string {
     return `          <button class="config-option${isActive ? " active" : ""}" data-orientation="${o}">${icon} ${label}</button>`;
   }).join("\n");
 
-  // Margin pills — show metric options for A-series sizes
+  // Margin pills — filter out margins that leave < 2.5in content width
   const marginOptions = METRIC_SIZES.has(opts.size) ? MARGIN_OPTIONS_METRIC : MARGIN_OPTIONS_IMPERIAL;
-  const marginPills = marginOptions.map((opt) => {
-    const isActive = opt.value === opts.margin;
-    return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
-  }).join("\n");
+  const pageDims = FORMAT_DIMENSIONS[opts.size];
+  const pageWidthIn = pageDims
+    ? (pageDims.w > 50 ? pageDims.w / 25.4 : pageDims.w) // mm → in if > 50
+    : 8.5;
+  const effectiveWidth = opts.orientation === "landscape"
+    ? (pageDims && pageDims.h > 50 ? pageDims.h / 25.4 : pageDims?.h ?? 11)
+    : pageWidthIn;
+  const minContentWidth = 2.5; // inches
+
+  const marginPills = marginOptions
+    .filter((opt) => {
+      const mVal = opt.value.endsWith("mm")
+        ? parseFloat(opt.value) / 25.4
+        : parseFloat(opt.value);
+      return effectiveWidth - 2 * mVal >= minContentWidth;
+    })
+    .map((opt) => {
+      const isActive = opt.value === opts.margin;
+      return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
+    }).join("\n");
 
   // Layout top-level: Single Sheets / Facing Pages
   const singleActive = opts.layout === "single" ? " active" : "";
@@ -277,8 +293,8 @@ ${gutterPills}
       <section class="config-section config-export">
         <h3 class="config-label">Export</h3>
         <div class="config-options">
-          <button class="config-option active" data-dpi="300">300dpi</button>
-          <button class="config-option" data-dpi="600">600dpi</button>
+          <button class="config-option" data-dpi="300">300dpi</button>
+          <button class="config-option active" data-dpi="600">600dpi</button>
         </div>
         <button class="config-button" data-action="save">Export ${exportMonthName}.png</button>
         <button class="config-button" data-action="save-pdf">Export Calendar.pdf</button>

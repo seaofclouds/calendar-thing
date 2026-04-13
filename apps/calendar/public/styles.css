@@ -1355,18 +1355,12 @@ body:has(.config) {
    Mini calendar width for small sizes
    =================== */
 
-/* A5/A6: wider mini cal columns + header grid */
-.page.size-a6 .month-view .view-header,
-.page.size-a5 .month-view .view-header,
-#root.size-a6 .month-view .view-header,
-#root.size-a5 .month-view .view-header {
+/* Narrow content: wider mini cal columns when content area < 480px */
+.page.narrow-content .month-view .view-header {
   grid-template-columns: 1.5fr 4fr 1.5fr;
 }
 
-.page.size-a6 .view-nav .month.mini,
-.page.size-a5 .view-nav .month.mini,
-#root.size-a6 .view-nav .month.mini,
-#root.size-a5 .view-nav .month.mini {
+.page.narrow-content .view-nav .month.mini {
   min-width: 0;
   letter-spacing: -0.02em;
 }
