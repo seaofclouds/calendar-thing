@@ -1059,6 +1059,10 @@ body:has(.config) {
   margin-top: 1.5em;
 }
 
+.config-export .config-button:first-of-type {
+  margin-top: 0.8em;
+}
+
 .config-content {
   flex: 1;
   height: 100vh;
