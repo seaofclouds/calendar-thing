@@ -389,7 +389,8 @@ function scalePages() {
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
   for (const scrollMonth of scrollMonths) {
-    const page = scrollMonth.querySelector(".page") as HTMLElement | null;
+    // Find the ORIGINAL page (not a facing clone)
+    const page = scrollMonth.querySelector(".page:not(.month-facing)") as HTMLElement | null;
     if (!page) continue;
 
     const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
