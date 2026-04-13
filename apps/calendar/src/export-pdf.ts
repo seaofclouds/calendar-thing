@@ -122,16 +122,36 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     return;
   }
 
-  // Collect month metadata
+  // Collect month metadata — handles both single and facing-month layouts.
+  // In facing-month layout, visible scroll-months contain a spread-pair with
+  // two .page elements; the second (.month-facing) belongs to the next
+  // (hidden) scroll-month.
   const months: { year: number; month: string; pageEl: HTMLElement }[] = [];
-  for (const el of scrollMonths) {
-    const page = el.querySelector(".page") as HTMLElement | null;
-    if (!page) continue;
-    months.push({
-      year: parseInt(el.dataset.year ?? params.year),
-      month: el.dataset.month ?? "1",
-      pageEl: page,
-    });
+  for (let i = 0; i < scrollMonths.length; i++) {
+    const el = scrollMonths[i];
+    // Skip hidden scroll-months — their pages were moved into spread-pairs
+    if (el.style.display === "none") continue;
+
+    const pages = el.querySelectorAll(".page") as NodeListOf<HTMLElement>;
+    for (const page of pages) {
+      if (page.classList.contains("month-facing")) {
+        // Second page in a facing pair — its month data is on the next (hidden) scroll-month
+        const nextEl = scrollMonths[i + 1];
+        if (nextEl) {
+          months.push({
+            year: parseInt(nextEl.dataset.year ?? params.year),
+            month: nextEl.dataset.month ?? "1",
+            pageEl: page,
+          });
+        }
+      } else {
+        months.push({
+          year: parseInt(el.dataset.year ?? params.year),
+          month: el.dataset.month ?? "1",
+          pageEl: page,
+        });
+      }
+    }
   }
 
   const { toJpeg } = await import("html-to-image");
@@ -160,11 +180,25 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   }
 
   async function renderCalendarToJpeg(el: HTMLElement): Promise<string> {
-    return toJpeg(el, {
-      pixelRatio,
-      backgroundColor: "#FFFFFF",
-      quality: 0.92,
-    });
+    // Temporarily reset viewport scaling so the capture is at natural page dimensions
+    const origTransform = el.style.transform;
+    const origMarginBottom = el.style.marginBottom;
+    const origMarginRight = el.style.marginRight;
+    el.style.transform = "";
+    el.style.marginBottom = "";
+    el.style.marginRight = "";
+
+    try {
+      return await toJpeg(el, {
+        pixelRatio,
+        backgroundColor: "#FFFFFF",
+        quality: 0.92,
+      });
+    } finally {
+      el.style.transform = origTransform;
+      el.style.marginBottom = origMarginBottom;
+      el.style.marginRight = origMarginRight;
+    }
   }
 
   const totalMonths = months.length;

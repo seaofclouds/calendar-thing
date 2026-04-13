@@ -758,6 +758,8 @@ function getVisibleMonth(): { year: string; month: string } | null {
   let best: HTMLElement | null = null;
   let bestDist = Infinity;
   for (const m of months) {
+    // Skip hidden scroll-months (e.g. the second month in a facing-month pair)
+    if (m.style.display === "none") continue;
     const rect = m.getBoundingClientRect();
     const dist = Math.abs(rect.top - scrollRect.top);
     if (dist < bestDist) {
@@ -806,6 +808,8 @@ async function exportCurrentView() {
     const scrollRect = scroll.getBoundingClientRect();
     let bestDist = Infinity;
     for (const m of scrollMonths) {
+      // Skip hidden scroll-months (e.g. the second month in a facing-month pair)
+      if (m.style.display === "none") continue;
       const rect = m.getBoundingClientRect();
       const dist = Math.abs(rect.top - scrollRect.top);
       if (dist < bestDist) {
@@ -835,9 +839,11 @@ async function exportCurrentView() {
 
   // Temporarily remove transform + margin for clean export at natural dimensions
   const origTransform = targetPage.style.transform;
-  const origMargin = targetPage.style.marginBottom;
+  const origMarginBottom = targetPage.style.marginBottom;
+  const origMarginRight = targetPage.style.marginRight;
   targetPage.style.transform = "";
   targetPage.style.marginBottom = "";
+  targetPage.style.marginRight = "";
 
   try {
     const { toPng } = await import("html-to-image");
@@ -861,7 +867,8 @@ async function exportCurrentView() {
     }, 3000);
   } finally {
     targetPage.style.transform = origTransform;
-    targetPage.style.marginBottom = origMargin;
+    targetPage.style.marginBottom = origMarginBottom;
+    targetPage.style.marginRight = origMarginRight;
   }
 }
 
@@ -880,29 +887,55 @@ async function exportAllMonths() {
   const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   if (scrollMonths.length === 0) return;
 
+  // Collect all pages — handles both single and facing-month layouts.
+  // In facing layout, visible scroll-months have spread-pairs with two pages;
+  // the second (.month-facing) belongs to the next (hidden) scroll-month.
+  const allPages: { yearNum: string; monthNum: number; page: HTMLElement }[] = [];
+  for (let i = 0; i < scrollMonths.length; i++) {
+    const el = scrollMonths[i];
+    if (el.style.display === "none") continue;
+
+    const pages = el.querySelectorAll(".page") as NodeListOf<HTMLElement>;
+    for (const page of pages) {
+      if (page.classList.contains("month-facing")) {
+        const nextEl = scrollMonths[i + 1];
+        if (nextEl) {
+          allPages.push({
+            yearNum: nextEl.dataset.year ?? params.year,
+            monthNum: parseInt(nextEl.dataset.month ?? "0"),
+            page,
+          });
+        }
+      } else {
+        allPages.push({
+          yearNum: el.dataset.year ?? params.year,
+          monthNum: parseInt(el.dataset.month ?? "0"),
+          page,
+        });
+      }
+    }
+  }
+
   try {
     const { toPng } = await import("html-to-image");
     const pixelRatio = dpi / 96;
 
-    for (let i = 0; i < scrollMonths.length; i++) {
-      const scrollMonth = scrollMonths[i];
-      const page = scrollMonth.querySelector(".page") as HTMLElement | null;
-      if (!page) continue;
-
-      const monthNum = parseInt(scrollMonth.dataset.month ?? "0");
-      const yearNum = scrollMonth.dataset.year ?? params.year;
+    for (let i = 0; i < allPages.length; i++) {
+      const { yearNum, monthNum, page } = allPages[i];
       const monthStr = String(monthNum).padStart(2, "0");
       const label = monthNames[monthNum] || monthStr;
 
       if (status) {
-        status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
+        status.textContent = `Exporting ${label}\u2026 (${i + 1}/${allPages.length})`;
       }
 
       // Temporarily remove transform + margin for clean export
       const origTransform = page.style.transform;
-      const origMargin = page.style.marginBottom;
+      const origMarginBottom = page.style.marginBottom;
+      const origMarginRight = page.style.marginRight;
       page.style.transform = "";
       page.style.marginBottom = "";
+      page.style.marginRight = "";
 
       const dataUrl = await toPng(page, {
         pixelRatio,
@@ -910,7 +943,8 @@ async function exportAllMonths() {
       });
 
       page.style.transform = origTransform;
-      page.style.marginBottom = origMargin;
+      page.style.marginBottom = origMarginBottom;
+      page.style.marginRight = origMarginRight;
 
       const link = document.createElement("a");
       link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
