@@ -79,21 +79,41 @@ if (document.querySelector("[data-format]")) {
 
 // ─── Layout management ─────────────────────────────────────────────
 
-/** Remove any spread elements and restore pages to scroll-months */
+/** Remove any spread elements and restore pages to their scroll-months */
 function clearSpreads() {
   document.querySelectorAll(".spread-pair").forEach((pair) => {
     const parent = pair.parentElement!;
-    // Restore the original page (not the facing clone)
-    const originalPage = pair.querySelector(".page:not(.month-facing)");
-    if (originalPage) {
-      // Reset any inline styles from scaling
-      (originalPage as HTMLElement).style.transform = "";
-      (originalPage as HTMLElement).style.marginBottom = "";
-      parent.appendChild(originalPage);
-    }
+
+    // Restore all pages from the pair back to their scroll-months
+    const pages = pair.querySelectorAll(".page");
+    pages.forEach((p) => {
+      const pg = p as HTMLElement;
+      pg.style.transform = "";
+      pg.style.marginBottom = "";
+      pg.style.marginRight = "";
+      pg.classList.remove("month-facing", "narrow-content");
+
+      // Find the scroll-month this page belongs to (by data-month match)
+      const monthView = pg.querySelector(".month-view");
+      const monthAttr = parent.dataset.month;
+      // If the page was moved from another scroll-month, find it
+      const allScrollMonths = document.querySelectorAll(".scroll-month");
+      for (const sm of allScrollMonths) {
+        if (sm.querySelector(".page") === null && sm.style.display === "none") {
+          // This is a hidden scroll-month that lost its page
+          sm.style.display = "";
+          sm.appendChild(pg);
+          return;
+        }
+      }
+      // Otherwise put it back in the current parent
+      parent.appendChild(pg);
+    });
+
     pair.remove();
   });
   document.querySelectorAll(".spread-image").forEach((el) => el.remove());
+  document.querySelectorAll(".spread-gutter").forEach((el) => el.remove());
 }
 
 /** Apply a layout mode: single, facing-photo, or facing-month */
@@ -114,6 +134,25 @@ function applyLayout(config: HTMLElement, layout: string) {
   const gutterSection = document.querySelector(".config-gutter") as HTMLElement | null;
   if (gutterSection) {
     gutterSection.style.display = (layout === "facing-photo" || layout === "facing-month") ? "" : "none";
+  }
+
+  // Disable 14mo for month+month (odd target-year pairing)
+  const len14btn = document.querySelector('[data-length="14"]') as HTMLElement | null;
+  if (len14btn) {
+    if (layout === "facing-month") {
+      len14btn.classList.add("disabled");
+      len14btn.setAttribute("aria-disabled", "true");
+      // If currently 14mo, switch to 16mo
+      if (getConfigParams().length === "14") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("length", "16");
+        saveVisibleMonth();
+        window.location.href = buildHref(url);
+      }
+    } else {
+      len14btn.classList.remove("disabled");
+      len14btn.removeAttribute("aria-disabled");
+    }
   }
 
   // Clear existing spreads first
@@ -692,33 +731,42 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-/** For facing-month layout: insert the next month's calendar as a facing page */
+/** For facing-month layout: pair target-year months into spreads.
+ *  Keeps the target year's months paired (Jan+Feb, Mar+Apr, ...Nov+Dec).
+ *  Extra months at edges (from 14/16mo) stay solo. */
 async function initMonthSpreadLayout() {
+  const config = document.querySelector(".config") as HTMLElement;
+  const targetYear = parseInt(config?.dataset.year ?? "0");
+
   const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   const monthElements = Array.from(scrollMonths);
 
-  for (let i = 0; i < monthElements.length; i++) {
-    const el = monthElements[i];
-    const page = el.querySelector(".page") as HTMLElement | null;
-    if (!page) continue;
+  // Find where the target year starts (month=1 of target year)
+  const yearStartIdx = monthElements.findIndex(
+    (el) => el.dataset.year === String(targetYear) && el.dataset.month === "1",
+  );
+  const pairStart = yearStartIdx >= 0 ? yearStartIdx : 0;
 
-    // Clone the NEXT month's page as the facing page
-    const nextEl = monthElements[i + 1];
-    const nextPage = nextEl?.querySelector(".page") as HTMLElement | null;
+  // Pair from the target year start: [pairStart, pairStart+1], [pairStart+2, pairStart+3], ...
+  // Months before pairStart stay solo. Months after pairs end stay solo.
+  for (let i = pairStart; i < monthElements.length - 1; i += 2) {
+    const firstEl = monthElements[i];
+    const secondEl = monthElements[i + 1];
 
-    if (nextPage) {
-      // Clone keeps all classes (page, size-*, orientation-*, print)
-      // so it gets identical CSS sizing
-      const clone = nextPage.cloneNode(true) as HTMLElement;
-      clone.classList.add("month-facing");
+    const firstPage = firstEl.querySelector(".page") as HTMLElement | null;
+    const secondPage = secondEl?.querySelector(".page") as HTMLElement | null;
+    if (!firstPage || !secondPage) continue;
 
-      // Wrap clone + current page in spread-pair
-      const pair = document.createElement("div");
-      pair.className = "spread-pair";
-      el.insertBefore(pair, page);
-      pair.appendChild(clone);
-      pair.appendChild(page);
-    }
+    // Move second month's page into first scroll-month as a spread-pair
+    secondPage.classList.add("month-facing");
+    const pair = document.createElement("div");
+    pair.className = "spread-pair";
+    firstEl.insertBefore(pair, firstPage);
+    pair.appendChild(firstPage);  // first month on top
+    pair.appendChild(secondPage); // second month on bottom
+
+    // Hide the now-empty second scroll-month
+    secondEl.style.display = "none";
   }
 }
 

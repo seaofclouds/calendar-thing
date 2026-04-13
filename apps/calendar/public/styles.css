@@ -1027,6 +1027,11 @@ body:has(.config) {
   background: var(--color-config-active);
 }
 
+.config-option.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .config-option.active {
   background: var(--color-config-active);
 }

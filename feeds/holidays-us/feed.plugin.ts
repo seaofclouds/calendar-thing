@@ -15,6 +15,7 @@ const plugin: FeedPlugin = {
     "New Year's Day": "us-new-years-day",
     "Martin Luther King Jr. Day": "us-mlk-day",
     "Presidents' Day": "us-presidents-day",
+    "Presidents Day": "us-presidents-day",
     "Valentine's Day": "us-valentines-day",
     "St. Patrick's Day": "us-st-patricks-day",
     "Easter": "us-easter",
