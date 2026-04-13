@@ -43,3 +43,6 @@ tmp/
 
 # Wrangler local secrets
 .dev.vars
+
+# Private feed data (contains personal information)
+feeds/birthdays/fixtures/

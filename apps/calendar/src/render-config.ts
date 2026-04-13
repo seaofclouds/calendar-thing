@@ -99,6 +99,7 @@ const FEED_OPTIONS = [
   { token: "holidays-us", label: "Holidays" },
   { token: "busd", label: "School" },
   { token: "astrology", label: "Astrology" },
+  { token: "birthdays", label: "Birthdays" },
 ];
 
 const DEFAULT_INCLUDE = ["lunar:phases", "solar:season", "holidays-us", "busd", "astrology"];
