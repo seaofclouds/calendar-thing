@@ -442,8 +442,16 @@ function scalePages() {
         facingEl.style.boxSizing = "border-box";
       }
 
-      // Both pages at natural height, no padding modifications
-      const totalNaturalH = pageHeight * 2;
+      // Parse gutter to estimate pixel height for scale calculation
+      const gutterVal = getConfigParams().gutter;
+      let gutterPx = 0;
+      if (gutterVal !== "0") {
+        if (gutterVal.endsWith("in")) gutterPx = parseFloat(gutterVal) * 96;
+        else if (gutterVal.endsWith("mm")) gutterPx = parseFloat(gutterVal) * 96 / 25.4;
+      }
+
+      // Both pages at natural height + gutter between them
+      const totalNaturalH = pageHeight * 2 + gutterPx;
       const maxContentH = scrollHeight - 40;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / totalNaturalH);
       const unusedH = Math.max(0, pageHeight * (1 - scale));
@@ -456,12 +464,24 @@ function scalePages() {
       page.style.marginBottom = `${-unusedH}px`;
       page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
 
-      // Constrain spread-pair width and apply gutter gap
+      // Constrain spread-pair width and add gutter
       const pair = scrollMonth.querySelector(".spread-pair") as HTMLElement | null;
       if (pair) {
         pair.style.width = `${pageWidth * scale}px`;
+
+        // Insert or update gutter strip between facing and main page
         const gutter = getConfigParams().gutter;
-        pair.style.gap = gutter === "0" ? "0" : gutter;
+        let gutterEl = pair.querySelector(".spread-gutter") as HTMLElement | null;
+        if (gutter !== "0") {
+          if (!gutterEl) {
+            gutterEl = document.createElement("div");
+            gutterEl.className = "spread-gutter";
+            pair.insertBefore(gutterEl, page);
+          }
+          gutterEl.style.height = gutter;
+        } else if (gutterEl) {
+          gutterEl.remove();
+        }
       }
     } else {
       // Calendar-only mode: no gutter

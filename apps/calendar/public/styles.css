@@ -1163,9 +1163,12 @@ body:has(.config) {
 
 /* Wrapper around spread-image + page — single shadow for the pair */
 .spread-pair {
-  display: flex;
-  flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.spread-gutter {
+  background: var(--color-bg);
+  width: 100%;
 }
 
 .spread-pair > .page {
