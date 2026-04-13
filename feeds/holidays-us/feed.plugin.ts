@@ -41,7 +41,7 @@ const plugin: FeedPlugin = {
     "Washington's Birthday": "us-presidents-day",
     "Juneteenth National Independence Day": "us-juneteenth",
   },
-  icon: `<svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M7 0C3.134 0 0 3.134 0 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7Zm0 1.5c1.13 0 2.176.345 3.05.93L3.43 10.05A5.47 5.47 0 0 1 1.5 7c0-3.038 2.462-5.5 5.5-5.5Zm0 11c-1.13 0-2.176-.345-3.05-.93l6.62-7.62A5.47 5.47 0 0 1 12.5 7c0 3.038-2.462 5.5-5.5 5.5Z"/></svg>`,
+  icon: `<svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M7 .5l1.76 3.57 3.94.57-2.85 2.78.67 3.93L7 9.47 3.48 11.35l.67-3.93L1.3 4.64l3.94-.57z"/></svg>`,
 };
 
 export default plugin;

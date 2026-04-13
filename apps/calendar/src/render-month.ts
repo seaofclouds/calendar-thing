@@ -195,7 +195,10 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
   const dayNum = `<span class="day-number">${day.date}</span>`;
 
   // Right-aligned indicators (day-marker events like moon phase or solar event)
-  const indicator = (day.markers ?? []).map((m) => m.emoji).filter(Boolean).join("");
+  const indicators = (day.markers ?? []).map((m) => m.emoji).filter(Boolean);
+  const indicator = indicators.length > 1
+    ? `<span class="day-markers">${indicators.join("")}</span>`
+    : indicators.join("");
 
   // Event text (left-aligned, max 3)
   const eventItems = (day.events ?? [])

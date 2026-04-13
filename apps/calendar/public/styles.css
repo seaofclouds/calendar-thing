@@ -744,6 +744,13 @@ body {
   font-weight: var(--font-weight-book);
 }
 
+/* Multiple markers side by side with small gap */
+.day-markers {
+  display: inline-flex;
+  gap: 0.2em;
+  align-items: center;
+}
+
 /* Moon/solar icons in month view — right-aligned */
 .day-header .day-marker-moon {
   width: 1em;
@@ -775,6 +782,7 @@ body {
   overflow-wrap: break-word;
   padding-left: 1.15em;
   text-indent: -1.15em;
+  overflow: visible;
 }
 
 .event-icon {

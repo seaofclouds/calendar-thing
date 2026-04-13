@@ -83,12 +83,16 @@ if (document.querySelector("[data-format]")) {
 function clearSpreads() {
   document.querySelectorAll(".spread-pair").forEach((pair) => {
     const parent = pair.parentElement!;
-    const page = pair.querySelector(".page");
-    if (page) parent.appendChild(page);
+    // Restore the original page (not the facing clone)
+    const originalPage = pair.querySelector(".page:not(.month-facing)");
+    if (originalPage) {
+      // Reset any gutter padding
+      (originalPage as HTMLElement).style.paddingTop = "";
+      parent.appendChild(originalPage);
+    }
     pair.remove();
   });
   document.querySelectorAll(".spread-image").forEach((el) => el.remove());
-  document.querySelectorAll(".month-facing").forEach((el) => el.remove());
 }
 
 /** Apply a layout mode: single, facing-photo, or facing-month */
@@ -143,7 +147,7 @@ function initConfigSidebar() {
         if (isFacing) {
           // Determine which facing mode is active (default to photo)
           const activeFacing = facingSub?.querySelector(".config-option.active") as HTMLElement | null;
-          const facingMode = activeFacing?.dataset.facing ?? "facing-photo";
+          const facingMode = activeFacing?.dataset.facing ?? "facing-month";
           applyLayout(config, facingMode);
         } else {
           applyLayout(config, "single");
@@ -389,7 +393,7 @@ function scalePages() {
     if (!page) continue;
 
     const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
-    const monthFacing = scrollMonth.querySelector(".month-facing") as HTMLElement | null;
+    const monthFacing = scrollMonth.querySelector(".page.month-facing") as HTMLElement | null;
     const facingEl = spreadImage || monthFacing;
     const hasFacing = facingEl !== null;
 
@@ -542,7 +546,7 @@ async function refreshSpreadImage(year: number, month: string) {
 /** Inject spread image containers above each calendar month when in photo-calendar layout */
 async function initSpreadLayout() {
   const config = document.querySelector(".config") as HTMLElement | null;
-  if (!config || config.dataset.layout !== "photo-calendar") return;
+  if (!config || config.dataset.layout !== "facing-photo") return;
 
   const scrollMonths = document.querySelectorAll(".scroll-month");
   const scaling = getConfigParams().scaling;
@@ -657,25 +661,19 @@ async function initMonthSpreadLayout() {
     const nextEl = monthElements[i + 1];
     const nextPage = nextEl?.querySelector(".page") as HTMLElement | null;
 
-    const facingDiv = document.createElement("div");
-    facingDiv.className = "month-facing";
-
     if (nextPage) {
+      // Clone keeps all classes (page, size-*, orientation-*, print)
+      // so it gets identical CSS sizing
       const clone = nextPage.cloneNode(true) as HTMLElement;
-      clone.classList.remove("page");
-      clone.classList.add("page-facing");
-      facingDiv.appendChild(clone);
-    } else {
-      // Last month has no next — show empty facing
-      facingDiv.classList.add("empty");
-    }
+      clone.classList.add("month-facing");
 
-    // Wrap facing + page in spread-pair
-    const pair = document.createElement("div");
-    pair.className = "spread-pair";
-    el.insertBefore(pair, page);
-    pair.appendChild(facingDiv);
-    pair.appendChild(page);
+      // Wrap clone + current page in spread-pair
+      const pair = document.createElement("div");
+      pair.className = "spread-pair";
+      el.insertBefore(pair, page);
+      pair.appendChild(clone);
+      pair.appendChild(page);
+    }
   }
 }
 

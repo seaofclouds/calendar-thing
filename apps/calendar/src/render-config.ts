@@ -123,8 +123,9 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   const facingActive = isFacing ? " active" : "";
 
   // Facing sub-toggle: Photo + Month / Month + Month
+  // Default to Month + Month when in single mode (so it's pre-selected when user clicks Facing Pages)
   const photoActive = opts.layout === "facing-photo" ? " active" : "";
-  const monthActive = opts.layout === "facing-month" ? " active" : "";
+  const monthActive = (opts.layout === "facing-month" || opts.layout === "single") ? " active" : "";
   const facingSubDisplay = isFacing ? "" : ' style="display:none"';
 
   // Image scaling (only when Photo + Month)
