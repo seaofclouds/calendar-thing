@@ -731,25 +731,14 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-/** For facing-month layout: pair target-year months into spreads.
- *  Keeps the target year's months paired (Jan+Feb, Mar+Apr, ...Nov+Dec).
- *  Extra months at edges (from 14/16mo) stay solo. */
+/** For facing-month layout: pair all months into spreads.
+ *  Nov+Dec, Jan+Feb, Mar+Apr, etc. Each month appears exactly once. */
 async function initMonthSpreadLayout() {
-  const config = document.querySelector(".config") as HTMLElement;
-  const targetYear = parseInt(config?.dataset.year ?? "0");
-
   const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   const monthElements = Array.from(scrollMonths);
 
-  // Find where the target year starts (month=1 of target year)
-  const yearStartIdx = monthElements.findIndex(
-    (el) => el.dataset.year === String(targetYear) && el.dataset.month === "1",
-  );
-  const pairStart = yearStartIdx >= 0 ? yearStartIdx : 0;
-
-  // Pair from the target year start: [pairStart, pairStart+1], [pairStart+2, pairStart+3], ...
-  // Months before pairStart stay solo. Months after pairs end stay solo.
-  for (let i = pairStart; i < monthElements.length - 1; i += 2) {
+  // Pair all months sequentially: [0,1], [2,3], [4,5], ...
+  for (let i = 0; i < monthElements.length - 1; i += 2) {
     const firstEl = monthElements[i];
     const secondEl = monthElements[i + 1];
 
