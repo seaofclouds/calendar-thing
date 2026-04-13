@@ -13,7 +13,7 @@ import { generateICS } from "./ics";
 function yearFromRequest(request: Request): number {
   const url = new URL(request.url);
   const requestedYear = url.searchParams.get("year");
-  return requestedYear ? parseInt(requestedYear) : new Date().getUTCFullYear();
+  return requestedYear ? parseInt(requestedYear, 10) : new Date().getUTCFullYear();
 }
 
 function computeYear(year: number) {
@@ -32,7 +32,7 @@ export default createFeedWorker({
   routes: [
     {
       path: "/feeds/astronomy.ics",
-      handler: async (request) => {
+      handler: async (request, _env, _ctx) => {
         try {
           const year = yearFromRequest(request);
           const { phases, solarEvents } = computeYear(year);
@@ -45,7 +45,7 @@ export default createFeedWorker({
     },
     {
       path: "/feeds/astronomy.json",
-      handler: async (request) => {
+      handler: async (request, _env, _ctx) => {
         try {
           const year = yearFromRequest(request);
           const { phases, solarEvents } = computeYear(year);

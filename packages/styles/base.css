@@ -6,6 +6,9 @@
   --color-border: #aaa;
   --color-border-light: #e0e0e0;
   --color-muted: #ccc;
+  --color-shadow: rgba(0, 0, 0, 0.15);
+  --color-overlay: rgba(0, 0, 0, 0.35);
+  --color-overlay-hover: rgba(0, 0, 0, 0.55);
 
   /* Config sidebar */
   --color-config-bg: #e8e0d8;

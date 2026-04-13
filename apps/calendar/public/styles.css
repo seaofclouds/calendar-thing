@@ -1087,7 +1087,7 @@ body:has(.config) {
   background: var(--color-bg);
   color: var(--color-text);
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 /* ===================
@@ -1175,7 +1175,7 @@ body:has(.config) {
 
 /* Wrapper around spread-image + page — single shadow for the pair */
 .spread-pair {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--color-shadow);
   overflow: hidden;
 }
 
@@ -1276,7 +1276,7 @@ body:has(.config) {
   padding: 8px;
   border: none;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-overlay);
   color: white;
   cursor: pointer;
   opacity: 0;
@@ -1295,7 +1295,7 @@ body:has(.config) {
 }
 
 .spread-scaling-toggle:hover {
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--color-overlay-hover);
 }
 
 /* ===================

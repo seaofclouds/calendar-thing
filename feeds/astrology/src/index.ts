@@ -11,7 +11,7 @@ import { generateICS } from "./ics";
 function yearFromRequest(request: Request): number {
   const url = new URL(request.url);
   const requestedYear = url.searchParams.get("year");
-  return requestedYear ? parseInt(requestedYear) : new Date().getUTCFullYear();
+  return requestedYear ? parseInt(requestedYear, 10) : new Date().getUTCFullYear();
 }
 
 export default createFeedWorker({
@@ -21,7 +21,7 @@ export default createFeedWorker({
   routes: [
     {
       path: "/feeds/astrology.ics",
-      handler: async (request) => {
+      handler: async (request, _env, _ctx) => {
         try {
           const events = computeZodiacSeasons(yearFromRequest(request));
           return icsResponse(generateICS(events));
@@ -33,7 +33,7 @@ export default createFeedWorker({
     },
     {
       path: "/feeds/astrology.json",
-      handler: async (request) => {
+      handler: async (request, _env, _ctx) => {
         try {
           const events = computeZodiacSeasons(yearFromRequest(request));
           return jsonResponse(JSON.stringify(buildJSON(events, new Date()), null, 2));
