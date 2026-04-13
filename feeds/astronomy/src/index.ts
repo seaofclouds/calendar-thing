@@ -3,7 +3,7 @@
  * Serves ICS and JSON feeds for moon phases and solar events.
  */
 
-import { createFeedWorker, icsResponse, jsonResponse } from "@calendar-feeds/shared";
+import { createFeedWorker, icsResponse, jsonResponse, errorResponse } from "@calendar-feeds/shared";
 import { computeMoonPhases, phaseName } from "./moon";
 import type { MoonPhase } from "./moon";
 import { computeSolarEvents } from "./solar";
@@ -13,7 +13,7 @@ import { generateICS } from "./ics";
 function yearFromRequest(request: Request): number {
   const url = new URL(request.url);
   const requestedYear = url.searchParams.get("year");
-  return requestedYear ? parseInt(requestedYear) : new Date().getUTCFullYear();
+  return requestedYear ? parseInt(requestedYear, 10) : new Date().getUTCFullYear();
 }
 
 function computeYear(year: number) {
@@ -32,19 +32,29 @@ export default createFeedWorker({
   routes: [
     {
       path: "/feeds/astronomy.ics",
-      handler: async (request) => {
-        const year = yearFromRequest(request);
-        const { phases, solarEvents } = computeYear(year);
-        return icsResponse(generateICS(phases, solarEvents));
+      handler: async (request, _env, _ctx) => {
+        try {
+          const year = yearFromRequest(request);
+          const { phases, solarEvents } = computeYear(year);
+          return icsResponse(generateICS(phases, solarEvents));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Unknown error";
+          return errorResponse(500, `Error generating calendar: ${message}`);
+        }
       },
     },
     {
       path: "/feeds/astronomy.json",
-      handler: async (request) => {
-        const year = yearFromRequest(request);
-        const { phases, solarEvents } = computeYear(year);
-        const json = buildJSON(phases, solarEvents, new Date());
-        return jsonResponse(JSON.stringify(json, null, 2));
+      handler: async (request, _env, _ctx) => {
+        try {
+          const year = yearFromRequest(request);
+          const { phases, solarEvents } = computeYear(year);
+          const json = buildJSON(phases, solarEvents, new Date());
+          return jsonResponse(JSON.stringify(json, null, 2));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Unknown error";
+          return errorResponse(500, message, true);
+        }
       },
     },
   ],

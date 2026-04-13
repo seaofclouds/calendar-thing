@@ -7,6 +7,7 @@ const plugin: FeedPlugin = {
   endpoint: "/feeds/busd.ics",
   category: "school",
   renderMode: "event-list",
+  defaultInclude: ["busd"],
   fixture,
   stripSummarySuffix: " Holiday",
   dedupeKeys: {

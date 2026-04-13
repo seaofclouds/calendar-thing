@@ -26,6 +26,7 @@ const plugin: FeedPlugin = {
   prodUrl: "https://calendar-astrology.seaofclouds.workers.dev",
   category: "astrology",
   renderMode: "event-list",
+  defaultInclude: ["astrology"],
   fixture,
   signIcons: ZODIAC_ICONS,
 };

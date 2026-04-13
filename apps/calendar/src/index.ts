@@ -4,9 +4,9 @@
  * Fetches event data from feed plugins via service bindings.
  */
 
-import { renderCalendar, renderCalendarFragment } from "./render";
+import { renderCalendar } from "./render";
 import { renderMonthView, renderMonthViewFragment } from "./render-month";
-import { renderConfigView } from "./render-config";
+import { renderConfigView, type MonthFragment } from "./render-config";
 import { renderStyleguide } from "./render-styleguide";
 import {
   createFeedRegistry,
@@ -25,7 +25,13 @@ import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
 import holidaysUSPlugin from "../../../feeds/holidays-us/feed.plugin";
 
-/** Serialize URLSearchParams without over-encoding safe chars like : and , */
+/**
+ * Serialize URLSearchParams without percent-encoding colons and commas.
+ * Standard toString() encodes `:` → `%3A` and `,` → `%2C`, which makes
+ * the `include` param unreadable (e.g. `lunar%3Afull%2Clunar%3Anew`).
+ * Safe because all keys and values are from a controlled vocabulary
+ * (feed tokens, page sizes, orientations) — never free-text user input.
+ */
 function serializeParams(params: URLSearchParams): string {
   const parts: string[] = [];
   params.forEach((v, k) => parts.push(`${k}=${v}`));
@@ -64,9 +70,9 @@ interface CalendarParams {
   borders: boolean;
 }
 
-const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-letter", "a4", "a5", "a6"]);
+const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-letter", "a4", "a5", "a6", "5x7", "4x6"]);
 const VALID_ORIENTATIONS = new Set(["portrait", "landscape"]);
-const VALID_MARGINS = new Set(["0.25in", "0.5in", "1in"]);
+const VALID_MARGINS = new Set(["0.125in", "0.25in", "0.5in", "1in", "5mm", "10mm"]);
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -295,6 +301,41 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
   });
 }
 
+const VALID_LENGTHS = new Set(["12", "14", "16"]);
+const VALID_LAYOUTS = new Set(["single", "facing-photo", "facing-month"]);
+const VALID_SCALINGS = new Set(["fit", "crop"]);
+const VALID_GUTTERS = new Set(["0", "0.5in", "0.75in", "1in"]);
+
+/**
+ * Calculate the month range for a calendar of a given length centered on a year.
+ * Returns array of { year, month } objects (month is 1-12).
+ */
+function getMonthRange(year: number, length: number): { year: number; month: number }[] {
+  const months: { year: number; month: number }[] = [];
+  // Extra months split evenly at both ends
+  const extra = length - 12;
+  const before = Math.floor(extra / 2);
+
+  // Start date: go back `before` months from January of target year
+  let startYear = year;
+  let startMonth = 1 - before; // 1-based
+  while (startMonth <= 0) {
+    startMonth += 12;
+    startYear--;
+  }
+
+  for (let i = 0; i < length; i++) {
+    let m = startMonth + i;
+    let y = startYear;
+    while (m > 12) {
+      m -= 12;
+      y++;
+    }
+    months.push({ year: y, month: m });
+  }
+  return months;
+}
+
 async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Response> {
   const segments = path.replace(/^\/config\//, "").split("/").filter(Boolean);
   if (segments.length === 0) {
@@ -306,11 +347,12 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
     return Response.redirect(`${url.origin}/config/${new Date().getFullYear()}`, 302);
   }
 
-  let month: number | undefined;
+  // Optional month param for initial scroll target
+  let scrollToMonth: number | undefined;
   if (segments[1]) {
     const monthNum = parseInt(segments[1]);
     if (!isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
-      month = monthNum;
+      scrollToMonth = monthNum;
     }
   }
 
@@ -324,11 +366,25 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   const marginParam = url.searchParams.get("margin") ?? "0.25in";
   const margin = VALID_MARGINS.has(marginParam) ? marginParam : "0.25in";
 
+  // New config params
+  const lengthParam = url.searchParams.get("length") ?? "12";
+  const calendarLength = VALID_LENGTHS.has(lengthParam) ? parseInt(lengthParam) : 12;
+  const layoutParam = url.searchParams.get("layout") ?? "single";
+  const layout = (VALID_LAYOUTS.has(layoutParam) ? layoutParam : "single") as "single" | "facing-photo" | "facing-month";
+  const scalingParam = url.searchParams.get("scaling") ?? "fit";
+  const scaling = (VALID_SCALINGS.has(scalingParam) ? scalingParam : "fit") as "fit" | "crop";
+  const gutterParam = url.searchParams.get("gutter") ?? "0.5in";
+  const gutter = VALID_GUTTERS.has(gutterParam) ? gutterParam : "0.5in";
+
   // Build query string for calendar-internal links (preserves config state)
   const configParams = new URLSearchParams();
   configParams.set("size", size);
   configParams.set("orientation", orientation);
   configParams.set("margin", margin);
+  configParams.set("layout", layout);
+  configParams.set("length", String(calendarLength));
+  configParams.set("scaling", scaling);
+  configParams.set("gutter", gutter);
   if (includeParam) configParams.set("include", includeParam);
   const configQs = `?${serializeParams(configParams)}`;
 
@@ -353,15 +409,15 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   const markers = allEvents.filter((e) => markerIds.has(e.category));
   const events = allEvents.filter((e) => !markerIds.has(e.category));
 
-  // Render calendar fragment in print mode at selected paper size
-  let calendarHtml: string;
-  if (month != null) {
+  // Render month fragments for the full calendar range
+  const monthRange = getMonthRange(yearNum, calendarLength);
+  const monthFragments: MonthFragment[] = monthRange.map(({ year, month }) => {
     const monthStr = String(month).padStart(2, "0");
-    const prefix = `${yearNum}-${monthStr}-`;
+    const prefix = `${year}-${monthStr}-`;
     const monthEvents = events.filter((e) => e.date.startsWith(prefix));
 
-    calendarHtml = renderMonthViewFragment({
-      year: yearNum,
+    const html = renderMonthViewFragment({
+      year,
       month,
       size,
       orientation,
@@ -374,30 +430,24 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       queryString: configQs,
       urlPrefix: "/config",
       margin,
+      embedded: true,
     });
-  } else {
-    calendarHtml = renderCalendarFragment({
-      year: yearNum,
-      size,
-      orientation,
-      header: true,
-      testing: false,
-      forExport: true,
-      markers,
-      queryString: configQs,
-      urlPrefix: "/config",
-      margin,
-    });
-  }
+
+    return { year, month, html };
+  });
 
   const html = renderConfigView({
     year: yearNum,
-    month,
+    scrollToMonth,
     size,
     orientation,
     margin,
-    calendarHtml,
+    monthFragments,
     includeParam,
+    calendarLength,
+    layout,
+    scaling,
+    gutter,
   });
 
   return new Response(html, {

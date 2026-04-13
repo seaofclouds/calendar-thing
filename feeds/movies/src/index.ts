@@ -17,7 +17,7 @@ interface Env {
   CALENDAR_TOKEN: string;
 }
 
-export default createFeedWorker({
+export default createFeedWorker<Env>({
   name: "Movie Release Calendar",
   cacheVersion: 11,
   routes: [
