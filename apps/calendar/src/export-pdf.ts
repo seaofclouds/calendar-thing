@@ -111,6 +111,8 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   const pixelRatio = dpi / 96;
 
   const isPhotoLayout = params.layout === "photo-calendar";
+  const isFacing = params.layout === "facing-month" || params.layout === "facing-photo";
+  const gutterVal = isFacing ? params.gutter : "0";
   const year = parseInt(params.year);
 
   // Get rendered months from the DOM
@@ -188,6 +190,14 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     el.style.marginBottom = "";
     el.style.marginRight = "";
 
+    // For facing layouts, add gutter as extra top padding (binding margin)
+    const monthView = el.querySelector(".month-view") as HTMLElement | null;
+    let origPaddingTop: string | undefined;
+    if (gutterVal !== "0" && monthView) {
+      origPaddingTop = monthView.style.paddingTop;
+      monthView.style.paddingTop = `calc(${params.margin} + ${gutterVal})`;
+    }
+
     try {
       return await toJpeg(el, {
         pixelRatio,
@@ -198,6 +208,9 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       el.style.transform = origTransform;
       el.style.marginBottom = origMarginBottom;
       el.style.marginRight = origMarginRight;
+      if (origPaddingTop !== undefined && monthView) {
+        monthView.style.paddingTop = origPaddingTop;
+      }
     }
   }
 
@@ -270,7 +283,8 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   if (status) status.textContent = "Saving PDF\u2026";
 
   const sizeName = params.size.charAt(0).toUpperCase() + params.size.slice(1);
-  pdf.save(`calendar--${params.year}--${sizeName}.pdf`);
+  const layoutTag = isFacing ? "--facing" : "";
+  pdf.save(`calendar--${params.year}--${sizeName}--${params.orientation}${layoutTag}--${dpi}dpi.pdf`);
 
   if (status) {
     status.textContent = "PDF exported!";

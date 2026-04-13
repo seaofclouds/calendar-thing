@@ -853,8 +853,9 @@ async function exportCurrentView() {
     });
 
     const monthPart = monthNum ? `--${monthNum.padStart(2, "0")}` : "";
+    const layoutTag = (params.layout === "facing-month" || params.layout === "facing-photo") ? "--facing" : "";
     const link = document.createElement("a");
-    link.download = `calendar--${params.year}${monthPart}--${params.size}--${params.orientation}--${dpi}dpi.png`;
+    link.download = `calendar--${params.year}${monthPart}--${params.size}--${params.orientation}${layoutTag}--${dpi}dpi.png`;
     link.href = dataUrl;
     link.click();
 
@@ -947,7 +948,8 @@ async function exportAllMonths() {
       page.style.marginRight = origMarginRight;
 
       const link = document.createElement("a");
-      link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
+      const layoutTag = (params.layout === "facing-month" || params.layout === "facing-photo") ? "--facing" : "";
+      link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}${layoutTag}--${dpi}dpi.png`;
       link.href = dataUrl;
       link.click();
 
