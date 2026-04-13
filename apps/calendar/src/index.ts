@@ -23,6 +23,7 @@ import astronomyPlugin from "../../../feeds/astronomy/feed.plugin";
 import { theatrical, digital } from "../../../feeds/movies/feed.plugin";
 import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
+import birthdaysPlugin from "../../../feeds/birthdays/feed.plugin";
 import holidaysUSPlugin from "../../../feeds/holidays-us/feed.plugin";
 
 /**
@@ -45,6 +46,7 @@ const registry = createFeedRegistry([
   holidaysUSPlugin,
   busdPlugin,
   astrologyPlugin,
+  birthdaysPlugin,
 ]);
 
 interface Env {

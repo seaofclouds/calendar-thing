@@ -34,6 +34,11 @@ function parseVEvent(block: string, category: string): CalendarEvent[] {
     category,
   };
 
+  const rrule = getField(block, "RRULE");
+  if (rrule && /FREQ=YEARLY/i.test(rrule)) {
+    return expandYearlyRecurrence(dtstart, uid ?? `${category}-${dtstart}-${summary}`, base);
+  }
+
   // Expand multi-day events (DTEND is exclusive in ICS)
   const dates = expandDateRange(dtstart, dtend);
   return dates.map((date) => ({
@@ -41,6 +46,26 @@ function parseVEvent(block: string, category: string): CalendarEvent[] {
     uid: (uid ?? `${category}-${dtstart}-${summary}`) + (dates.length > 1 ? `-${date}` : ""),
     date,
   }));
+}
+
+/** Expand a RRULE:FREQ=YEARLY event into instances for current year ± 2 */
+function expandYearlyRecurrence(
+  dtstart: string,
+  uid: string,
+  base: Omit<CalendarEvent, "uid" | "date">,
+): CalendarEvent[] {
+  const monthDay = dtstart.slice(5); // "MM-DD"
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const events: CalendarEvent[] = [];
+  for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+    events.push({
+      ...base,
+      uid: `${uid}-${y}`,
+      date: `${y}-${monthDay}`,
+    });
+  }
+  return events;
 }
 
 /** Extract a field value from an ICS block, handling folded lines */
