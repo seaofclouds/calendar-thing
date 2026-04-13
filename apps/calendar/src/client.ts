@@ -897,9 +897,15 @@ if (document.querySelector(".config-scroll")) {
   const layout = config?.dataset.layout ?? "single";
 
   const initDone = () => {
-    scalePages();
-    restoreScrollPosition();
-    updateExportLabel();
+    // Double rAF ensures one paint cycle has completed before measuring.
+    // Safari needs this to resolve CSS mm-based dimensions on .page elements.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scalePages();
+        restoreScrollPosition();
+        updateExportLabel();
+      });
+    });
   };
 
   if (layout === "facing-photo") {
