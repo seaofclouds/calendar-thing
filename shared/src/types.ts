@@ -54,6 +54,8 @@ export interface FeedPlugin {
   prodUrl?: string;
   /** External ICS URL (e.g. Google Calendar) */
   sourceUrl?: string;
+  /** Environment variable name containing the source URL (for private feeds) */
+  sourceUrlEnv?: string;
   /** Embedded ICS fixture data for offline dev fallback */
   fixture?: string;
   includeTokens?: Record<string, string>;

@@ -97,10 +97,11 @@ async function fetchRaw(
     }
   }
 
-  // 3. Try source URL (external ICS feed)
-  if (feed.sourceUrl) {
+  // 3. Try source URL (external ICS feed, or from env var for private feeds)
+  const sourceUrl = feed.sourceUrl ?? (feed.sourceUrlEnv ? env[feed.sourceUrlEnv] as string : undefined);
+  if (sourceUrl) {
     try {
-      const response = await fetch(feed.sourceUrl, {
+      const response = await fetch(sourceUrl, {
         signal: AbortSignal.timeout(5000),
       });
       if (response.ok) {
