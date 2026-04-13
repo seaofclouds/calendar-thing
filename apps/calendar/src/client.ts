@@ -10,8 +10,15 @@ import {
   loadImageUrl,
   listImages,
 } from "./store-images";
+import { getConfigParams, getActiveDpi } from "./config-helpers";
 
-/** Serialize URL search params without over-encoding safe chars like : and , */
+/**
+ * Serialize URLSearchParams without percent-encoding colons and commas.
+ * Standard toString() encodes `:` → `%3A` and `,` → `%2C`, which makes
+ * the `include` param unreadable (e.g. `lunar%3Afull%2Clunar%3Anew`).
+ * Safe because all keys and values are from a controlled vocabulary
+ * (feed tokens, page sizes, orientations) — never free-text user input.
+ */
 function serializeParams(params: URLSearchParams): string {
   const parts: string[] = [];
   params.forEach((v, k) => parts.push(`${k}=${v}`));
@@ -335,30 +342,7 @@ function initConfigSidebar() {
   });
 }
 
-// ─── Config helpers ────────────────────────────────────────────────
-
-function getActiveDpi(): number {
-  const active = document.querySelector(
-    ".config-option[data-dpi].active",
-  ) as HTMLElement | null;
-  return parseInt(active?.dataset.dpi ?? "300");
-}
-
-function getConfigParams() {
-  const url = new URL(window.location.href);
-  const match = url.pathname.match(/\/config\/(\d+)/);
-  return {
-    year: match?.[1] ?? String(new Date().getFullYear()),
-    size: url.searchParams.get("size") ?? "letter",
-    orientation: url.searchParams.get("orientation") ?? "landscape",
-    include: url.searchParams.get("include") ?? "",
-    margin: url.searchParams.get("margin") ?? "0.25in",
-    layout: url.searchParams.get("layout") ?? "calendar",
-    length: url.searchParams.get("length") ?? "12",
-    scaling: url.searchParams.get("scaling") ?? "fit",
-    gutter: url.searchParams.get("gutter") ?? "0.5in",
-  };
-}
+// ─── Config helpers (imported from config-helpers.ts) ─────────────
 
 // ─── Scroll position preservation ──────────────────────────────────
 
@@ -453,7 +437,10 @@ function scalePages() {
   const scrollHeight = scroll.clientHeight;
   const padding = 24;
   const availableWidth = scrollWidth - padding * 2;
-  const margin = getConfigParams().margin;
+  const { margin, gutter } = getConfigParams();
+  const PX_PER_INCH = 96;
+  const TOOLBAR_HEIGHT = 80;
+  const NARROW_CONTENT_THRESHOLD = 480;
 
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
@@ -490,16 +477,15 @@ function scalePages() {
       // Month-facing pages already have correct CSS dimensions from .page.size-* classes
 
       // Parse gutter to estimate pixel height for scale calculation
-      const gutterVal = getConfigParams().gutter;
       let gutterPx = 0;
-      if (gutterVal !== "0") {
-        if (gutterVal.endsWith("in")) gutterPx = parseFloat(gutterVal) * 96;
-        else if (gutterVal.endsWith("mm")) gutterPx = parseFloat(gutterVal) * 96 / 25.4;
+      if (gutter !== "0") {
+        if (gutter.endsWith("in")) gutterPx = parseFloat(gutter) * PX_PER_INCH;
+        else if (gutter.endsWith("mm")) gutterPx = parseFloat(gutter) * PX_PER_INCH / 25.4;
       }
 
       // Both pages at natural height + gutter between them
       const totalNaturalH = pageHeight * 2 + gutterPx;
-      const maxContentH = scrollHeight - 80;
+      const maxContentH = scrollHeight - TOOLBAR_HEIGHT;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / totalNaturalH);
       const unusedH = Math.max(0, pageHeight * (1 - scale));
 
@@ -517,7 +503,6 @@ function scalePages() {
         pair.style.width = `${pageWidth * scale}px`;
 
         // Insert or update gutter strip between the two pages
-        const gutter = getConfigParams().gutter;
         let gutterEl = pair.querySelector(".spread-gutter") as HTMLElement | null;
         if (gutter !== "0") {
           if (!gutterEl) {
@@ -534,7 +519,7 @@ function scalePages() {
       }
     } else {
       // Calendar-only mode: no gutter
-      const maxContentH = scrollHeight - 80;
+      const maxContentH = scrollHeight - TOOLBAR_HEIGHT;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / pageHeight);
       const unusedSpace = Math.max(0, pageHeight * (1 - scale));
 
@@ -546,13 +531,13 @@ function scalePages() {
     // Dynamic mini cal width: if content area is narrow, use wider mini cal columns
     const marginVal = parseFloat(margin);
     const marginUnit = margin.replace(/[\d.]/g, "");
-    const marginPx = marginUnit === "mm" ? marginVal * 96 / 25.4 : marginVal * 96;
+    const marginPx = marginUnit === "mm" ? marginVal * PX_PER_INCH / 25.4 : marginVal * PX_PER_INCH;
     const contentWidth = pageWidth - 2 * marginPx;
-    page.classList.toggle("narrow-content", contentWidth < 480);
+    page.classList.toggle("narrow-content", contentWidth < NARROW_CONTENT_THRESHOLD);
 
     // Also apply to facing clone if present
     const facingClone = scrollMonth.querySelector(".page.month-facing") as HTMLElement | null;
-    if (facingClone) facingClone.classList.toggle("narrow-content", contentWidth < 480);
+    if (facingClone) facingClone.classList.toggle("narrow-content", contentWidth < NARROW_CONTENT_THRESHOLD);
   }
 }
 

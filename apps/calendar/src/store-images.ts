@@ -66,6 +66,10 @@ export async function loadImage(
   });
 }
 
+/**
+ * Load an image as an object URL for use in `<img src>` or CSS.
+ * Caller MUST call `revokeImageUrl()` when done to free memory.
+ */
 export async function loadImageUrl(
   year: number,
   slot: string,
@@ -73,6 +77,11 @@ export async function loadImageUrl(
   const record = await loadImage(year, slot);
   if (!record) return undefined;
   return URL.createObjectURL(record.blob);
+}
+
+/** Revoke an object URL returned by `loadImageUrl()` to free memory. */
+export function revokeImageUrl(url: string): void {
+  URL.revokeObjectURL(url);
 }
 
 export async function removeImage(

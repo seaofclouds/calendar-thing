@@ -14,6 +14,7 @@
 
 import { loadImage } from "./store-images";
 import { PAGE_TYPES } from "./config";
+import { getConfigParams, getActiveDpi } from "./config-helpers";
 
 export interface ExportPDFOptions {
   getStatus: () => HTMLElement | null;
@@ -41,27 +42,6 @@ function getPageDimensionsMm(
     : { width: w, height: h };
 }
 
-/** Read config params from the current URL */
-function getConfigParams() {
-  const url = new URL(window.location.href);
-  const match = url.pathname.match(/\/config\/(\d+)/);
-  return {
-    year: match?.[1] ?? String(new Date().getFullYear()),
-    size: url.searchParams.get("size") ?? "letter",
-    orientation: url.searchParams.get("orientation") ?? "landscape",
-    layout: url.searchParams.get("layout") ?? "calendar",
-    scaling: url.searchParams.get("scaling") ?? "fit",
-  };
-}
-
-/** Get active DPI from sidebar */
-function getActiveDpi(): number {
-  const el = document.querySelector(
-    ".config-option[data-dpi].active",
-  ) as HTMLElement | null;
-  return parseInt(el?.dataset.dpi ?? "300");
-}
-
 /**
  * Draw a user photo onto a canvas at the given page dimensions.
  * Supports fit (contain) and crop (cover) scaling modes.
@@ -75,39 +55,42 @@ async function composeImagePage(
   rotate180: boolean,
 ): Promise<string> {
   const img = await createImageBitmap(blob);
-  const canvas = document.createElement("canvas");
-  canvas.width = canvasW;
-  canvas.height = canvasH;
-  const ctx = canvas.getContext("2d")!;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+    const ctx = canvas.getContext("2d")!;
 
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(0, 0, canvasW, canvasH);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvasW, canvasH);
 
-  if (rotate180) {
-    ctx.translate(canvasW, canvasH);
-    ctx.rotate(Math.PI);
+    if (rotate180) {
+      ctx.translate(canvasW, canvasH);
+      ctx.rotate(Math.PI);
+    }
+
+    if (scaling === "crop") {
+      // object-fit: cover — fill canvas, center-crop
+      const scale = Math.max(canvasW / img.width, canvasH / img.height);
+      const sw = canvasW / scale;
+      const sh = canvasH / scale;
+      const sx = (img.width - sw) / 2;
+      const sy = (img.height - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
+    } else {
+      // object-fit: contain — fit within canvas, letterboxed
+      const scale = Math.min(canvasW / img.width, canvasH / img.height);
+      const dw = img.width * scale;
+      const dh = img.height * scale;
+      const dx = (canvasW - dw) / 2;
+      const dy = (canvasH - dh) / 2;
+      ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+    }
+
+    return canvas.toDataURL("image/jpeg", 0.92);
+  } finally {
+    img.close();
   }
-
-  if (scaling === "crop") {
-    // object-fit: cover — fill canvas, center-crop
-    const scale = Math.max(canvasW / img.width, canvasH / img.height);
-    const sw = canvasW / scale;
-    const sh = canvasH / scale;
-    const sx = (img.width - sw) / 2;
-    const sy = (img.height - sh) / 2;
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
-  } else {
-    // object-fit: contain — fit within canvas, letterboxed
-    const scale = Math.min(canvasW / img.width, canvasH / img.height);
-    const dw = img.width * scale;
-    const dh = img.height * scale;
-    const dx = (canvasW - dw) / 2;
-    const dy = (canvasH - dh) / 2;
-    ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
-  }
-
-  img.close();
-  return canvas.toDataURL("image/jpeg", 0.92);
 }
 
 export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
