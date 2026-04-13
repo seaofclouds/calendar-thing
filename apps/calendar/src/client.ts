@@ -456,7 +456,7 @@ function scalePages() {
 
       // Both pages at natural height + gutter between them
       const totalNaturalH = pageHeight * 2 + gutterPx;
-      const maxContentH = scrollHeight - 40;
+      const maxContentH = scrollHeight - 80;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / totalNaturalH);
       const unusedH = Math.max(0, pageHeight * (1 - scale));
 
@@ -489,7 +489,7 @@ function scalePages() {
       }
     } else {
       // Calendar-only mode: no gutter
-      const maxContentH = scrollHeight - 40;
+      const maxContentH = scrollHeight - 80;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / pageHeight);
       const unusedSpace = Math.max(0, pageHeight * (1 - scale));
 
