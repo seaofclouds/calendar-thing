@@ -1090,7 +1090,6 @@ body:has(.config) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 2em;
 }
 
 .scroll-month {
@@ -1105,6 +1104,11 @@ body:has(.config) {
 
 .scroll-month:first-child {
   padding-top: 0.5em;
+}
+
+/* Bottom spacer — padding-bottom is unreliable in scroll containers */
+.scroll-month:last-child {
+  padding-bottom: 3em;
 }
 
 /* .page mirrors #root sizing for config scroll view (avoids duplicate IDs) */
@@ -1172,8 +1176,12 @@ body:has(.config) {
   width: 100%;
 }
 
-.spread-pair > .page {
+.spread-pair > .page,
+.spread-pair > .page.month-facing {
   box-shadow: none;
+  /* White outline covers the anti-aliased edge from transform: scale() */
+  outline: 2px solid var(--color-bg);
+  outline-offset: -1px;
 }
 
 .spread-image {

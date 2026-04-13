@@ -98,6 +98,9 @@ function clearSpreads() {
 
 /** Apply a layout mode: single, facing-photo, or facing-month */
 function applyLayout(config: HTMLElement, layout: string) {
+  // Save current scroll position before rebuilding
+  saveVisibleMonth();
+
   const url = new URL(window.location.href);
   url.searchParams.set("layout", layout);
   history.replaceState(null, "", buildHref(url));
@@ -117,11 +120,12 @@ function applyLayout(config: HTMLElement, layout: string) {
   clearSpreads();
 
   if (layout === "facing-photo") {
-    initSpreadLayout().then(() => scalePages());
+    initSpreadLayout().then(() => { scalePages(); restoreScrollPosition(); });
   } else if (layout === "facing-month") {
-    initMonthSpreadLayout().then(() => scalePages());
+    initMonthSpreadLayout().then(() => { scalePages(); restoreScrollPosition(); });
   } else {
     scalePages();
+    restoreScrollPosition();
   }
 }
 
