@@ -110,8 +110,9 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   const canvasH = Math.round(pageH * pxPerMm);
   const pixelRatio = dpi / 96;
 
-  const isPhotoLayout = params.layout === "photo-calendar";
-  const isFacing = params.layout === "facing-month" || params.layout === "facing-photo";
+  const isPhotoLayout = params.layout === "facing-photo";
+  const isFacingMonth = params.layout === "facing-month";
+  const isFacing = isFacingMonth || isPhotoLayout;
   const gutterVal = isFacing ? params.gutter : "0";
   const year = parseInt(params.year);
 
@@ -124,11 +125,16 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     return;
   }
 
-  // Collect month metadata — handles both single and facing-month layouts.
-  // In facing-month layout, visible scroll-months contain a spread-pair with
+  // Collect month metadata — handles single, facing-month, and facing-photo layouts.
+  // In facing layouts, visible scroll-months contain a spread-pair with
   // two .page elements; the second (.month-facing) belongs to the next
   // (hidden) scroll-month.
-  const months: { year: number; month: string; pageEl: HTMLElement }[] = [];
+  // gutterEdge tracks which edge needs binding margin:
+  //   "bottom" = top page of a spread (binding at its bottom edge)
+  //   "top"    = bottom page of a spread (binding at its top edge)
+  //   "none"   = single layout, no binding margin
+  type GutterEdge = "top" | "bottom" | "none";
+  const months: { year: number; month: string; pageEl: HTMLElement; gutterEdge: GutterEdge }[] = [];
   for (let i = 0; i < scrollMonths.length; i++) {
     const el = scrollMonths[i];
     // Skip hidden scroll-months — their pages were moved into spread-pairs
@@ -137,20 +143,26 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     const pages = el.querySelectorAll(".page") as NodeListOf<HTMLElement>;
     for (const page of pages) {
       if (page.classList.contains("month-facing")) {
-        // Second page in a facing pair — its month data is on the next (hidden) scroll-month
+        // Second page in a facing pair (bottom of spread) — binding at top
         const nextEl = scrollMonths[i + 1];
         if (nextEl) {
           months.push({
             year: parseInt(nextEl.dataset.year ?? params.year),
             month: nextEl.dataset.month ?? "1",
             pageEl: page,
+            gutterEdge: gutterVal !== "0" ? "top" : "none",
           });
         }
       } else {
+        // First page in a facing pair (top of spread) — binding at bottom
+        // For single layout or photo layout, calendar pages get top gutter
+        const edge: GutterEdge = gutterVal === "0" ? "none"
+          : (isFacingMonth ? "bottom" : "top");
         months.push({
           year: parseInt(el.dataset.year ?? params.year),
           month: el.dataset.month ?? "1",
           pageEl: page,
+          gutterEdge: edge,
         });
       }
     }
@@ -181,7 +193,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     pdf.addImage(dataUrl, "JPEG", 0, 0, pageW, pageH);
   }
 
-  async function renderCalendarToJpeg(el: HTMLElement): Promise<string> {
+  async function renderCalendarToJpeg(el: HTMLElement, gutterEdge: GutterEdge): Promise<string> {
     // Temporarily reset viewport scaling so the capture is at natural page dimensions
     const origTransform = el.style.transform;
     const origMarginBottom = el.style.marginBottom;
@@ -190,12 +202,14 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     el.style.marginBottom = "";
     el.style.marginRight = "";
 
-    // For facing layouts, add gutter as extra top padding (binding margin)
+    // For facing layouts, add gutter as extra padding on the binding edge
     const monthView = el.querySelector(".month-view") as HTMLElement | null;
-    let origPaddingTop: string | undefined;
-    if (gutterVal !== "0" && monthView) {
-      origPaddingTop = monthView.style.paddingTop;
-      monthView.style.paddingTop = `calc(${params.margin} + ${gutterVal})`;
+    let origPadding: string | undefined;
+    let paddingProp: "paddingTop" | "paddingBottom" | undefined;
+    if (gutterEdge !== "none" && monthView) {
+      paddingProp = gutterEdge === "top" ? "paddingTop" : "paddingBottom";
+      origPadding = monthView.style[paddingProp];
+      monthView.style[paddingProp] = `calc(${params.margin} + ${gutterVal})`;
     }
 
     try {
@@ -208,8 +222,8 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       el.style.transform = origTransform;
       el.style.marginBottom = origMarginBottom;
       el.style.marginRight = origMarginRight;
-      if (origPaddingTop !== undefined && monthView) {
-        monthView.style.paddingTop = origPaddingTop;
+      if (origPadding !== undefined && monthView && paddingProp) {
+        monthView.style[paddingProp] = origPadding;
       }
     }
   }
@@ -271,7 +285,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       status.textContent = `Rendering ${label} calendar\u2026 (${step}/${totalSteps})`;
     }
 
-    const calendarUrl = await renderCalendarToJpeg(m.pageEl);
+    const calendarUrl = await renderCalendarToJpeg(m.pageEl, m.gutterEdge);
     addFullPageImage(calendarUrl);
 
     // Yield to keep UI responsive
