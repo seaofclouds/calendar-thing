@@ -296,7 +296,7 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
 }
 
 const VALID_LENGTHS = new Set(["12", "14", "16"]);
-const VALID_LAYOUTS = new Set(["calendar", "photo-calendar"]);
+const VALID_LAYOUTS = new Set(["single", "facing-photo", "facing-month"]);
 const VALID_SCALINGS = new Set(["fit", "crop"]);
 
 /**
@@ -362,8 +362,8 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   // New config params
   const lengthParam = url.searchParams.get("length") ?? "12";
   const calendarLength = VALID_LENGTHS.has(lengthParam) ? parseInt(lengthParam) : 12;
-  const layoutParam = url.searchParams.get("layout") ?? "calendar";
-  const layout = (VALID_LAYOUTS.has(layoutParam) ? layoutParam : "calendar") as "calendar" | "photo-calendar";
+  const layoutParam = url.searchParams.get("layout") ?? "single";
+  const layout = (VALID_LAYOUTS.has(layoutParam) ? layoutParam : "single") as "single" | "facing-photo" | "facing-month";
   const scalingParam = url.searchParams.get("scaling") ?? "fit";
   const scaling = (VALID_SCALINGS.has(scalingParam) ? scalingParam : "fit") as "fit" | "crop";
 

@@ -6,35 +6,45 @@
 
 import { PAGE_TYPES } from "./config";
 
-const FORMAT_OPTIONS = [
-  { value: "letter", label: "Letter" },
-  { value: "legal", label: "Legal" },
-  { value: "tabloid", label: "Tabloid" },
-  { value: "a5", label: "A5" },
-  { value: "a4", label: "A4" },
-  { value: "a6", label: "A6" },
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
-const ORIENTATION_OPTIONS = [
-  { value: "portrait", label: "Portrait" },
-  { value: "landscape", label: "Landscape" },
-];
+/** SVG rectangle at paper aspect ratio, used as format icon */
+function formatIcon(widthVal: number, heightVal: number, orientation: string): string {
+  const w = orientation === "landscape" ? heightVal : widthVal;
+  const h = orientation === "landscape" ? widthVal : heightVal;
+  // Normalize to fit in a 16x16 viewBox
+  const scale = 14 / Math.max(w, h);
+  const rw = Math.round(w * scale * 10) / 10;
+  const rh = Math.round(h * scale * 10) / 10;
+  const rx = Math.round((16 - rw) / 2 * 10) / 10;
+  const ry = Math.round((16 - rh) / 2 * 10) / 10;
+  return `<svg class="format-icon" viewBox="0 0 16 16" width="16" height="16"><rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.8"/></svg>`;
+}
+
+/** SVG orientation icon — tall or wide rectangle */
+function orientationIcon(type: "portrait" | "landscape"): string {
+  if (type === "portrait") {
+    return `<svg class="orientation-icon" viewBox="0 0 16 16" width="16" height="16"><rect x="4" y="1" width="8" height="14" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.8"/></svg>`;
+  }
+  return `<svg class="orientation-icon" viewBox="0 0 16 16" width="16" height="16"><rect x="1" y="4" width="14" height="8" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.8"/></svg>`;
+}
+
+const FORMAT_DIMENSIONS: Record<string, { w: number; h: number }> = {
+  letter: { w: 8.5, h: 11 },
+  legal: { w: 8.5, h: 14 },
+  tabloid: { w: 11, h: 17 },
+  a5: { w: 148, h: 210 },
+  a4: { w: 210, h: 297 },
+  a6: { w: 105, h: 148 },
+};
 
 const MARGIN_OPTIONS = [
   { value: "0.25in", label: '1/4"' },
   { value: "0.5in", label: '1/2"' },
   { value: "1in", label: '1"' },
-];
-
-const LAYOUT_OPTIONS = [
-  { value: "calendar", label: "Calendar" },
-  { value: "photo-calendar", label: "Calendar + Photos" },
-];
-
-const LENGTH_OPTIONS = [
-  { value: "12", label: "12mo" },
-  { value: "14", label: "14mo" },
-  { value: "16", label: "16mo" },
 ];
 
 const SCALING_OPTIONS = [
@@ -70,28 +80,36 @@ export interface MonthFragment {
 
 export interface ConfigViewOptions {
   year: number;
-  scrollToMonth?: number; // 1-12, initial scroll target
+  scrollToMonth?: number;
   size: string;
   orientation: "portrait" | "landscape";
   margin: string;
   monthFragments: MonthFragment[];
   includeParam?: string;
-  calendarLength: number; // 12, 14, or 16
-  layout: "calendar" | "photo-calendar";
+  calendarLength: number;
+  layout: "single" | "facing-photo" | "facing-month";
   scaling: "fit" | "crop";
 }
 
 export function renderConfigView(opts: ConfigViewOptions): string {
-  // Format pills
-  const formatPills = FORMAT_OPTIONS.map((opt) => {
-    const isActive = opt.value === opts.size;
-    return `          <button class="config-option${isActive ? " active" : ""}" data-size="${opt.value}">${opt.label}</button>`;
+  const isFacing = opts.layout !== "single";
+  const isPhoto = opts.layout === "facing-photo";
+
+  // Format pills with SVG icons
+  const formatEntries = Object.entries(FORMAT_DIMENSIONS);
+  const formatPills = formatEntries.map(([value, dims]) => {
+    const label = DISPLAY_NAMES[value] ?? value;
+    const isActive = value === opts.size;
+    const icon = formatIcon(dims.w, dims.h, opts.orientation);
+    return `          <button class="config-option${isActive ? " active" : ""}" data-size="${value}">${icon} ${label}</button>`;
   }).join("\n");
 
-  // Orientation pills
-  const orientationPills = ORIENTATION_OPTIONS.map((opt) => {
-    const isActive = opt.value === opts.orientation;
-    return `          <button class="config-option${isActive ? " active" : ""}" data-orientation="${opt.value}">${opt.label}</button>`;
+  // Orientation pills with SVG icons
+  const orientationPills = (["portrait", "landscape"] as const).map((o) => {
+    const isActive = o === opts.orientation;
+    const icon = orientationIcon(o);
+    const label = o.charAt(0).toUpperCase() + o.slice(1);
+    return `          <button class="config-option${isActive ? " active" : ""}" data-orientation="${o}">${icon} ${label}</button>`;
   }).join("\n");
 
   // Margin pills
@@ -100,22 +118,26 @@ export function renderConfigView(opts: ConfigViewOptions): string {
     return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
   }).join("\n");
 
-  // Layout toggle
-  const layoutPills = LAYOUT_OPTIONS.map((opt) => {
-    const isActive = opt.value === opts.layout;
-    return `          <button class="config-option${isActive ? " active" : ""}" data-layout="${opt.value}">${opt.label}</button>`;
-  }).join("\n");
+  // Layout top-level: Single Sheets / Facing Pages
+  const singleActive = opts.layout === "single" ? " active" : "";
+  const facingActive = isFacing ? " active" : "";
 
-  // Calendar length
-  const lengthPills = LENGTH_OPTIONS.map((opt) => {
-    const isActive = opt.value === String(opts.calendarLength);
-    return `          <button class="config-option${isActive ? " active" : ""}" data-length="${opt.value}">${opt.label}</button>`;
-  }).join("\n");
+  // Facing sub-toggle: Photo + Month / Month + Month
+  const photoActive = opts.layout === "facing-photo" ? " active" : "";
+  const monthActive = opts.layout === "facing-month" ? " active" : "";
+  const facingSubDisplay = isFacing ? "" : ' style="display:none"';
 
-  // Image scaling (only visible when photo-calendar layout)
+  // Image scaling (only when Photo + Month)
   const scalingPills = SCALING_OPTIONS.map((opt) => {
     const isActive = opt.value === opts.scaling;
     return `          <button class="config-option${isActive ? " active" : ""}" data-scaling="${opt.value}">${opt.label}</button>`;
+  }).join("\n");
+  const scalingDisplay = isPhoto ? "" : ' style="display:none"';
+
+  // Calendar length
+  const lengthPills = ["12", "14", "16"].map((v) => {
+    const isActive = v === String(opts.calendarLength);
+    return `          <button class="config-option${isActive ? " active" : ""}" data-length="${v}">${v}mo</button>`;
   }).join("\n");
 
   // Feed toggles
@@ -124,15 +146,14 @@ export function renderConfigView(opts: ConfigViewOptions): string {
     return `          <button class="config-option${isActive ? " active" : ""}" data-feed="${opt.token}">${opt.label}</button>`;
   }).join("\n");
 
-  // Status line
-  const statusText = getStatusText(opts.size, opts.orientation);
-
-  // Scaling section visibility
-  const scalingDisplay = opts.layout === "photo-calendar" ? "" : ' style="display:none"';
+  // Initial month name for export button
+  const firstMonth = opts.monthFragments[0];
+  const exportMonthName = firstMonth
+    ? MONTH_NAMES[(firstMonth.month - 1) % 12]
+    : "Month";
 
   // Render scrollable month list
   const monthCards = opts.monthFragments.map((frag) => {
-    // Merge "page" class into existing class attribute (avoid duplicate class attrs)
     const pageHtml = frag.html.replace('id="root" class="', 'class="page ');
     return `      <div class="scroll-month" data-year="${frag.year}" data-month="${frag.month}">
         ${pageHtml}
@@ -159,7 +180,15 @@ export function renderConfigView(opts: ConfigViewOptions): string {
       <section class="config-section">
         <h3 class="config-label">Layout</h3>
         <div class="config-options">
-${layoutPills}
+          <button class="config-option${singleActive}" data-layout="single">Single Sheets</button>
+          <button class="config-option${facingActive}" data-layout="facing">Facing Pages</button>
+        </div>
+      </section>
+
+      <section class="config-section config-facing-sub"${facingSubDisplay}>
+        <div class="config-options">
+          <button class="config-option${photoActive}" data-facing="facing-photo">Photo + Month</button>
+          <button class="config-option${monthActive}" data-facing="facing-month">Month + Month</button>
         </div>
       </section>
 
@@ -171,15 +200,8 @@ ${scalingPills}
       </section>
 
       <section class="config-section">
-        <h3 class="config-label">Length</h3>
-        <div class="config-options">
-${lengthPills}
-        </div>
-      </section>
-
-      <section class="config-section">
         <h3 class="config-label">Format</h3>
-        <div class="config-options">
+        <div class="config-options config-options-format">
 ${formatPills}
         </div>
       </section>
@@ -188,6 +210,13 @@ ${formatPills}
         <h3 class="config-label">Orientation</h3>
         <div class="config-options">
 ${orientationPills}
+        </div>
+      </section>
+
+      <section class="config-section">
+        <h3 class="config-label">Length</h3>
+        <div class="config-options">
+${lengthPills}
         </div>
       </section>
 
@@ -205,19 +234,15 @@ ${feedPills}
         </div>
       </section>
 
-      <section class="config-section">
-        <h3 class="config-label">Export Resolution</h3>
+      <section class="config-section config-export">
+        <h3 class="config-label">Export</h3>
         <div class="config-options">
           <button class="config-option active" data-dpi="300">300dpi</button>
           <button class="config-option" data-dpi="600">600dpi</button>
         </div>
-      </section>
-
-      <section class="config-section config-export">
+        <button class="config-button" data-action="save">Export ${exportMonthName}.png</button>
+        <button class="config-button" data-action="save-pdf">Export Calendar.pdf</button>
         <p class="config-status"></p>
-        <button class="config-button" data-action="save">Save Image</button>
-        <button class="config-button" data-action="save-all">Save All Months</button>
-        <button class="config-button" data-action="save-pdf">Save PDF for Print</button>
       </section>
     </aside>
 
@@ -229,21 +254,6 @@ ${monthCards}
   </div>
 </body>
 </html>`;
-}
-
-function getStatusText(size: string, orientation: string): string {
-  const config = PAGE_TYPES[size];
-  if (!config) return size;
-
-  const name = DISPLAY_NAMES[size] ?? size;
-  const { width, height } = config.dimensions;
-
-  const w = orientation === "landscape" ? height : width;
-  const h = orientation === "landscape" ? width : height;
-
-  const formatDim = (d: { value: number; unit: string }) => `${d.value}${d.unit}`;
-
-  return `${name}, ${orientation.charAt(0).toUpperCase() + orientation.slice(1)}, ${formatDim(w)} \u00d7 ${formatDim(h)}`;
 }
 
 function isFeedActive(token: string, includeParam?: string): boolean {

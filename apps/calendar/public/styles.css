@@ -973,6 +973,26 @@ body:has(.config) {
   color: inherit;
   text-align: left;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+/* Format and orientation SVG icons */
+.format-icon,
+.orientation-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.config-option.active .format-icon,
+.config-option.active .orientation-icon {
+  opacity: 1;
+}
+
+/* Format options: one per line */
+.config-options-format {
+  flex-direction: column;
 }
 
 .config-option:hover {
@@ -1146,6 +1166,26 @@ body:has(.config) {
   object-fit: cover;
   width: 100%;
   height: 100%;
+}
+
+/* Month + Month facing page */
+.month-facing {
+  background: var(--color-bg);
+  box-sizing: border-box;
+  overflow: hidden;
+  transform-origin: top left;
+}
+
+.month-facing .page-facing {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.month-facing.empty {
+  background: color-mix(in srgb, var(--color-bg) 90%, var(--color-config-bg) 10%);
 }
 
 .spread-add-btn {

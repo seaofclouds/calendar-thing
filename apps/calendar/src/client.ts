@@ -77,6 +77,45 @@ if (document.querySelector("[data-format]")) {
   setTimeout(maybeExportImage, 2000);
 }
 
+// ─── Layout management ─────────────────────────────────────────────
+
+/** Remove any spread elements and restore pages to scroll-months */
+function clearSpreads() {
+  document.querySelectorAll(".spread-pair").forEach((pair) => {
+    const parent = pair.parentElement!;
+    const page = pair.querySelector(".page");
+    if (page) parent.appendChild(page);
+    pair.remove();
+  });
+  document.querySelectorAll(".spread-image").forEach((el) => el.remove());
+  document.querySelectorAll(".month-facing").forEach((el) => el.remove());
+}
+
+/** Apply a layout mode: single, facing-photo, or facing-month */
+function applyLayout(config: HTMLElement, layout: string) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("layout", layout);
+  history.replaceState(null, "", buildHref(url));
+  config.dataset.layout = layout;
+
+  // Show/hide scaling section
+  const scalingSection = document.querySelector(".config-scaling") as HTMLElement | null;
+  if (scalingSection) {
+    scalingSection.style.display = layout === "facing-photo" ? "" : "none";
+  }
+
+  // Clear existing spreads first
+  clearSpreads();
+
+  if (layout === "facing-photo") {
+    initSpreadLayout().then(() => scalePages());
+  } else if (layout === "facing-month") {
+    initMonthSpreadLayout().then(() => scalePages());
+  } else {
+    scalePages();
+  }
+}
+
 // ─── Config sidebar ────────────────────────────────────────────────
 
 function initConfigSidebar() {
@@ -87,41 +126,40 @@ function initConfigSidebar() {
     const target = e.target as HTMLElement;
 
     if (target.classList.contains("config-option")) {
-      // Layout toggle — client-side only, no reload
+      // Layout top-level toggle: Single Sheets / Facing Pages
       if (target.dataset.layout) {
-        const url = new URL(window.location.href);
-        url.searchParams.set("layout", target.dataset.layout);
-        history.replaceState(null, "", url.toString());
+        const isFacing = target.dataset.layout === "facing";
+        const config = document.querySelector(".config") as HTMLElement;
 
         // Toggle active pill
         const section = target.closest(".config-section")!;
         section.querySelectorAll(".config-option").forEach((el) => el.classList.remove("active"));
         target.classList.add("active");
 
-        // Update data attribute
-        const config = document.querySelector(".config") as HTMLElement;
-        config.dataset.layout = target.dataset.layout;
+        // Show/hide facing sub-toggle
+        const facingSub = document.querySelector(".config-facing-sub") as HTMLElement | null;
+        if (facingSub) facingSub.style.display = isFacing ? "" : "none";
 
-        // Show/hide scaling section
-        const scalingSection = document.querySelector(".config-scaling") as HTMLElement | null;
-        if (scalingSection) {
-          scalingSection.style.display = target.dataset.layout === "photo-calendar" ? "" : "none";
-        }
-
-        // Toggle spread layout
-        if (target.dataset.layout === "photo-calendar") {
-          initSpreadLayout().then(() => scalePages());
+        if (isFacing) {
+          // Determine which facing mode is active (default to photo)
+          const activeFacing = facingSub?.querySelector(".config-option.active") as HTMLElement | null;
+          const facingMode = activeFacing?.dataset.facing ?? "facing-photo";
+          applyLayout(config, facingMode);
         } else {
-          // Remove spread elements, restore pages
-          document.querySelectorAll(".spread-pair").forEach((pair) => {
-            const parent = pair.parentElement!;
-            const page = pair.querySelector(".page");
-            if (page) parent.appendChild(page);
-            pair.remove();
-          });
-          document.querySelectorAll(".spread-image").forEach((el) => el.remove());
-          scalePages();
+          applyLayout(config, "single");
         }
+
+        return;
+      }
+
+      // Facing sub-toggle: Photo + Month / Month + Month
+      if (target.dataset.facing) {
+        const section = target.closest(".config-section")!;
+        section.querySelectorAll(".config-option").forEach((el) => el.classList.remove("active"));
+        target.classList.add("active");
+
+        const config = document.querySelector(".config") as HTMLElement;
+        applyLayout(config, target.dataset.facing);
         return;
       }
 
@@ -351,22 +389,24 @@ function scalePages() {
     if (!page) continue;
 
     const spreadImage = scrollMonth.querySelector(".spread-image") as HTMLElement | null;
-    const hasSpread = spreadImage !== null;
+    const monthFacing = scrollMonth.querySelector(".month-facing") as HTMLElement | null;
+    const facingEl = spreadImage || monthFacing;
+    const hasFacing = facingEl !== null;
 
     // Reset transforms, margins, and spread-specific padding
     page.style.transform = "";
     page.style.marginBottom = "";
     page.style.paddingTop = "";
-    if (spreadImage) {
-      spreadImage.style.transform = "";
-      spreadImage.style.marginBottom = "";
+    if (facingEl) {
+      facingEl.style.transform = "";
+      facingEl.style.marginBottom = "";
     }
 
     const pageWidth = page.offsetWidth;
     const pageHeight = page.offsetHeight;
     if (pageWidth <= 0 || pageHeight <= 0) continue;
 
-    if (hasSpread && spreadImage) {
+    if (hasFacing && facingEl) {
       // Binding gutter: add 0.5in to the configured margin at the
       // edges where image and calendar meet the spiral binding.
       // Image gets extra bottom padding, calendar gets extra top padding.
@@ -374,11 +414,17 @@ function scalePages() {
       const marginUnit = margin.replace(/[\d.]/g, "");
       const bindingMargin = `${marginVal + 0.5}${marginUnit}`;
 
-      // Spread-image: standard margin on 3 sides, binding gutter at bottom
-      spreadImage.style.width = `${pageWidth}px`;
-      spreadImage.style.height = `${pageHeight}px`;
-      spreadImage.style.padding = `${margin} ${margin} ${bindingMargin} ${margin}`;
-      spreadImage.style.boxSizing = "border-box";
+      // Facing element: match page dimensions, add binding gutter at bottom
+      facingEl.style.width = `${pageWidth}px`;
+      facingEl.style.height = `${pageHeight}px`;
+      facingEl.style.boxSizing = "border-box";
+      if (spreadImage) {
+        // Photo facing: image padding with gutter
+        facingEl.style.padding = `${margin} ${margin} ${bindingMargin} ${margin}`;
+      } else {
+        // Month facing: just binding gutter at bottom
+        facingEl.style.paddingBottom = bindingMargin;
+      }
 
       // Calendar page: binding gutter at top
       page.style.paddingTop = bindingMargin;
@@ -394,9 +440,9 @@ function scalePages() {
       const unusedSpread = spreadHeightWithGutter * (1 - scale);
       const unusedPage = pageHeightWithGutter * (1 - scale);
 
-      spreadImage.style.transform = `scale(${scale})`;
-      spreadImage.style.marginBottom = `${-unusedSpread}px`;
-      spreadImage.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
+      facingEl.style.transform = `scale(${scale})`;
+      facingEl.style.marginBottom = `${-unusedSpread}px`;
+      facingEl.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
 
       page.style.transform = `scale(${scale})`;
       page.style.marginBottom = `${-unusedPage}px`;
@@ -590,6 +636,96 @@ async function initSpreadLayout() {
   });
 }
 
+// ─── Month + Month facing layout ───────────────────────────────────
+
+const MONTH_NAMES = [
+  "", "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/** For facing-month layout: insert the next month's calendar as a facing page */
+async function initMonthSpreadLayout() {
+  const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
+  const monthElements = Array.from(scrollMonths);
+
+  for (let i = 0; i < monthElements.length; i++) {
+    const el = monthElements[i];
+    const page = el.querySelector(".page") as HTMLElement | null;
+    if (!page) continue;
+
+    // Clone the NEXT month's page as the facing page
+    const nextEl = monthElements[i + 1];
+    const nextPage = nextEl?.querySelector(".page") as HTMLElement | null;
+
+    const facingDiv = document.createElement("div");
+    facingDiv.className = "month-facing";
+
+    if (nextPage) {
+      const clone = nextPage.cloneNode(true) as HTMLElement;
+      clone.classList.remove("page");
+      clone.classList.add("page-facing");
+      facingDiv.appendChild(clone);
+    } else {
+      // Last month has no next — show empty facing
+      facingDiv.classList.add("empty");
+    }
+
+    // Wrap facing + page in spread-pair
+    const pair = document.createElement("div");
+    pair.className = "spread-pair";
+    el.insertBefore(pair, page);
+    pair.appendChild(facingDiv);
+    pair.appendChild(page);
+  }
+}
+
+// ─── Scroll tracking for export label ──────────────────────────────
+
+function getVisibleMonth(): { year: string; month: string } | null {
+  const scroll = document.querySelector(".config-content") as HTMLElement | null;
+  if (!scroll) return null;
+
+  const scrollRect = scroll.getBoundingClientRect();
+  const months = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
+
+  let best: HTMLElement | null = null;
+  let bestDist = Infinity;
+  for (const m of months) {
+    const rect = m.getBoundingClientRect();
+    const dist = Math.abs(rect.top - scrollRect.top);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = m;
+    }
+  }
+
+  if (!best) return null;
+  return { year: best.dataset.year ?? "", month: best.dataset.month ?? "" };
+}
+
+function updateExportLabel() {
+  const btn = document.querySelector('[data-action="save"]') as HTMLElement | null;
+  if (!btn) return;
+
+  const visible = getVisibleMonth();
+  if (visible) {
+    const monthNum = parseInt(visible.month);
+    const name = MONTH_NAMES[monthNum] || "Month";
+    btn.textContent = `Export ${name}.png`;
+  }
+}
+
+function initScrollTracking() {
+  const content = document.querySelector(".config-content") as HTMLElement | null;
+  if (!content) return;
+
+  let scrollTimer: ReturnType<typeof setTimeout>;
+  content.addEventListener("scroll", () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(updateExportLabel, 100);
+  }, { passive: true });
+}
+
 // ─── Export: current view ──────────────────────────────────────────
 
 async function exportCurrentView() {
@@ -759,18 +895,23 @@ initConfigSidebar();
 
 // Config scroll view setup
 if (document.querySelector(".config-scroll")) {
-  const isPhotoLayout = document.querySelector('.config[data-layout="photo-calendar"]');
+  const config = document.querySelector(".config") as HTMLElement;
+  const layout = config?.dataset.layout ?? "single";
 
-  if (isPhotoLayout) {
-    // Init spread layout first (adds spread-image divs), then scale, then scroll
-    initSpreadLayout().then(() => {
-      scalePages();
-      restoreScrollPosition();
-    });
-  } else {
+  const initDone = () => {
     scalePages();
     restoreScrollPosition();
+    updateExportLabel();
+  };
+
+  if (layout === "facing-photo") {
+    initSpreadLayout().then(initDone);
+  } else if (layout === "facing-month") {
+    initMonthSpreadLayout().then(initDone);
+  } else {
+    initDone();
   }
 
   window.addEventListener("resize", onResize);
+  initScrollTracking();
 }
