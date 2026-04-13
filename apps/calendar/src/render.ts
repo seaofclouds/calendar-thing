@@ -3,7 +3,7 @@
  * Replaces the React Calendar.tsx component with plain template strings.
  */
 
-import { getPageLayout } from "./config";
+import { getPageLayout } from "./page-config";
 import { MONTH_NAMES, WEEK_DAYS, buildMarkerMap } from "./render-utils";
 import type { CalendarEvent } from "@calendar-feeds/shared";
 

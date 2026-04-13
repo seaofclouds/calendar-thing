@@ -1,3 +1,0 @@
-# Root wrangler.toml — not used directly.
-# The calendar app deploys from apps/calendar/wrangler.toml via wrangler deploy.
-# Feed workers deploy from feeds/*/wrangler.toml.
