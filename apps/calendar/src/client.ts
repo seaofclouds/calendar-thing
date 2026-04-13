@@ -209,13 +209,13 @@ function initConfigSidebar() {
       }
 
       // Facing sub-toggle: Photo + Month / Month + Month
+      // Reload required — DOM state after month-pairing can't be cleanly
+      // converted to photo-spreading (or vice versa)
       if (target.dataset.facing) {
-        const section = target.closest(".config-section")!;
-        section.querySelectorAll(".config-option").forEach((el) => el.classList.remove("active"));
-        target.classList.add("active");
-
-        const config = document.querySelector(".config") as HTMLElement;
-        applyLayout(config, target.dataset.facing);
+        saveVisibleMonth();
+        const url = new URL(window.location.href);
+        url.searchParams.set("layout", target.dataset.facing);
+        window.location.href = buildHref(url);
         return;
       }
 
