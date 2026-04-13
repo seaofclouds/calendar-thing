@@ -516,14 +516,16 @@ function scalePages() {
       if (pair) {
         pair.style.width = `${pageWidth * scale}px`;
 
-        // Insert or update gutter strip between facing and main page
+        // Insert or update gutter strip between the two pages
         const gutter = getConfigParams().gutter;
         let gutterEl = pair.querySelector(".spread-gutter") as HTMLElement | null;
         if (gutter !== "0") {
           if (!gutterEl) {
             gutterEl = document.createElement("div");
             gutterEl.className = "spread-gutter";
-            pair.insertBefore(gutterEl, page);
+            // Insert before the second child (between the two pages)
+            const secondChild = pair.children[1];
+            pair.insertBefore(gutterEl, secondChild);
           }
           gutterEl.style.height = gutter;
         } else if (gutterEl) {
