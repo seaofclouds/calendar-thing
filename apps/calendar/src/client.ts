@@ -86,9 +86,9 @@ function clearSpreads() {
     // Restore the original page (not the facing clone)
     const originalPage = pair.querySelector(".page:not(.month-facing)");
     if (originalPage) {
-      // Reset gutter padding and box-sizing
-      (originalPage as HTMLElement).style.paddingTop = "";
-      (originalPage as HTMLElement).style.boxSizing = "";
+      // Reset any inline styles from scaling
+      (originalPage as HTMLElement).style.transform = "";
+      (originalPage as HTMLElement).style.marginBottom = "";
       parent.appendChild(originalPage);
     }
     pair.remove();
@@ -399,11 +399,9 @@ function scalePages() {
     const facingEl = spreadImage || monthFacing;
     const hasFacing = facingEl !== null;
 
-    // Reset transforms, margins, and spread-specific padding/box-sizing
+    // Reset transforms and margins
     page.style.transform = "";
     page.style.marginBottom = "";
-    page.style.paddingTop = "";
-    page.style.boxSizing = "";
     if (facingEl) {
       facingEl.style.transform = "";
       facingEl.style.marginBottom = "";
@@ -414,46 +412,27 @@ function scalePages() {
     if (pageWidth <= 0 || pageHeight <= 0) continue;
 
     if (hasFacing && facingEl) {
-      // Binding gutter: add 0.5in to the configured margin at the
-      // edges where image and calendar meet the spiral binding.
-      // Image gets extra bottom padding, calendar gets extra top padding.
-      const marginVal = parseFloat(margin);
-      const marginUnit = margin.replace(/[\d.]/g, "");
-      const bindingMargin = `${marginVal + 0.5}${marginUnit}`;
-
-      // Facing element: match page dimensions, add binding gutter at bottom
+      // Facing element: match page dimensions
       facingEl.style.width = `${pageWidth}px`;
       facingEl.style.height = `${pageHeight}px`;
-      facingEl.style.boxSizing = "border-box";
       if (spreadImage) {
-        // Photo facing: image padding with gutter
-        facingEl.style.padding = `${margin} ${margin} ${bindingMargin} ${margin}`;
-      } else {
-        // Month facing: just binding gutter at bottom
-        facingEl.style.paddingBottom = bindingMargin;
+        // Photo facing: image needs padding for margins
+        facingEl.style.padding = margin;
+        facingEl.style.boxSizing = "border-box";
       }
 
-      // Calendar page: binding gutter at top (border-box keeps same total height)
-      page.style.boxSizing = "border-box";
-      page.style.paddingTop = bindingMargin;
-
-      // Both elements are now border-box with the same total height
-      const pageHeightWithGutter = pageHeight;
-      const spreadHeightWithGutter = pageHeight;
-
-      // Scale to fit both pages stacked
-      const totalNaturalH = spreadHeightWithGutter + pageHeightWithGutter;
+      // Both pages at natural height, no padding modifications
+      const totalNaturalH = pageHeight * 2;
       const maxContentH = scrollHeight - 40;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / totalNaturalH);
-      const unusedSpread = Math.max(0, spreadHeightWithGutter * (1 - scale));
-      const unusedPage = Math.max(0, pageHeightWithGutter * (1 - scale));
+      const unusedH = Math.max(0, pageHeight * (1 - scale));
 
       facingEl.style.transform = `scale(${scale})`;
-      facingEl.style.marginBottom = `${-unusedSpread}px`;
+      facingEl.style.marginBottom = `${-unusedH}px`;
       facingEl.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
 
       page.style.transform = `scale(${scale})`;
-      page.style.marginBottom = `${-unusedPage}px`;
+      page.style.marginBottom = `${-unusedH}px`;
       page.style.marginRight = `${-(pageWidth * (1 - scale))}px`;
 
       // Constrain spread-pair width so shadow doesn't go wide
