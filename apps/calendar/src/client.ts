@@ -86,8 +86,9 @@ function clearSpreads() {
     // Restore the original page (not the facing clone)
     const originalPage = pair.querySelector(".page:not(.month-facing)");
     if (originalPage) {
-      // Reset any gutter padding
+      // Reset gutter padding and box-sizing
       (originalPage as HTMLElement).style.paddingTop = "";
+      (originalPage as HTMLElement).style.boxSizing = "";
       parent.appendChild(originalPage);
     }
     pair.remove();
@@ -398,10 +399,11 @@ function scalePages() {
     const facingEl = spreadImage || monthFacing;
     const hasFacing = facingEl !== null;
 
-    // Reset transforms, margins, and spread-specific padding
+    // Reset transforms, margins, and spread-specific padding/box-sizing
     page.style.transform = "";
     page.style.marginBottom = "";
     page.style.paddingTop = "";
+    page.style.boxSizing = "";
     if (facingEl) {
       facingEl.style.transform = "";
       facingEl.style.marginBottom = "";
@@ -431,12 +433,13 @@ function scalePages() {
         facingEl.style.paddingBottom = bindingMargin;
       }
 
-      // Calendar page: binding gutter at top
+      // Calendar page: binding gutter at top (border-box keeps same total height)
+      page.style.boxSizing = "border-box";
       page.style.paddingTop = bindingMargin;
 
-      // Remeasure page height after padding change
-      const pageHeightWithGutter = page.offsetHeight;
-      const spreadHeightWithGutter = pageHeight; // spread-image natural height stays the same (box-sizing: border-box)
+      // Both elements are now border-box with the same total height
+      const pageHeightWithGutter = pageHeight;
+      const spreadHeightWithGutter = pageHeight;
 
       // Scale to fit both pages stacked
       const totalNaturalH = spreadHeightWithGutter + pageHeightWithGutter;
