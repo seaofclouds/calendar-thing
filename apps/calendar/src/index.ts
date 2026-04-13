@@ -51,7 +51,7 @@ interface CalendarParams {
   rows?: number;
   header: boolean;
   testing: boolean;
-  format?: "png" | "jpg";
+  format?: "png";
   dpi: number;
   include: IncludeState;
   month?: number;
@@ -177,7 +177,7 @@ function parseCalendarURL(
   const borders = searchParams.get("borders") !== "false"; // default true
 
   // Parse format/DPI, size, and orientation from remaining segments
-  let format: "png" | "jpg" | undefined;
+  let format: "png" | undefined;
   let dpi = 300;
   let size: string | undefined;
   let orientation: "portrait" | "landscape" = "portrait";
@@ -234,17 +234,16 @@ function parseCalendarURL(
 
 function parseFormatSegment(
   segment: string
-): { format: "png" | "jpg"; dpi: number } | null {
+): { format: "png"; dpi: number } | null {
   const formatMatch = segment.match(/\.?(png|jpg)$/i);
   if (!formatMatch) return null;
 
-  const format = formatMatch[1].toLowerCase() as "png" | "jpg";
   let dpi = 300;
 
   const dpiMatch = segment.match(/(\d+)dpi/);
   if (dpiMatch) dpi = parseInt(dpiMatch[1]);
 
-  return { format, dpi };
+  return { format: "png", dpi };
 }
 
 async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Response> {

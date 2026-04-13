@@ -190,7 +190,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
   }
 
-  const { toJpeg } = await import("html-to-image");
+  const { toPng } = await import("html-to-image");
   const jsPDFModule = await import("jspdf");
   const jsPDF = jsPDFModule.jsPDF;
 
@@ -210,12 +210,12 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
   }
 
-  function addFullPageImage(dataUrl: string) {
+  function addFullPageImage(dataUrl: string, format: "PNG" | "JPEG" = "PNG") {
     nextPage();
-    pdf.addImage(dataUrl, "JPEG", 0, 0, pageW, pageH);
+    pdf.addImage(dataUrl, format, 0, 0, pageW, pageH);
   }
 
-  async function renderCalendarToJpeg(el: HTMLElement, gutterEdge: GutterEdge): Promise<string> {
+  async function renderCalendarToPng(el: HTMLElement, gutterEdge: GutterEdge): Promise<string> {
     // Temporarily reset viewport scaling so the capture is at natural page dimensions
     const origTransform = el.style.transform;
     const origMarginBottom = el.style.marginBottom;
@@ -235,10 +235,9 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
 
     try {
-      return await toJpeg(el, {
+      return await toPng(el, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
-        quality: 0.92,
       });
     } finally {
       el.style.transform = origTransform;
@@ -278,7 +277,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       const coverUrl = await composeImagePage(
         coverRecord.blob, canvasW, canvasH, params.scaling, photoMargin, 0,
       );
-      addFullPageImage(coverUrl);
+      addFullPageImage(coverUrl, "JPEG");
     } else {
       // Blank white cover
       nextPage();
@@ -303,7 +302,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
         const imgUrl = await composeImagePage(
           imgRecord.blob, canvasW, canvasH, params.scaling, photoMargin, gutterPx,
         );
-        addFullPageImage(imgUrl);
+        addFullPageImage(imgUrl, "JPEG");
       } else {
         nextPage(); // blank photo page
       }
@@ -315,7 +314,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       status.textContent = `Rendering ${label} calendar\u2026 (${step}/${totalSteps})`;
     }
 
-    const calendarUrl = await renderCalendarToJpeg(m.pageEl, m.gutterEdge);
+    const calendarUrl = await renderCalendarToPng(m.pageEl, m.gutterEdge);
     addFullPageImage(calendarUrl);
 
     // Yield to keep UI responsive
