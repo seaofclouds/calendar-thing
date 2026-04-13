@@ -10,8 +10,15 @@ import {
   loadImageUrl,
   listImages,
 } from "./store-images";
+import { getConfigParams, getActiveDpi } from "./config-helpers";
 
-/** Serialize URL search params without over-encoding safe chars like : and , */
+/**
+ * Serialize URLSearchParams without percent-encoding colons and commas.
+ * Standard toString() encodes `:` → `%3A` and `,` → `%2C`, which makes
+ * the `include` param unreadable (e.g. `lunar%3Afull%2Clunar%3Anew`).
+ * Safe because all keys and values are from a controlled vocabulary
+ * (feed tokens, page sizes, orientations) — never free-text user input.
+ */
 function serializeParams(params: URLSearchParams): string {
   const parts: string[] = [];
   params.forEach((v, k) => parts.push(`${k}=${v}`));
@@ -335,30 +342,7 @@ function initConfigSidebar() {
   });
 }
 
-// ─── Config helpers ────────────────────────────────────────────────
-
-function getActiveDpi(): number {
-  const active = document.querySelector(
-    ".config-option[data-dpi].active",
-  ) as HTMLElement | null;
-  return parseInt(active?.dataset.dpi ?? "300");
-}
-
-function getConfigParams() {
-  const url = new URL(window.location.href);
-  const match = url.pathname.match(/\/config\/(\d+)/);
-  return {
-    year: match?.[1] ?? String(new Date().getFullYear()),
-    size: url.searchParams.get("size") ?? "letter",
-    orientation: url.searchParams.get("orientation") ?? "landscape",
-    include: url.searchParams.get("include") ?? "",
-    margin: url.searchParams.get("margin") ?? "0.25in",
-    layout: url.searchParams.get("layout") ?? "calendar",
-    length: url.searchParams.get("length") ?? "12",
-    scaling: url.searchParams.get("scaling") ?? "fit",
-    gutter: url.searchParams.get("gutter") ?? "0.5in",
-  };
-}
+// ─── Config helpers (imported from config-helpers.ts) ─────────────
 
 // ─── Scroll position preservation ──────────────────────────────────
 
@@ -440,6 +424,13 @@ function restoreScrollPosition() {
 
 // ─── Page scaling ──────────────────────────────────────────────────
 
+// ─── Scale constants ──────────────────────────────────────────────
+
+const SCROLL_PADDING = 24;
+const TOOLBAR_HEIGHT = 80;
+const PX_PER_INCH = 96;
+const NARROW_CONTENT_THRESHOLD = 480;
+
 /**
  * Scale .page elements to fit within the viewport, maintaining paper proportions.
  * Uses transform: scale() (preserves correct PDF export) with negative margins
@@ -451,9 +442,8 @@ function scalePages() {
 
   const scrollWidth = scroll.clientWidth;
   const scrollHeight = scroll.clientHeight;
-  const padding = 24;
-  const availableWidth = scrollWidth - padding * 2;
-  const margin = getConfigParams().margin;
+  const availableWidth = scrollWidth - SCROLL_PADDING * 2;
+  const { margin, gutter } = getConfigParams();
 
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 
@@ -490,16 +480,15 @@ function scalePages() {
       // Month-facing pages already have correct CSS dimensions from .page.size-* classes
 
       // Parse gutter to estimate pixel height for scale calculation
-      const gutterVal = getConfigParams().gutter;
       let gutterPx = 0;
-      if (gutterVal !== "0") {
-        if (gutterVal.endsWith("in")) gutterPx = parseFloat(gutterVal) * 96;
-        else if (gutterVal.endsWith("mm")) gutterPx = parseFloat(gutterVal) * 96 / 25.4;
+      if (gutter !== "0") {
+        if (gutter.endsWith("in")) gutterPx = parseFloat(gutter) * PX_PER_INCH;
+        else if (gutter.endsWith("mm")) gutterPx = parseFloat(gutter) * PX_PER_INCH / 25.4;
       }
 
       // Both pages at natural height + gutter between them
       const totalNaturalH = pageHeight * 2 + gutterPx;
-      const maxContentH = scrollHeight - 80;
+      const maxContentH = scrollHeight - TOOLBAR_HEIGHT;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / totalNaturalH);
       const unusedH = Math.max(0, pageHeight * (1 - scale));
 
@@ -517,7 +506,6 @@ function scalePages() {
         pair.style.width = `${pageWidth * scale}px`;
 
         // Insert or update gutter strip between the two pages
-        const gutter = getConfigParams().gutter;
         let gutterEl = pair.querySelector(".spread-gutter") as HTMLElement | null;
         if (gutter !== "0") {
           if (!gutterEl) {
@@ -534,7 +522,7 @@ function scalePages() {
       }
     } else {
       // Calendar-only mode: no gutter
-      const maxContentH = scrollHeight - 80;
+      const maxContentH = scrollHeight - TOOLBAR_HEIGHT;
       const scale = Math.min(1, availableWidth / pageWidth, maxContentH / pageHeight);
       const unusedSpace = Math.max(0, pageHeight * (1 - scale));
 
@@ -546,13 +534,13 @@ function scalePages() {
     // Dynamic mini cal width: if content area is narrow, use wider mini cal columns
     const marginVal = parseFloat(margin);
     const marginUnit = margin.replace(/[\d.]/g, "");
-    const marginPx = marginUnit === "mm" ? marginVal * 96 / 25.4 : marginVal * 96;
+    const marginPx = marginUnit === "mm" ? marginVal * PX_PER_INCH / 25.4 : marginVal * PX_PER_INCH;
     const contentWidth = pageWidth - 2 * marginPx;
-    page.classList.toggle("narrow-content", contentWidth < 480);
+    page.classList.toggle("narrow-content", contentWidth < NARROW_CONTENT_THRESHOLD);
 
     // Also apply to facing clone if present
     const facingClone = scrollMonth.querySelector(".page.month-facing") as HTMLElement | null;
-    if (facingClone) facingClone.classList.toggle("narrow-content", contentWidth < 480);
+    if (facingClone) facingClone.classList.toggle("narrow-content", contentWidth < NARROW_CONTENT_THRESHOLD);
   }
 }
 
@@ -773,6 +761,8 @@ function getVisibleMonth(): { year: string; month: string } | null {
   let best: HTMLElement | null = null;
   let bestDist = Infinity;
   for (const m of months) {
+    // Skip hidden scroll-months (e.g. the second month in a facing-month pair)
+    if (m.style.display === "none") continue;
     const rect = m.getBoundingClientRect();
     const dist = Math.abs(rect.top - scrollRect.top);
     if (dist < bestDist) {
@@ -821,6 +811,8 @@ async function exportCurrentView() {
     const scrollRect = scroll.getBoundingClientRect();
     let bestDist = Infinity;
     for (const m of scrollMonths) {
+      // Skip hidden scroll-months (e.g. the second month in a facing-month pair)
+      if (m.style.display === "none") continue;
       const rect = m.getBoundingClientRect();
       const dist = Math.abs(rect.top - scrollRect.top);
       if (dist < bestDist) {
@@ -850,9 +842,11 @@ async function exportCurrentView() {
 
   // Temporarily remove transform + margin for clean export at natural dimensions
   const origTransform = targetPage.style.transform;
-  const origMargin = targetPage.style.marginBottom;
+  const origMarginBottom = targetPage.style.marginBottom;
+  const origMarginRight = targetPage.style.marginRight;
   targetPage.style.transform = "";
   targetPage.style.marginBottom = "";
+  targetPage.style.marginRight = "";
 
   try {
     const { toPng } = await import("html-to-image");
@@ -862,8 +856,9 @@ async function exportCurrentView() {
     });
 
     const monthPart = monthNum ? `--${monthNum.padStart(2, "0")}` : "";
+    const layoutTag = (params.layout === "facing-month" || params.layout === "facing-photo") ? "--facing" : "";
     const link = document.createElement("a");
-    link.download = `calendar--${params.year}${monthPart}--${params.size}--${params.orientation}--${dpi}dpi.png`;
+    link.download = `calendar--${params.year}${monthPart}--${params.size}--${params.orientation}${layoutTag}--${dpi}dpi.png`;
     link.href = dataUrl;
     link.click();
 
@@ -876,7 +871,8 @@ async function exportCurrentView() {
     }, 3000);
   } finally {
     targetPage.style.transform = origTransform;
-    targetPage.style.marginBottom = origMargin;
+    targetPage.style.marginBottom = origMarginBottom;
+    targetPage.style.marginRight = origMarginRight;
   }
 }
 
@@ -895,29 +891,55 @@ async function exportAllMonths() {
   const scrollMonths = document.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
   if (scrollMonths.length === 0) return;
 
+  // Collect all pages — handles both single and facing-month layouts.
+  // In facing layout, visible scroll-months have spread-pairs with two pages;
+  // the second (.month-facing) belongs to the next (hidden) scroll-month.
+  const allPages: { yearNum: string; monthNum: number; page: HTMLElement }[] = [];
+  for (let i = 0; i < scrollMonths.length; i++) {
+    const el = scrollMonths[i];
+    if (el.style.display === "none") continue;
+
+    const pages = el.querySelectorAll(".page") as NodeListOf<HTMLElement>;
+    for (const page of pages) {
+      if (page.classList.contains("month-facing")) {
+        const nextEl = scrollMonths[i + 1];
+        if (nextEl) {
+          allPages.push({
+            yearNum: nextEl.dataset.year ?? params.year,
+            monthNum: parseInt(nextEl.dataset.month ?? "0"),
+            page,
+          });
+        }
+      } else {
+        allPages.push({
+          yearNum: el.dataset.year ?? params.year,
+          monthNum: parseInt(el.dataset.month ?? "0"),
+          page,
+        });
+      }
+    }
+  }
+
   try {
     const { toPng } = await import("html-to-image");
     const pixelRatio = dpi / 96;
 
-    for (let i = 0; i < scrollMonths.length; i++) {
-      const scrollMonth = scrollMonths[i];
-      const page = scrollMonth.querySelector(".page") as HTMLElement | null;
-      if (!page) continue;
-
-      const monthNum = parseInt(scrollMonth.dataset.month ?? "0");
-      const yearNum = scrollMonth.dataset.year ?? params.year;
+    for (let i = 0; i < allPages.length; i++) {
+      const { yearNum, monthNum, page } = allPages[i];
       const monthStr = String(monthNum).padStart(2, "0");
       const label = monthNames[monthNum] || monthStr;
 
       if (status) {
-        status.textContent = `Exporting ${label}\u2026 (${i + 1}/${scrollMonths.length})`;
+        status.textContent = `Exporting ${label}\u2026 (${i + 1}/${allPages.length})`;
       }
 
       // Temporarily remove transform + margin for clean export
       const origTransform = page.style.transform;
-      const origMargin = page.style.marginBottom;
+      const origMarginBottom = page.style.marginBottom;
+      const origMarginRight = page.style.marginRight;
       page.style.transform = "";
       page.style.marginBottom = "";
+      page.style.marginRight = "";
 
       const dataUrl = await toPng(page, {
         pixelRatio,
@@ -925,10 +947,12 @@ async function exportAllMonths() {
       });
 
       page.style.transform = origTransform;
-      page.style.marginBottom = origMargin;
+      page.style.marginBottom = origMarginBottom;
+      page.style.marginRight = origMarginRight;
 
       const link = document.createElement("a");
-      link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}--${dpi}dpi.png`;
+      const layoutTag = (params.layout === "facing-month" || params.layout === "facing-photo") ? "--facing" : "";
+      link.download = `calendar--${yearNum}--${monthStr}--${params.size}--${params.orientation}${layoutTag}--${dpi}dpi.png`;
       link.href = dataUrl;
       link.click();
 

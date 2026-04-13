@@ -25,7 +25,13 @@ import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
 import holidaysUSPlugin from "../../../feeds/holidays-us/feed.plugin";
 
-/** Serialize URLSearchParams without over-encoding safe chars like : and , */
+/**
+ * Serialize URLSearchParams without percent-encoding colons and commas.
+ * Standard toString() encodes `:` → `%3A` and `,` → `%2C`, which makes
+ * the `include` param unreadable (e.g. `lunar%3Afull%2Clunar%3Anew`).
+ * Safe because all keys and values are from a controlled vocabulary
+ * (feed tokens, page sizes, orientations) — never free-text user input.
+ */
 function serializeParams(params: URLSearchParams): string {
   const parts: string[] = [];
   params.forEach((v, k) => parts.push(`${k}=${v}`));
@@ -424,6 +430,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       queryString: configQs,
       urlPrefix: "/config",
       margin,
+      embedded: true,
     });
 
     return { year, month, html };

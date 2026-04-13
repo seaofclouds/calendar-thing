@@ -5,13 +5,7 @@
  */
 
 import type { CalendarEvent } from "@calendar-feeds/shared";
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+import { MONTH_NAMES, WEEK_DAYS, escapeHtml, escapeAttr, buildMarkerMap } from "./render-utils";
 const FULL_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -32,6 +26,8 @@ export interface MonthViewOptions {
   dataSource?: string;
   urlPrefix?: string;
   margin?: string;
+  /** When true, omit id="root" and add "page" class (for embedding multiple months) */
+  embedded?: boolean;
 }
 
 interface DayData {
@@ -80,6 +76,7 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
   const nextMiniWeeks = generateWeeks(next.year, next.month, markersByDate, todayStr);
 
   const rootClasses = [
+    opts.embedded ? "page" : "",
     opts.size ? `size-${opts.size.toLowerCase()}` : "",
     `orientation-${opts.orientation}`,
     isPreview ? "print" : "",
@@ -96,7 +93,8 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
     ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
     : "";
 
-  return `<div id="root" class="${rootClasses}">
+  const rootId = opts.embedded ? "" : ' id="root"';
+  return `<div${rootId} class="${rootClasses}">
     <main class="${containerClasses}"${opts.margin ? ` style="padding: ${opts.margin}"` : ""}${dataAttrs}>
       <header class="view-header">
         <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>
@@ -281,28 +279,3 @@ function generateWeeks(
   return weeks;
 }
 
-/** Solar events are rarer and more significant — prioritize them over lunar in compact views */
-function markerPriority(e: CalendarEvent): number {
-  return e.uid.startsWith("solar-") ? 0 : 1;
-}
-
-function buildMarkerMap(markers: CalendarEvent[]): Map<string, CalendarEvent[]> {
-  const map = new Map<string, CalendarEvent[]>();
-  for (const m of markers) {
-    const existing = map.get(m.date);
-    if (existing) existing.push(m);
-    else map.set(m.date, [m]);
-  }
-  for (const arr of map.values()) {
-    if (arr.length > 1) arr.sort((a, b) => markerPriority(a) - markerPriority(b));
-  }
-  return map;
-}
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function escapeAttr(str: string): string {
-  return escapeHtml(str).replace(/"/g, "&quot;");
-}

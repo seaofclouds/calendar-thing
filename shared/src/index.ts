@@ -34,6 +34,7 @@ export {
 // Feed worker factory
 export {
   createFeedWorker,
+  type FeedEnv,
   type FeedRoute,
   type FeedWorkerConfig,
 } from "./feed-worker";

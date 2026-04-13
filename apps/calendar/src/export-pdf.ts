@@ -1,19 +1,19 @@
 /**
- * PDF export with imposition for spiral-bound calendar printing.
+ * PDF export for calendar printing.
  * Uses jsPDF for PDF generation and html-to-image for calendar rendering.
  *
- * Imposition order (double-sided, spiral-bound at top):
- *   Sheet 1 front: Cover image (normal)
- *   Sheet 1 back:  Month 1 image (rotated 180°)
- *   Sheet 2 front: Month 1 calendar (normal)
- *   Sheet 2 back:  Month 2 image (rotated 180°)
- *   ...
- *   Sheet N front: Last month calendar (normal)
- *   Sheet N back:  (blank)
+ * Photo+Month layout page order:
+ *   Cover image, Photo 1, Month 1, Photo 2, Month 2, ...
+ *   Photos have margin + bottom gutter (binding edge).
+ *   Calendar pages have margin + top gutter (binding edge).
+ *
+ * Month+Month layout page order:
+ *   Month 1 (bottom gutter), Month 2 (top gutter), Month 3, ...
  */
 
 import { loadImage } from "./store-images";
 import { PAGE_TYPES } from "./config";
+import { getConfigParams, getActiveDpi } from "./config-helpers";
 
 export interface ExportPDFOptions {
   getStatus: () => HTMLElement | null;
@@ -41,73 +41,66 @@ function getPageDimensionsMm(
     : { width: w, height: h };
 }
 
-/** Read config params from the current URL */
-function getConfigParams() {
-  const url = new URL(window.location.href);
-  const match = url.pathname.match(/\/config\/(\d+)/);
-  return {
-    year: match?.[1] ?? String(new Date().getFullYear()),
-    size: url.searchParams.get("size") ?? "letter",
-    orientation: url.searchParams.get("orientation") ?? "landscape",
-    layout: url.searchParams.get("layout") ?? "calendar",
-    scaling: url.searchParams.get("scaling") ?? "fit",
-  };
-}
-
-/** Get active DPI from sidebar */
-function getActiveDpi(): number {
-  const el = document.querySelector(
-    ".config-option[data-dpi].active",
-  ) as HTMLElement | null;
-  return parseInt(el?.dataset.dpi ?? "300");
-}
-
 /**
  * Draw a user photo onto a canvas at the given page dimensions.
  * Supports fit (contain) and crop (cover) scaling modes.
- * Optionally rotates 180° for back-side imposition.
+ * Matches the web preview: image fills the margin-bounded area,
+ * then the gutter zone is painted white over any overflow.
  */
 async function composeImagePage(
   blob: Blob,
   canvasW: number,
   canvasH: number,
   scaling: string,
-  rotate180: boolean,
+  margin: { top: number; right: number; bottom: number; left: number },
+  gutterBottom: number,
 ): Promise<string> {
   const img = await createImageBitmap(blob);
-  const canvas = document.createElement("canvas");
-  canvas.width = canvasW;
-  canvas.height = canvasH;
-  const ctx = canvas.getContext("2d")!;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+    const ctx = canvas.getContext("2d")!;
 
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(0, 0, canvasW, canvasH);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvasW, canvasH);
 
-  if (rotate180) {
-    ctx.translate(canvasW, canvasH);
-    ctx.rotate(Math.PI);
+    // Image area matches web: margin on all sides, gutter NOT subtracted
+    // (web has the gutter as a separate element outside the image container)
+    const drawX = margin.left;
+    const drawY = margin.top;
+    const drawW = canvasW - margin.left - margin.right;
+    const drawH = canvasH - margin.top - margin.bottom;
+
+    if (scaling === "crop") {
+      // object-fit: cover — fill drawing area, center-crop
+      const scale = Math.max(drawW / img.width, drawH / img.height);
+      const sw = drawW / scale;
+      const sh = drawH / scale;
+      const sx = (img.width - sw) / 2;
+      const sy = (img.height - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
+    } else {
+      // object-fit: contain — fit within drawing area, letterboxed
+      const scale = Math.min(drawW / img.width, drawH / img.height);
+      const dw = img.width * scale;
+      const dh = img.height * scale;
+      const dx = drawX + (drawW - dw) / 2;
+      const dy = drawY + (drawH - dh) / 2;
+      ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+    }
+
+    // Paint gutter zone white — the binding margin at the bottom edge.
+    // Any image content that extends into this zone is covered.
+    if (gutterBottom > 0) {
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, canvasH - margin.bottom - gutterBottom, canvasW, gutterBottom);
+    }
+
+    return canvas.toDataURL("image/jpeg", 0.92);
+  } finally {
+    img.close();
   }
-
-  if (scaling === "crop") {
-    // object-fit: cover — fill canvas, center-crop
-    const scale = Math.max(canvasW / img.width, canvasH / img.height);
-    const sw = canvasW / scale;
-    const sh = canvasH / scale;
-    const sx = (img.width - sw) / 2;
-    const sy = (img.height - sh) / 2;
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
-  } else {
-    // object-fit: contain — fit within canvas, letterboxed
-    const scale = Math.min(canvasW / img.width, canvasH / img.height);
-    const dw = img.width * scale;
-    const dh = img.height * scale;
-    const dx = (canvasW - dw) / 2;
-    const dy = (canvasH - dh) / 2;
-    ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
-  }
-
-  img.close();
-  return canvas.toDataURL("image/jpeg", 0.92);
 }
 
 export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
@@ -127,8 +120,23 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   const canvasH = Math.round(pageH * pxPerMm);
   const pixelRatio = dpi / 96;
 
-  const isPhotoLayout = params.layout === "photo-calendar";
+  const isPhotoLayout = params.layout === "facing-photo";
+  const isFacingMonth = params.layout === "facing-month";
+  const isFacing = isFacingMonth || isPhotoLayout;
+  const gutterVal = isFacing ? params.gutter : "0";
   const year = parseInt(params.year);
+
+  // Convert a CSS length (e.g. "0.25in", "6mm") to pixels at the export DPI
+  function cssLengthToPx(val: string): number {
+    const num = parseFloat(val);
+    if (val.endsWith("mm")) return num * pxPerMm;
+    return num * dpi; // inches
+  }
+
+  // Margin inset in pixels (all sides)
+  const marginPx = cssLengthToPx(params.margin);
+  // Gutter inset in pixels (binding edge only)
+  const gutterPx = gutterVal !== "0" ? cssLengthToPx(gutterVal) : 0;
 
   // Get rendered months from the DOM
   const scrollMonths = document.querySelectorAll(
@@ -139,16 +147,47 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     return;
   }
 
-  // Collect month metadata
-  const months: { year: number; month: string; pageEl: HTMLElement }[] = [];
-  for (const el of scrollMonths) {
-    const page = el.querySelector(".page") as HTMLElement | null;
-    if (!page) continue;
-    months.push({
-      year: parseInt(el.dataset.year ?? params.year),
-      month: el.dataset.month ?? "1",
-      pageEl: page,
-    });
+  // Collect month metadata — handles single, facing-month, and facing-photo layouts.
+  // In facing layouts, visible scroll-months contain a spread-pair with
+  // two .page elements; the second (.month-facing) belongs to the next
+  // (hidden) scroll-month.
+  // gutterEdge tracks which edge needs binding margin:
+  //   "bottom" = top page of a spread (binding at its bottom edge)
+  //   "top"    = bottom page of a spread (binding at its top edge)
+  //   "none"   = single layout, no binding margin
+  type GutterEdge = "top" | "bottom" | "none";
+  const months: { year: number; month: string; pageEl: HTMLElement; gutterEdge: GutterEdge }[] = [];
+  for (let i = 0; i < scrollMonths.length; i++) {
+    const el = scrollMonths[i];
+    // Skip hidden scroll-months — their pages were moved into spread-pairs
+    if (el.style.display === "none") continue;
+
+    const pages = el.querySelectorAll(".page") as NodeListOf<HTMLElement>;
+    for (const page of pages) {
+      if (page.classList.contains("month-facing")) {
+        // Second page in a facing pair (bottom of spread) — binding at top
+        const nextEl = scrollMonths[i + 1];
+        if (nextEl) {
+          months.push({
+            year: parseInt(nextEl.dataset.year ?? params.year),
+            month: nextEl.dataset.month ?? "1",
+            pageEl: page,
+            gutterEdge: gutterVal !== "0" ? "top" : "none",
+          });
+        }
+      } else {
+        // First page in a facing pair (top of spread) — binding at bottom
+        // For single layout or photo layout, calendar pages get top gutter
+        const edge: GutterEdge = gutterVal === "0" ? "none"
+          : (isFacingMonth ? "bottom" : "top");
+        months.push({
+          year: parseInt(el.dataset.year ?? params.year),
+          month: el.dataset.month ?? "1",
+          pageEl: page,
+          gutterEdge: edge,
+        });
+      }
+    }
   }
 
   const { toJpeg } = await import("html-to-image");
@@ -176,12 +215,39 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     pdf.addImage(dataUrl, "JPEG", 0, 0, pageW, pageH);
   }
 
-  async function renderCalendarToJpeg(el: HTMLElement): Promise<string> {
-    return toJpeg(el, {
-      pixelRatio,
-      backgroundColor: "#FFFFFF",
-      quality: 0.92,
-    });
+  async function renderCalendarToJpeg(el: HTMLElement, gutterEdge: GutterEdge): Promise<string> {
+    // Temporarily reset viewport scaling so the capture is at natural page dimensions
+    const origTransform = el.style.transform;
+    const origMarginBottom = el.style.marginBottom;
+    const origMarginRight = el.style.marginRight;
+    el.style.transform = "";
+    el.style.marginBottom = "";
+    el.style.marginRight = "";
+
+    // For facing layouts, add gutter as extra padding on the binding edge
+    const monthView = el.querySelector(".month-view") as HTMLElement | null;
+    let origPadding: string | undefined;
+    let paddingProp: "paddingTop" | "paddingBottom" | undefined;
+    if (gutterEdge !== "none" && monthView) {
+      paddingProp = gutterEdge === "top" ? "paddingTop" : "paddingBottom";
+      origPadding = monthView.style[paddingProp];
+      monthView.style[paddingProp] = `calc(${params.margin} + ${gutterVal})`;
+    }
+
+    try {
+      return await toJpeg(el, {
+        pixelRatio,
+        backgroundColor: "#FFFFFF",
+        quality: 0.92,
+      });
+    } finally {
+      el.style.transform = origTransform;
+      el.style.marginBottom = origMarginBottom;
+      el.style.marginRight = origMarginRight;
+      if (origPadding !== undefined && monthView && paddingProp) {
+        monthView.style[paddingProp] = origPadding;
+      }
+    }
   }
 
   const totalMonths = months.length;
@@ -193,6 +259,14 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     return new Date(2000, monthNum - 1).toLocaleString("en", { month: "short" });
   };
 
+  // Margin rect for photo pages (same on all sides, matching web preview)
+  const photoMargin = {
+    top: marginPx,
+    right: marginPx,
+    bottom: marginPx,
+    left: marginPx,
+  };
+
   // ─── COVER PAGE ────────────────────────────────────────────────
 
   if (isPhotoLayout) {
@@ -202,7 +276,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     const coverRecord = await loadImage(year, "cover");
     if (coverRecord) {
       const coverUrl = await composeImagePage(
-        coverRecord.blob, canvasW, canvasH, params.scaling, false,
+        coverRecord.blob, canvasW, canvasH, params.scaling, photoMargin, 0,
       );
       addFullPageImage(coverUrl);
     } else {
@@ -211,14 +285,14 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
   }
 
-  // ─── MONTH PAGES (IMPOSED) ────────────────────────────────────
+  // ─── MONTH PAGES ──────────────────────────────────────────────
 
   for (let i = 0; i < months.length; i++) {
     const m = months[i];
     const label = monthLabel(m);
 
     if (isPhotoLayout) {
-      // Back of previous sheet: this month's photo, rotated 180°
+      // Photo page: same orientation as preview, with margin + bottom gutter
       step++;
       if (status) {
         status.textContent = `Composing ${label} image\u2026 (${step}/${totalSteps})`;
@@ -227,11 +301,11 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       const imgRecord = await loadImage(m.year, m.month);
       if (imgRecord) {
         const imgUrl = await composeImagePage(
-          imgRecord.blob, canvasW, canvasH, params.scaling, true,
+          imgRecord.blob, canvasW, canvasH, params.scaling, photoMargin, gutterPx,
         );
         addFullPageImage(imgUrl);
       } else {
-        nextPage(); // blank back
+        nextPage(); // blank photo page
       }
     }
 
@@ -241,7 +315,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       status.textContent = `Rendering ${label} calendar\u2026 (${step}/${totalSteps})`;
     }
 
-    const calendarUrl = await renderCalendarToJpeg(m.pageEl);
+    const calendarUrl = await renderCalendarToJpeg(m.pageEl, m.gutterEdge);
     addFullPageImage(calendarUrl);
 
     // Yield to keep UI responsive
@@ -253,7 +327,8 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   if (status) status.textContent = "Saving PDF\u2026";
 
   const sizeName = params.size.charAt(0).toUpperCase() + params.size.slice(1);
-  pdf.save(`calendar--${params.year}--${sizeName}.pdf`);
+  const layoutTag = isFacing ? "--facing" : "";
+  pdf.save(`calendar--${params.year}--${sizeName}--${params.orientation}${layoutTag}--${dpi}dpi.pdf`);
 
   if (status) {
     status.textContent = "PDF exported!";

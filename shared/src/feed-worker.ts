@@ -7,25 +7,30 @@ import { authenticateToken } from "./worker";
 import { withEdgeCache } from "./worker";
 import type { CacheKeyOptions } from "./worker";
 
-export interface FeedRoute {
-  path: string;
-  handler: (request: Request, env: any, ctx: ExecutionContext) => Promise<Response>;
+/** Base env required by all feed workers (token auth) */
+export interface FeedEnv {
+  CALENDAR_TOKEN: string;
 }
 
-export interface FeedWorkerConfig {
+export interface FeedRoute<E extends FeedEnv = FeedEnv> {
+  path: string;
+  handler: (request: Request, env: E, ctx: ExecutionContext) => Promise<Response>;
+}
+
+export interface FeedWorkerConfig<E extends FeedEnv = FeedEnv> {
   /** Display name shown at the health-check root */
   name: string;
   /** Cache version — increment to invalidate on deploy */
   cacheVersion: number;
   /** Route definitions — path + handler pairs */
-  routes: FeedRoute[];
+  routes: FeedRoute<E>[];
   /** Extra cache key params applied to all routes (e.g. { _y: year }) */
   cacheParams?: (request: Request) => Record<string, string> | undefined;
 }
 
-export function createFeedWorker(config: FeedWorkerConfig): ExportedHandler {
+export function createFeedWorker<E extends FeedEnv = FeedEnv>(config: FeedWorkerConfig<E>): ExportedHandler<E> {
   return {
-    async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
+    async fetch(request: Request, env: E, ctx: ExecutionContext): Promise<Response> {
       const url = new URL(request.url);
 
       // Health check — no auth required
