@@ -32,7 +32,6 @@ async function maybeExportImage() {
   ) as HTMLElement | null;
   if (!calendar) return;
 
-  const format = calendar.dataset.format as "png" | "jpg";
   const dpi = parseInt(calendar.dataset.dpi || "300");
   const year = calendar.dataset.year || "";
   const size = calendar.dataset.size || "";
@@ -40,18 +39,16 @@ async function maybeExportImage() {
 
   const pixelRatio = dpi / 96;
   const opts = {
-    quality: format === "png" ? 1.0 : 0.95,
     pixelRatio,
     backgroundColor: "#FFFFFF",
   };
 
   try {
-    const { toPng, toJpeg } = await import("html-to-image");
-    const fn = format === "png" ? toPng : toJpeg;
-    const dataUrl = await fn(calendar, opts);
+    const { toPng } = await import("html-to-image");
+    const dataUrl = await toPng(calendar, opts);
 
     const link = document.createElement("a");
-    link.download = `calendar--${year}--${size}--${orientation}.${format}`;
+    link.download = `calendar--${year}--${size}--${orientation}.png`;
     link.href = dataUrl;
     link.click();
   } catch (err) {

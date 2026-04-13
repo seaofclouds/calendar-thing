@@ -15,7 +15,7 @@ export interface RenderOptions {
   header: boolean;
   testing: boolean;
   forExport: boolean;
-  format?: "png" | "jpg";
+  format?: "png";
   dpi?: number;
   markers: CalendarEvent[];
   queryString?: string;

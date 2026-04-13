@@ -17,7 +17,7 @@ export interface MonthViewOptions {
   header: boolean;
   testing: boolean;
   forExport: boolean;
-  format?: "png" | "jpg";
+  format?: "png";
   dpi?: number;
   markers: CalendarEvent[];
   borders: boolean;
