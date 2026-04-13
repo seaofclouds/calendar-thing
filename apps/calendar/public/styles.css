@@ -717,6 +717,7 @@ body {
   min-width: 0;
   box-sizing: border-box;
   font-size: 1em;
+  overflow: visible;
 }
 
 .month-days .day.other-month {
@@ -744,10 +745,10 @@ body {
   font-weight: var(--font-weight-book);
 }
 
-/* Multiple markers side by side with small gap */
+/* Multiple markers side by side */
 .day-markers {
   display: inline-flex;
-  gap: 0.2em;
+  gap: 0.4em;
   align-items: center;
 }
 
@@ -1036,6 +1037,7 @@ body:has(.config) {
 
 .config-content {
   flex: 1;
+  height: 100%;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
