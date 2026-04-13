@@ -346,6 +346,24 @@ body {
   height: 139.7mm;
 }
 
+#root.size-5x7, #root.size-5x7.orientation-portrait {
+  width: 127mm;
+  height: 177.8mm;
+}
+#root.size-5x7.orientation-landscape {
+  width: 177.8mm;
+  height: 127mm;
+}
+
+#root.size-4x6, #root.size-4x6.orientation-portrait {
+  width: 101.6mm;
+  height: 152.4mm;
+}
+#root.size-4x6.orientation-landscape {
+  width: 152.4mm;
+  height: 101.6mm;
+}
+
 /* A6 styles */
 .size-a6 .year-view.print {
   font-size: 0.5rem;
@@ -421,7 +439,7 @@ body {
 .size-legal .print .year-grid {
   gap: 3em 4em;
 }
-.size-legal .print .month .month-header h2 {
+.size-legal .print .month:not(.mini) .month-header h2 {
   padding-bottom: .5em;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-light);
@@ -443,7 +461,7 @@ body {
 .size-tabloid .print .year-grid {
   gap: 3em 4em;
 }
-.size-tabloid .print .month .month-header h2 {
+.size-tabloid .print .month:not(.mini) .month-header h2 {
   padding-bottom: .5em;
 }
 
@@ -530,7 +548,7 @@ body {
 .month-view .view-header {
   position: relative;
   display: grid;
-  grid-template-columns: 1.5fr 4fr 1.5fr;
+  grid-template-columns: 1fr 5fr 1fr;
   align-items: center;
   padding: 0 0 0.5em 0;
 }
@@ -1112,6 +1130,10 @@ body:has(.config) {
 .page.size-tabloid.orientation-landscape { width: 431.8mm; height: 279.4mm; }
 .page.size-half-letter, .page.size-half-letter.orientation-portrait { width: 139.7mm; height: 215.9mm; }
 .page.size-half-letter.orientation-landscape { width: 215.9mm; height: 139.7mm; }
+.page.size-5x7, .page.size-5x7.orientation-portrait { width: 127mm; height: 177.8mm; }
+.page.size-5x7.orientation-landscape { width: 177.8mm; height: 127mm; }
+.page.size-4x6, .page.size-4x6.orientation-portrait { width: 101.6mm; height: 152.4mm; }
+.page.size-4x6.orientation-landscape { width: 152.4mm; height: 101.6mm; }
 
 /* Print font sizes for .page (mirrors .size-* .print selectors) */
 .size-a6 .month-view.print,
@@ -1128,6 +1150,10 @@ body:has(.config) {
 .page.size-tabloid .month-view.print { font-size: 1rem; }
 .size-half-letter .month-view.print,
 .page.size-half-letter .month-view.print { font-size: 0.55rem; }
+.size-5x7 .month-view.print,
+.page.size-5x7 .month-view.print { font-size: 0.55rem; }
+.size-4x6 .month-view.print,
+.page.size-4x6 .month-view.print { font-size: 0.5rem; }
 
 /* ===================
    Spread Layout (Photo + Calendar)
@@ -1258,12 +1284,20 @@ body:has(.config) {
 .page.size-a5 .month-view.borders .month-days .day,
 .page.size-half-letter .month-view.borders .month-expanded > .weekdays .weekday,
 .page.size-half-letter .month-view.borders .month-days .day,
+.page.size-5x7 .month-view.borders .month-expanded > .weekdays .weekday,
+.page.size-5x7 .month-view.borders .month-days .day,
+.page.size-4x6 .month-view.borders .month-expanded > .weekdays .weekday,
+.page.size-4x6 .month-view.borders .month-days .day,
 #root.size-a6 .month-view.borders .month-expanded > .weekdays .weekday,
 #root.size-a6 .month-view.borders .month-days .day,
 #root.size-a5 .month-view.borders .month-expanded > .weekdays .weekday,
 #root.size-a5 .month-view.borders .month-days .day,
 #root.size-half-letter .month-view.borders .month-expanded > .weekdays .weekday,
-#root.size-half-letter .month-view.borders .month-days .day {
+#root.size-half-letter .month-view.borders .month-days .day,
+#root.size-5x7 .month-view.borders .month-expanded > .weekdays .weekday,
+#root.size-5x7 .month-view.borders .month-days .day,
+#root.size-4x6 .month-view.borders .month-expanded > .weekdays .weekday,
+#root.size-4x6 .month-view.borders .month-days .day {
   border-width: 0.5px;
 }
 
@@ -1305,12 +1339,14 @@ body:has(.config) {
    Mini calendar width for small sizes
    =================== */
 
+/* A6: wider mini cal columns + header grid */
+.page.size-a6 .month-view .view-header,
+#root.size-a6 .month-view .view-header {
+  grid-template-columns: 1.5fr 4fr 1.5fr;
+}
+
 .page.size-a6 .view-nav .month.mini,
-.page.size-a5 .view-nav .month.mini,
-.page.size-half-letter .view-nav .month.mini,
-#root.size-a6 .view-nav .month.mini,
-#root.size-a5 .view-nav .month.mini,
-#root.size-half-letter .view-nav .month.mini {
+#root.size-a6 .view-nav .month.mini {
   min-width: 0;
   letter-spacing: -0.02em;
 }

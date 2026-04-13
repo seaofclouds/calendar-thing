@@ -39,6 +39,8 @@ const FORMAT_DIMENSIONS: Record<string, { w: number; h: number }> = {
   a5: { w: 148, h: 210 },
   a4: { w: 210, h: 297 },
   a6: { w: 105, h: 148 },
+  "5x7": { w: 5, h: 7 },
+  "4x6": { w: 4, h: 6 },
 };
 
 const METRIC_SIZES = new Set(["a6", "a5", "a4"]);
@@ -71,6 +73,8 @@ const DISPLAY_NAMES: Record<string, string> = {
   a5: "A5",
   a4: "A4",
   a6: "A6",
+  "5x7": "5x7",
+  "4x6": "4x6",
 };
 
 const FEED_OPTIONS = [

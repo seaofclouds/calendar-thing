@@ -97,6 +97,26 @@ export const PAGE_TYPES: Record<string, PageTypeConfig> = {
       landscape: { rows: 3, columns: 4 },
     },
   },
+  "5x7": {
+    dimensions: {
+      width: { value: 5, unit: "in" },
+      height: { value: 7, unit: "in" },
+    },
+    layout: {
+      portrait: { rows: 3, columns: 2 },
+      landscape: { rows: 2, columns: 3 },
+    },
+  },
+  "4x6": {
+    dimensions: {
+      width: { value: 4, unit: "in" },
+      height: { value: 6, unit: "in" },
+    },
+    layout: {
+      portrait: { rows: 3, columns: 2 },
+      landscape: { rows: 2, columns: 3 },
+    },
+  },
 };
 
 export function getPageLayout(
