@@ -4,6 +4,7 @@
  */
 
 import { getPageLayout } from "./config";
+import { MONTH_NAMES, WEEK_DAYS, buildMarkerMap } from "./render-utils";
 import type { CalendarEvent } from "@calendar-feeds/shared";
 
 export interface RenderOptions {
@@ -36,12 +37,6 @@ interface MonthData {
   monthIndex: number; // 0-based
   weeks: DayData[][];
 }
-
-const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
 
 export function renderCalendarFragment(opts: RenderOptions): string {
   const layout = getPageLayout(opts.size ?? "letter", opts.orientation);
@@ -137,24 +132,6 @@ function renderDay(day: DayData): string {
   }
 
   return `<div class="${classes}">${content}</div>`;
-}
-
-/** Solar events are rarer and more significant — prioritize them over lunar in compact views */
-function markerPriority(e: CalendarEvent): number {
-  return e.uid.startsWith("solar-") ? 0 : 1;
-}
-
-function buildMarkerMap(markers: CalendarEvent[]): Map<string, CalendarEvent[]> {
-  const map = new Map<string, CalendarEvent[]>();
-  for (const m of markers) {
-    const existing = map.get(m.date);
-    if (existing) existing.push(m);
-    else map.set(m.date, [m]);
-  }
-  for (const arr of map.values()) {
-    if (arr.length > 1) arr.sort((a, b) => markerPriority(a) - markerPriority(b));
-  }
-  return map;
 }
 
 function generateMonths(

@@ -5,11 +5,19 @@
  */
 
 import { PAGE_TYPES } from "./config";
+import { MONTH_NAMES } from "./render-utils";
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+/** Render a row of config pill buttons */
+function renderPills(
+  items: { value: string; label: string }[],
+  dataAttr: string,
+  isActive: (value: string) => boolean,
+): string {
+  return items.map((item) => {
+    const active = isActive(item.value) ? " active" : "";
+    return `          <button class="config-option${active}" data-${dataAttr}="${item.value}">${item.label}</button>`;
+  }).join("\n");
+}
 
 /** SVG rectangle at paper aspect ratio, used as format icon */
 function formatIcon(widthVal: number, heightVal: number, orientation: string): string {
@@ -147,17 +155,13 @@ export function renderConfigView(opts: ConfigViewOptions): string {
     : pageWidthIn;
   const minContentWidth = 2.5; // inches
 
-  const marginPills = marginOptions
-    .filter((opt) => {
-      const mVal = opt.value.endsWith("mm")
-        ? parseFloat(opt.value) / 25.4
-        : parseFloat(opt.value);
-      return effectiveWidth - 2 * mVal >= minContentWidth;
-    })
-    .map((opt) => {
-      const isActive = opt.value === opts.margin;
-      return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
-    }).join("\n");
+  const filteredMargins = marginOptions.filter((opt) => {
+    const mVal = opt.value.endsWith("mm")
+      ? parseFloat(opt.value) / 25.4
+      : parseFloat(opt.value);
+    return effectiveWidth - 2 * mVal >= minContentWidth;
+  });
+  const marginPills = renderPills(filteredMargins, "margin", (v) => v === opts.margin);
 
   // Layout top-level: Single Sheets / Facing Pages
   const singleActive = opts.layout === "single" ? " active" : "";
@@ -170,30 +174,20 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   const facingSubDisplay = isFacing ? "" : ' style="display:none"';
 
   // Image scaling (only when Photo + Month)
-  const scalingPills = SCALING_OPTIONS.map((opt) => {
-    const isActive = opt.value === opts.scaling;
-    return `          <button class="config-option${isActive ? " active" : ""}" data-scaling="${opt.value}">${opt.label}</button>`;
-  }).join("\n");
+  const scalingPills = renderPills(SCALING_OPTIONS, "scaling", (v) => v === opts.scaling);
   const scalingDisplay = isPhoto ? "" : ' style="display:none"';
 
   // Gutter pills (only when facing pages)
-  const gutterPills = GUTTER_OPTIONS.map((opt) => {
-    const isActive = opt.value === opts.gutter;
-    return `          <button class="config-option${isActive ? " active" : ""}" data-gutter="${opt.value}">${opt.label}</button>`;
-  }).join("\n");
+  const gutterPills = renderPills(GUTTER_OPTIONS, "gutter", (v) => v === opts.gutter);
   const gutterDisplay = isFacing ? "" : ' style="display:none"';
 
   // Calendar length
-  const lengthPills = ["12", "14", "16"].map((v) => {
-    const isActive = v === String(opts.calendarLength);
-    return `          <button class="config-option${isActive ? " active" : ""}" data-length="${v}">${v}mo</button>`;
-  }).join("\n");
+  const lengthItems = ["12", "14", "16"].map((v) => ({ value: v, label: `${v}mo` }));
+  const lengthPills = renderPills(lengthItems, "length", (v) => v === String(opts.calendarLength));
 
   // Feed toggles
-  const feedPills = FEED_OPTIONS.map((opt) => {
-    const isActive = isFeedActive(opt.token, opts.includeParam);
-    return `          <button class="config-option${isActive ? " active" : ""}" data-feed="${opt.token}">${opt.label}</button>`;
-  }).join("\n");
+  const feedItems = FEED_OPTIONS.map((opt) => ({ value: opt.token, label: opt.label }));
+  const feedPills = renderPills(feedItems, "feed", (v) => isFeedActive(v, opts.includeParam));
 
   // Initial month name for export button
   const firstMonth = opts.monthFragments[0];

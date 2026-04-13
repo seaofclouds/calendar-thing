@@ -3,7 +3,7 @@
  * Serves ICS and JSON feeds for zodiac season events.
  */
 
-import { createFeedWorker, icsResponse, jsonResponse } from "@calendar-feeds/shared";
+import { createFeedWorker, icsResponse, jsonResponse, errorResponse } from "@calendar-feeds/shared";
 import { computeZodiacSeasons, formatSeasonRange } from "./zodiac";
 import type { ZodiacEvent } from "./zodiac";
 import { generateICS } from "./ics";
@@ -22,15 +22,25 @@ export default createFeedWorker({
     {
       path: "/feeds/astrology.ics",
       handler: async (request) => {
-        const events = computeZodiacSeasons(yearFromRequest(request));
-        return icsResponse(generateICS(events));
+        try {
+          const events = computeZodiacSeasons(yearFromRequest(request));
+          return icsResponse(generateICS(events));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Unknown error";
+          return errorResponse(500, `Error generating calendar: ${message}`);
+        }
       },
     },
     {
       path: "/feeds/astrology.json",
       handler: async (request) => {
-        const events = computeZodiacSeasons(yearFromRequest(request));
-        return jsonResponse(JSON.stringify(buildJSON(events, new Date()), null, 2));
+        try {
+          const events = computeZodiacSeasons(yearFromRequest(request));
+          return jsonResponse(JSON.stringify(buildJSON(events, new Date()), null, 2));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Unknown error";
+          return errorResponse(500, message, true);
+        }
       },
     },
   ],
