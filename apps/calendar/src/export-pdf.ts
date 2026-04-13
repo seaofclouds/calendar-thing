@@ -12,7 +12,7 @@
  */
 
 import { loadImage } from "./store-images";
-import { PAGE_TYPES } from "./config";
+import { PAGE_TYPES } from "./page-config";
 import { getConfigParams, getActiveDpi } from "./config-helpers";
 
 export interface ExportPDFOptions {

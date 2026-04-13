@@ -4,7 +4,7 @@
  * Right side is a scrollable preview of all calendar months.
  */
 
-import { PAGE_TYPES } from "./config";
+import { PAGE_TYPES } from "./page-config";
 import { MONTH_NAMES } from "./render-utils";
 
 /** Render a row of config pill buttons */

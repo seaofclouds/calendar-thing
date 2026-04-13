@@ -4,5 +4,5 @@
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/client.ts", "src/store-images.ts", "src/export-pdf.ts", "src/config-helpers.ts"]
+  "exclude": ["src/client.ts", "src/config.ts", "src/scaling.ts", "src/spreads.ts", "src/export.ts", "src/store-images.ts", "src/export-pdf.ts", "src/config-helpers.ts"]
 }

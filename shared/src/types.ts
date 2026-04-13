@@ -1,20 +1,4 @@
 /**
- * The interface every feed worker exposes — describes what the feed provides.
- */
-export interface CalendarFeed {
-  id: string;
-  name: string;
-  description: string;
-  endpoints: FeedEndpoint[];
-}
-
-export interface FeedEndpoint {
-  path: string;
-  format: "ics" | "json";
-  description: string;
-}
-
-/**
  * A single calendar event, normalized across all feed types.
  * Used by the calendar renderer to display events.
  */

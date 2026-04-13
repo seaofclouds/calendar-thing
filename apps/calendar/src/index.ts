@@ -25,19 +25,7 @@ import busdPlugin from "../../../feeds/busd/feed.plugin";
 import astrologyPlugin from "../../../feeds/astrology/feed.plugin";
 import birthdaysPlugin from "../../../feeds/birthdays/feed.plugin";
 import holidaysUSPlugin from "../../../feeds/holidays-us/feed.plugin";
-
-/**
- * Serialize URLSearchParams without percent-encoding colons and commas.
- * Standard toString() encodes `:` → `%3A` and `,` → `%2C`, which makes
- * the `include` param unreadable (e.g. `lunar%3Afull%2Clunar%3Anew`).
- * Safe because all keys and values are from a controlled vocabulary
- * (feed tokens, page sizes, orientations) — never free-text user input.
- */
-function serializeParams(params: URLSearchParams): string {
-  const parts: string[] = [];
-  params.forEach((v, k) => parts.push(`${k}=${v}`));
-  return parts.join("&");
-}
+import { serializeParams } from "./url-utils";
 
 const registry = createFeedRegistry([
   astronomyPlugin,
@@ -54,7 +42,6 @@ interface Env {
   MOVIE_RELEASE: Fetcher;
   ASTROLOGY: Fetcher;
   CALENDAR_TOKEN?: string;
-  [key: string]: unknown;
 }
 
 interface CalendarParams {
@@ -118,7 +105,7 @@ export default {
       ...allFeeds
         .filter((feed) => isFeedEnabled(params.include, feed.id))
         .map((feed) =>
-          fetchFeedEvents(feed, env, token, getActiveTokens(params.include, feed.id))
+          fetchFeedEvents(feed, env as unknown as Record<string, unknown>, token, getActiveTokens(params.include, feed.id))
         ),
       ...feedUrls.map((u) => fetchExternalFeed(u)),
     ]);
@@ -285,7 +272,7 @@ async function handleFeedProxy(path: string, url: URL, env: Env): Promise<Respon
     }
     return new Response("Service Unavailable", { status: 503 });
   }
-  const binding = env[feed.binding] as Fetcher | undefined;
+  const binding = (env as unknown as Record<string, Fetcher>)[feed.binding] as Fetcher | undefined;
   if (!binding) {
     return new Response("Service Unavailable", { status: 503 });
   }
@@ -399,7 +386,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
     ...allFeeds
       .filter((feed) => isFeedEnabled(include, feed.id))
       .map((feed) =>
-        fetchFeedEvents(feed, env, token, getActiveTokens(include, feed.id))
+        fetchFeedEvents(feed, env as unknown as Record<string, unknown>, token, getActiveTokens(include, feed.id))
       ),
     ...feedUrls.map((u) => fetchExternalFeed(u)),
   ]);
