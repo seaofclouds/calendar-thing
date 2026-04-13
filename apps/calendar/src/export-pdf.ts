@@ -44,14 +44,16 @@ function getPageDimensionsMm(
 /**
  * Draw a user photo onto a canvas at the given page dimensions.
  * Supports fit (contain) and crop (cover) scaling modes.
- * Respects margin and gutter insets to match the calendar page layout.
+ * Matches the web preview: image fills the margin-bounded area,
+ * then the gutter zone is painted white over any overflow.
  */
 async function composeImagePage(
   blob: Blob,
   canvasW: number,
   canvasH: number,
   scaling: string,
-  inset: { top: number; right: number; bottom: number; left: number },
+  margin: { top: number; right: number; bottom: number; left: number },
+  gutterBottom: number,
 ): Promise<string> {
   const img = await createImageBitmap(blob);
   try {
@@ -63,11 +65,12 @@ async function composeImagePage(
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvasW, canvasH);
 
-    // Drawing area after margin + gutter insets
-    const drawX = inset.left;
-    const drawY = inset.top;
-    const drawW = canvasW - inset.left - inset.right;
-    const drawH = canvasH - inset.top - inset.bottom;
+    // Image area matches web: margin on all sides, gutter NOT subtracted
+    // (web has the gutter as a separate element outside the image container)
+    const drawX = margin.left;
+    const drawY = margin.top;
+    const drawW = canvasW - margin.left - margin.right;
+    const drawH = canvasH - margin.top - margin.bottom;
 
     if (scaling === "crop") {
       // object-fit: cover — fill drawing area, center-crop
@@ -85,6 +88,13 @@ async function composeImagePage(
       const dx = drawX + (drawW - dw) / 2;
       const dy = drawY + (drawH - dh) / 2;
       ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+    }
+
+    // Paint gutter zone white — the binding margin at the bottom edge.
+    // Any image content that extends into this zone is covered.
+    if (gutterBottom > 0) {
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, canvasH - margin.bottom - gutterBottom, canvasW, gutterBottom);
     }
 
     return canvas.toDataURL("image/jpeg", 0.92);
@@ -249,15 +259,8 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     return new Date(2000, monthNum - 1).toLocaleString("en", { month: "short" });
   };
 
-  // Photo page inset: margin on all sides + gutter at bottom (binding edge)
-  const photoInset = {
-    top: marginPx,
-    right: marginPx,
-    bottom: marginPx + gutterPx,
-    left: marginPx,
-  };
-  // Cover has margin but no gutter (it's the first page, no facing pair above)
-  const coverInset = {
+  // Margin rect for photo pages (same on all sides, matching web preview)
+  const photoMargin = {
     top: marginPx,
     right: marginPx,
     bottom: marginPx,
@@ -273,7 +276,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     const coverRecord = await loadImage(year, "cover");
     if (coverRecord) {
       const coverUrl = await composeImagePage(
-        coverRecord.blob, canvasW, canvasH, params.scaling, coverInset,
+        coverRecord.blob, canvasW, canvasH, params.scaling, photoMargin, 0,
       );
       addFullPageImage(coverUrl);
     } else {
@@ -298,7 +301,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       const imgRecord = await loadImage(m.year, m.month);
       if (imgRecord) {
         const imgUrl = await composeImagePage(
-          imgRecord.blob, canvasW, canvasH, params.scaling, photoInset,
+          imgRecord.blob, canvasW, canvasH, params.scaling, photoMargin, gutterPx,
         );
         addFullPageImage(imgUrl);
       } else {
