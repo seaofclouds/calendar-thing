@@ -41,10 +41,22 @@ const FORMAT_DIMENSIONS: Record<string, { w: number; h: number }> = {
   a6: { w: 105, h: 148 },
 };
 
-const MARGIN_OPTIONS = [
+const METRIC_SIZES = new Set(["a6", "a5", "a4"]);
+
+const MARGIN_OPTIONS_IMPERIAL = [
+  { value: "0.125in", label: '1/8"' },
   { value: "0.25in", label: '1/4"' },
   { value: "0.5in", label: '1/2"' },
   { value: "1in", label: '1"' },
+];
+
+const MARGIN_OPTIONS_METRIC = [
+  { value: "0.125in", label: '1/8"' },
+  { value: "0.25in", label: '1/4"' },
+  { value: "0.5in", label: '1/2"' },
+  { value: "1in", label: '1"' },
+  { value: "5mm", label: "5mm" },
+  { value: "10mm", label: "10mm" },
 ];
 
 const SCALING_OPTIONS = [
@@ -112,8 +124,9 @@ export function renderConfigView(opts: ConfigViewOptions): string {
     return `          <button class="config-option${isActive ? " active" : ""}" data-orientation="${o}">${icon} ${label}</button>`;
   }).join("\n");
 
-  // Margin pills
-  const marginPills = MARGIN_OPTIONS.map((opt) => {
+  // Margin pills — show metric options for A-series sizes
+  const marginOptions = METRIC_SIZES.has(opts.size) ? MARGIN_OPTIONS_METRIC : MARGIN_OPTIONS_IMPERIAL;
+  const marginPills = marginOptions.map((opt) => {
     const isActive = opt.value === opts.margin;
     return `          <button class="config-option${isActive ? " active" : ""}" data-margin="${opt.value}">${opt.label}</button>`;
   }).join("\n");

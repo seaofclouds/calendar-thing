@@ -66,7 +66,7 @@ interface CalendarParams {
 
 const VALID_SIZES = new Set(["letter", "legal", "tabloid", "half-letter", "a4", "a5", "a6"]);
 const VALID_ORIENTATIONS = new Set(["portrait", "landscape"]);
-const VALID_MARGINS = new Set(["0.25in", "0.5in", "1in"]);
+const VALID_MARGINS = new Set(["0.125in", "0.25in", "0.5in", "1in", "5mm", "10mm"]);
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
