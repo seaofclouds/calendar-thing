@@ -480,14 +480,14 @@ function scalePages() {
     if (pageWidth <= 0 || pageHeight <= 0) continue;
 
     if (hasFacing && facingEl) {
-      // Facing element: match page dimensions
-      facingEl.style.width = `${pageWidth}px`;
-      facingEl.style.height = `${pageHeight}px`;
       if (spreadImage) {
-        // Photo facing: image needs padding for margins
+        // Photo facing: needs explicit dimensions + padding for margins
+        facingEl.style.width = `${pageWidth}px`;
+        facingEl.style.height = `${pageHeight}px`;
         facingEl.style.padding = margin;
         facingEl.style.boxSizing = "border-box";
       }
+      // Month-facing pages already have correct CSS dimensions from .page.size-* classes
 
       // Parse gutter to estimate pixel height for scale calculation
       const gutterVal = getConfigParams().gutter;
