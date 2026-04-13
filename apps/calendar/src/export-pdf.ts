@@ -1,15 +1,14 @@
 /**
- * PDF export with imposition for spiral-bound calendar printing.
+ * PDF export for calendar printing.
  * Uses jsPDF for PDF generation and html-to-image for calendar rendering.
  *
- * Imposition order (double-sided, spiral-bound at top):
- *   Sheet 1 front: Cover image (normal)
- *   Sheet 1 back:  Month 1 image (rotated 180°)
- *   Sheet 2 front: Month 1 calendar (normal)
- *   Sheet 2 back:  Month 2 image (rotated 180°)
- *   ...
- *   Sheet N front: Last month calendar (normal)
- *   Sheet N back:  (blank)
+ * Photo+Month layout page order:
+ *   Cover image, Photo 1, Month 1, Photo 2, Month 2, ...
+ *   Photos have margin + bottom gutter (binding edge).
+ *   Calendar pages have margin + top gutter (binding edge).
+ *
+ * Month+Month layout page order:
+ *   Month 1 (bottom gutter), Month 2 (top gutter), Month 3, ...
  */
 
 import { loadImage } from "./store-images";
@@ -45,14 +44,14 @@ function getPageDimensionsMm(
 /**
  * Draw a user photo onto a canvas at the given page dimensions.
  * Supports fit (contain) and crop (cover) scaling modes.
- * Optionally rotates 180° for back-side imposition.
+ * Respects margin and gutter insets to match the calendar page layout.
  */
 async function composeImagePage(
   blob: Blob,
   canvasW: number,
   canvasH: number,
   scaling: string,
-  rotate180: boolean,
+  inset: { top: number; right: number; bottom: number; left: number },
 ): Promise<string> {
   const img = await createImageBitmap(blob);
   try {
@@ -64,26 +63,27 @@ async function composeImagePage(
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvasW, canvasH);
 
-    if (rotate180) {
-      ctx.translate(canvasW, canvasH);
-      ctx.rotate(Math.PI);
-    }
+    // Drawing area after margin + gutter insets
+    const drawX = inset.left;
+    const drawY = inset.top;
+    const drawW = canvasW - inset.left - inset.right;
+    const drawH = canvasH - inset.top - inset.bottom;
 
     if (scaling === "crop") {
-      // object-fit: cover — fill canvas, center-crop
-      const scale = Math.max(canvasW / img.width, canvasH / img.height);
-      const sw = canvasW / scale;
-      const sh = canvasH / scale;
+      // object-fit: cover — fill drawing area, center-crop
+      const scale = Math.max(drawW / img.width, drawH / img.height);
+      const sw = drawW / scale;
+      const sh = drawH / scale;
       const sx = (img.width - sw) / 2;
       const sy = (img.height - sh) / 2;
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
+      ctx.drawImage(img, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
     } else {
-      // object-fit: contain — fit within canvas, letterboxed
-      const scale = Math.min(canvasW / img.width, canvasH / img.height);
+      // object-fit: contain — fit within drawing area, letterboxed
+      const scale = Math.min(drawW / img.width, drawH / img.height);
       const dw = img.width * scale;
       const dh = img.height * scale;
-      const dx = (canvasW - dw) / 2;
-      const dy = (canvasH - dh) / 2;
+      const dx = drawX + (drawW - dw) / 2;
+      const dy = drawY + (drawH - dh) / 2;
       ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
     }
 
@@ -115,6 +115,18 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
   const isFacing = isFacingMonth || isPhotoLayout;
   const gutterVal = isFacing ? params.gutter : "0";
   const year = parseInt(params.year);
+
+  // Convert a CSS length (e.g. "0.25in", "6mm") to pixels at the export DPI
+  function cssLengthToPx(val: string): number {
+    const num = parseFloat(val);
+    if (val.endsWith("mm")) return num * pxPerMm;
+    return num * dpi; // inches
+  }
+
+  // Margin inset in pixels (all sides)
+  const marginPx = cssLengthToPx(params.margin);
+  // Gutter inset in pixels (binding edge only)
+  const gutterPx = gutterVal !== "0" ? cssLengthToPx(gutterVal) : 0;
 
   // Get rendered months from the DOM
   const scrollMonths = document.querySelectorAll(
@@ -237,6 +249,21 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     return new Date(2000, monthNum - 1).toLocaleString("en", { month: "short" });
   };
 
+  // Photo page inset: margin on all sides + gutter at bottom (binding edge)
+  const photoInset = {
+    top: marginPx,
+    right: marginPx,
+    bottom: marginPx + gutterPx,
+    left: marginPx,
+  };
+  // Cover has margin but no gutter (it's the first page, no facing pair above)
+  const coverInset = {
+    top: marginPx,
+    right: marginPx,
+    bottom: marginPx,
+    left: marginPx,
+  };
+
   // ─── COVER PAGE ────────────────────────────────────────────────
 
   if (isPhotoLayout) {
@@ -246,7 +273,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     const coverRecord = await loadImage(year, "cover");
     if (coverRecord) {
       const coverUrl = await composeImagePage(
-        coverRecord.blob, canvasW, canvasH, params.scaling, false,
+        coverRecord.blob, canvasW, canvasH, params.scaling, coverInset,
       );
       addFullPageImage(coverUrl);
     } else {
@@ -255,14 +282,14 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
   }
 
-  // ─── MONTH PAGES (IMPOSED) ────────────────────────────────────
+  // ─── MONTH PAGES ──────────────────────────────────────────────
 
   for (let i = 0; i < months.length; i++) {
     const m = months[i];
     const label = monthLabel(m);
 
     if (isPhotoLayout) {
-      // Back of previous sheet: this month's photo, rotated 180°
+      // Photo page: same orientation as preview, with margin + bottom gutter
       step++;
       if (status) {
         status.textContent = `Composing ${label} image\u2026 (${step}/${totalSteps})`;
@@ -271,11 +298,11 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       const imgRecord = await loadImage(m.year, m.month);
       if (imgRecord) {
         const imgUrl = await composeImagePage(
-          imgRecord.blob, canvasW, canvasH, params.scaling, true,
+          imgRecord.blob, canvasW, canvasH, params.scaling, photoInset,
         );
         addFullPageImage(imgUrl);
       } else {
-        nextPage(); // blank back
+        nextPage(); // blank photo page
       }
     }
 
