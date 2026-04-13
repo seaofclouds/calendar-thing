@@ -26,6 +26,8 @@ export interface MonthViewOptions {
   dataSource?: string;
   urlPrefix?: string;
   margin?: string;
+  /** When true, omit id="root" and add "page" class (for embedding multiple months) */
+  embedded?: boolean;
 }
 
 interface DayData {
@@ -74,6 +76,7 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
   const nextMiniWeeks = generateWeeks(next.year, next.month, markersByDate, todayStr);
 
   const rootClasses = [
+    opts.embedded ? "page" : "",
     opts.size ? `size-${opts.size.toLowerCase()}` : "",
     `orientation-${opts.orientation}`,
     isPreview ? "print" : "",
@@ -90,7 +93,8 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
     ? ` data-format="${opts.format}" data-dpi="${opts.dpi ?? 300}" data-year="${opts.year}" data-size="${opts.size ?? "letter"}" data-orientation="${opts.orientation}"`
     : "";
 
-  return `<div id="root" class="${rootClasses}">
+  const rootId = opts.embedded ? "" : ' id="root"';
+  return `<div${rootId} class="${rootClasses}">
     <main class="${containerClasses}"${opts.margin ? ` style="padding: ${opts.margin}"` : ""}${dataAttrs}>
       <header class="view-header">
         <a href="${prevUrl}" class="month-nav prev" aria-label="Previous month: ${MONTH_NAMES[prev.month]}"></a>

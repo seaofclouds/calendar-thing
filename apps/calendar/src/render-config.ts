@@ -197,9 +197,8 @@ export function renderConfigView(opts: ConfigViewOptions): string {
 
   // Render scrollable month list
   const monthCards = opts.monthFragments.map((frag) => {
-    const pageHtml = frag.html.replace('id="root" class="', 'class="page ');
     return `      <div class="scroll-month" data-year="${frag.year}" data-month="${frag.month}">
-        ${pageHtml}
+        ${frag.html}
       </div>`;
   }).join("\n");
 

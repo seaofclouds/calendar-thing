@@ -424,6 +424,13 @@ function restoreScrollPosition() {
 
 // ─── Page scaling ──────────────────────────────────────────────────
 
+// ─── Scale constants ──────────────────────────────────────────────
+
+const SCROLL_PADDING = 24;
+const TOOLBAR_HEIGHT = 80;
+const PX_PER_INCH = 96;
+const NARROW_CONTENT_THRESHOLD = 480;
+
 /**
  * Scale .page elements to fit within the viewport, maintaining paper proportions.
  * Uses transform: scale() (preserves correct PDF export) with negative margins
@@ -435,12 +442,8 @@ function scalePages() {
 
   const scrollWidth = scroll.clientWidth;
   const scrollHeight = scroll.clientHeight;
-  const padding = 24;
-  const availableWidth = scrollWidth - padding * 2;
+  const availableWidth = scrollWidth - SCROLL_PADDING * 2;
   const { margin, gutter } = getConfigParams();
-  const PX_PER_INCH = 96;
-  const TOOLBAR_HEIGHT = 80;
-  const NARROW_CONTENT_THRESHOLD = 480;
 
   const scrollMonths = scroll.querySelectorAll(".scroll-month") as NodeListOf<HTMLElement>;
 

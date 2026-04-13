@@ -430,6 +430,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
       queryString: configQs,
       urlPrefix: "/config",
       margin,
+      embedded: true,
     });
 
     return { year, month, html };
