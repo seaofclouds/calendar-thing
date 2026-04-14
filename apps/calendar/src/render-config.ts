@@ -227,6 +227,15 @@ ${feedPills}
         </div>
       </section>
 
+      <section class="config-section config-my-feeds">
+        <h3 class="config-label">My Feeds</h3>
+        <div class="my-feeds-list"></div>
+        <div class="my-feed-add">
+          <input type="url" class="my-feed-input" placeholder="Paste ICS feed URL...">
+          <button class="my-feed-add-btn" title="Add feed">+</button>
+        </div>
+      </section>
+
       <section class="config-section">
         <h3 class="config-label">Format</h3>
         <div class="config-options config-options-format">
