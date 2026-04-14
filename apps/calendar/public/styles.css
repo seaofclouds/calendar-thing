@@ -1036,40 +1036,26 @@ body:has(.config) {
   background: var(--color-config-active);
 }
 
-/* My Feeds section */
+/* Custom feeds (listed inline with plugin feeds) */
 .my-feeds-list {
   display: flex;
   flex-direction: column;
   gap: 0.2em;
 }
 
-.my-feed-item {
-  display: flex;
-  align-items: center;
-  gap: 0.15em;
-}
-
-.my-feed-item .config-option {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.my-feed-pill {
+  position: relative;
 }
 
 .my-feed-remove {
-  border: none;
-  background: transparent;
   cursor: pointer;
-  font-size: var(--font-size-sm);
   color: var(--color-config-muted, #999);
-  padding: 0.3em 0.4em;
-  border-radius: 1em;
+  margin-left: 0.3em;
+  font-size: 1.1em;
   line-height: 1;
-  flex-shrink: 0;
 }
 
 .my-feed-remove:hover {
-  background: var(--color-config-active);
   color: inherit;
 }
 

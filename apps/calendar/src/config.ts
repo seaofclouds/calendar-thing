@@ -11,6 +11,7 @@ import { clearSpreads, initSpreadLayout, initMonthSpreadLayout } from "./spreads
 import { exportCurrentView, exportAllMonths, exportPDF } from "./export";
 import {
   loadState,
+  saveState,
   saveConfig,
   saveInclude,
   addCustomFeed,
@@ -251,23 +252,24 @@ export function initConfigSidebar() {
       if (target.dataset.action === "save-pdf") exportPDF();
     }
 
-    // My Feeds: toggle custom feed
-    if (target.dataset.customFeed) {
+    // My Feeds: remove custom feed (check before toggle — × is inside pill)
+    const removeBtn = target.closest("[data-remove-feed]") as HTMLElement | null;
+    if (removeBtn) {
       saveVisibleMonth();
-      const id = target.dataset.customFeed;
-      const isActive = target.classList.contains("active");
-      toggleCustomFeed(id, !isActive);
+      removeCustomFeed(removeBtn.dataset.removeFeed!);
       const url = new URL(window.location.href);
       appendCustomFeeds(url);
       window.location.href = buildHref(url);
       return;
     }
 
-    // My Feeds: remove custom feed
-    const removeBtn = target.closest("[data-remove-feed]") as HTMLElement | null;
-    if (removeBtn) {
+    // My Feeds: toggle custom feed
+    const feedPill = target.closest("[data-custom-feed]") as HTMLElement | null;
+    if (feedPill) {
       saveVisibleMonth();
-      removeCustomFeed(removeBtn.dataset.removeFeed!);
+      const id = feedPill.dataset.customFeed!;
+      const isActive = feedPill.classList.contains("active");
+      toggleCustomFeed(id, !isActive);
       const url = new URL(window.location.href);
       appendCustomFeeds(url);
       window.location.href = buildHref(url);
@@ -308,8 +310,33 @@ export function initConfigSidebar() {
 
 // ─── My Feeds hydration ───────────────────────────────────────────
 
+/** Update custom feed names from server-provided ICS calendar names */
+function updateFeedNames() {
+  const config = document.querySelector(".config") as HTMLElement | null;
+  const raw = config?.dataset.feedNames;
+  if (!raw) return;
+
+  let feedNames: Record<string, string>;
+  try { feedNames = JSON.parse(raw); } catch { return; }
+
+  const state = loadState();
+  if (!state) return;
+
+  let changed = false;
+  for (const cf of state.customFeeds) {
+    const serverName = feedNames[cf.url];
+    if (serverName && cf.name !== serverName) {
+      cf.name = serverName;
+      changed = true;
+    }
+  }
+  if (changed) saveState(state);
+}
+
 /** Populate the My Feeds list from localStorage */
 export function hydrateMyFeeds() {
+  updateFeedNames();
+
   const list = document.querySelector(".my-feeds-list");
   if (!list) return;
 
@@ -318,10 +345,7 @@ export function hydrateMyFeeds() {
 
   const items = state.customFeeds.map((cf) => {
     const active = cf.enabled ? " active" : "";
-    return `<div class="my-feed-item">
-        <button class="config-option${active}" data-custom-feed="${cf.id}">${cf.name}</button>
-        <button class="my-feed-remove" data-remove-feed="${cf.id}" title="Remove">&times;</button>
-      </div>`;
+    return `<button class="config-option my-feed-pill${active}" data-custom-feed="${cf.id}">${cf.name}<span class="my-feed-remove" data-remove-feed="${cf.id}" title="Remove">&times;</span></button>`;
   });
   list.innerHTML = items.join("\n");
 }

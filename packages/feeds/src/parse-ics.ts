@@ -132,3 +132,9 @@ function unescapeICS(value: string): string {
     .replace(/\\;/g, ";")
     .replace(/\\\\/g, "\\");
 }
+
+/** Extract the calendar name from ICS (X-WR-CALNAME property). */
+export function extractCalendarName(ics: string): string | undefined {
+  const match = ics.match(/^X-WR-CALNAME:(.+)$/m);
+  return match?.[1].trim();
+}

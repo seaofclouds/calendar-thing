@@ -122,6 +122,7 @@ export interface ConfigViewOptions {
   layout: "single" | "facing-photo" | "facing-month";
   scaling: "fit" | "crop";
   gutter: string;
+  feedNames?: Record<string, string>;
 }
 
 export function renderConfigView(opts: ConfigViewOptions): string {
@@ -218,17 +219,13 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   <script src="/client.js" type="module" defer></script>
 </head>
 <body>
-  <div class="config" data-year="${opts.year}" data-layout="${opts.layout}" data-scaling="${opts.scaling}" data-length="${opts.calendarLength}" data-gutter="${opts.gutter}">
+  <div class="config" data-year="${opts.year}" data-layout="${opts.layout}" data-scaling="${opts.scaling}" data-length="${opts.calendarLength}" data-gutter="${opts.gutter}"${opts.feedNames && Object.keys(opts.feedNames).length ? ` data-feed-names='${JSON.stringify(opts.feedNames).replace(/'/g, "&#39;")}'` : ""}>
     <aside class="config-sidebar">
       <section class="config-section">
         <h3 class="config-label">Feeds</h3>
         <div class="config-options config-options-feeds">
 ${feedPills}
         </div>
-      </section>
-
-      <section class="config-section config-my-feeds">
-        <h3 class="config-label">My Feeds</h3>
         <div class="my-feeds-list"></div>
         <div class="my-feed-add">
           <input type="url" class="my-feed-input" placeholder="Paste ICS feed URL...">

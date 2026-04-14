@@ -101,15 +101,20 @@ export default {
     const feedUrls = url.searchParams.getAll("feed");
     const allFeeds = registry.getAll();
 
-    const feedResults = await Promise.all([
-      ...allFeeds
-        .filter((feed) => isFeedEnabled(params.include, feed.id))
-        .map((feed) =>
-          fetchFeedEvents(feed, env as unknown as Record<string, unknown>, token, getActiveTokens(params.include, feed.id))
-        ),
-      ...feedUrls.map((u) => fetchExternalFeed(u)),
+    const [pluginResults, externalResults] = await Promise.all([
+      Promise.all(
+        allFeeds
+          .filter((feed) => isFeedEnabled(params.include, feed.id))
+          .map((feed) =>
+            fetchFeedEvents(feed, env as unknown as Record<string, unknown>, token, getActiveTokens(params.include, feed.id))
+          ),
+      ),
+      Promise.all(feedUrls.map((u) => fetchExternalFeed(u))),
     ]);
-    const allEvents = deduplicateEvents(feedResults.flat());
+    const allEvents = deduplicateEvents([
+      ...pluginResults.flat(),
+      ...externalResults.flatMap((r) => r.events),
+    ]);
 
     // Split by render mode: day-markers vs event-list
     const markerIds = new Set(
@@ -381,15 +386,26 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
   const feedUrls = url.searchParams.getAll("feed");
   const allFeeds = registry.getAll();
 
-  const feedResults = await Promise.all([
-    ...allFeeds
-      .filter((feed) => isFeedEnabled(include, feed.id))
-      .map((feed) =>
-        fetchFeedEvents(feed, env as unknown as Record<string, unknown>, token, getActiveTokens(include, feed.id))
-      ),
-    ...feedUrls.map((u) => fetchExternalFeed(u)),
+  const [pluginResults, externalResults] = await Promise.all([
+    Promise.all(
+      allFeeds
+        .filter((feed) => isFeedEnabled(include, feed.id))
+        .map((feed) =>
+          fetchFeedEvents(feed, env as unknown as Record<string, unknown>, token, getActiveTokens(include, feed.id))
+        ),
+    ),
+    Promise.all(feedUrls.map((u) => fetchExternalFeed(u))),
   ]);
-  const allEvents = deduplicateEvents(feedResults.flat());
+  const allEvents = deduplicateEvents([
+    ...pluginResults.flat(),
+    ...externalResults.flatMap((r) => r.events),
+  ]);
+
+  // Collect external feed URL → name mapping for the client
+  const feedNames: Record<string, string> = {};
+  for (const r of externalResults) {
+    if (r.name) feedNames[r.url] = r.name;
+  }
 
   const markerIds = new Set(
     allFeeds.filter((f) => f.renderMode === "day-marker").map((f) => f.category),
@@ -436,6 +452,7 @@ async function handleConfigRoute(path: string, url: URL, env: Env): Promise<Resp
     layout,
     scaling,
     gutter,
+    feedNames,
   });
 
   return new Response(html, {
