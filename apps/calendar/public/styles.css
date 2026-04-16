@@ -812,6 +812,7 @@ body {
   position: relative;
   top: 0.1em;
   margin-right: 0.25em;
+  overflow: visible;
 }
 
 /* Month view print */
