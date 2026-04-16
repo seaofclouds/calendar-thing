@@ -1,4 +1,5 @@
 import type { FeedPlugin } from "../../shared/src/types";
+import { FEED_ICONS, eventIcon } from "../../shared/src/icons";
 import fixture from "./fixtures/holidays-us.ics";
 
 const plugin: FeedPlugin = {
@@ -42,7 +43,7 @@ const plugin: FeedPlugin = {
     "Washington's Birthday": "us-presidents-day",
     "Juneteenth National Independence Day": "us-juneteenth",
   },
-  icon: `<svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M7 .5l1.76 3.57 3.94.57-2.85 2.78.67 3.93L7 9.47 3.48 11.35l.67-3.93L1.3 4.64l3.94-.57z"/></svg>`,
+  icon: eventIcon(FEED_ICONS.star.path, FEED_ICONS.star.viewBox),
 };
 
 export default plugin;
