@@ -14,7 +14,7 @@
 import { loadImage } from "./store-images";
 import { PAGE_TYPES } from "./page-config";
 import { getConfigParams, getActiveDpi } from "./config-helpers";
-import { toGrayscalePng } from "./grayscale-png";
+import { toGrayscaleJpeg } from "./grayscale-png";
 
 export interface ExportPDFOptions {
   getStatus: () => HTMLElement | null;
@@ -215,7 +215,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     pdf.addImage(dataUrl, format, 0, 0, pageW, pageH);
   }
 
-  async function renderCalendarToPng(el: HTMLElement, gutterEdge: GutterEdge): Promise<string> {
+  async function renderCalendarToJpeg(el: HTMLElement, gutterEdge: GutterEdge): Promise<string> {
     // Temporarily reset viewport scaling so the capture is at natural page dimensions
     const origTransform = el.style.transform;
     const origMarginBottom = el.style.marginBottom;
@@ -235,7 +235,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
 
     try {
-      return await toGrayscalePng(el, {
+      return await toGrayscaleJpeg(el, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });
@@ -314,8 +314,8 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       status.textContent = `Rendering ${label} calendar\u2026 (${step}/${totalSteps})`;
     }
 
-    const calendarUrl = await renderCalendarToPng(m.pageEl, m.gutterEdge);
-    addFullPageImage(calendarUrl);
+    const calendarUrl = await renderCalendarToJpeg(m.pageEl, m.gutterEdge);
+    addFullPageImage(calendarUrl, "JPEG");
 
     // Yield to keep UI responsive
     await new Promise((r) => setTimeout(r, 50));

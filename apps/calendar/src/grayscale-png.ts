@@ -1,24 +1,22 @@
 /**
- * 8-bit grayscale PNG export.
- * Renders an element via html-to-image, converts to grayscale,
- * then encodes as an indexed 8-bit PNG using UPNG for smaller file sizes.
+ * Grayscale image export utilities.
+ * Renders elements via html-to-image, converts to grayscale, then encodes as:
+ *   - 8-bit indexed PNG (for standalone file exports)
+ *   - JPEG (for PDF embedding, where jsPDF decodes PNGs to raw pixels anyway)
  */
 
 import UPNG from "upng-js";
 
-interface GrayscaleOptions {
+export interface GrayscaleOptions {
   pixelRatio: number;
   backgroundColor?: string;
 }
 
-/**
- * Render an HTML element to an 8-bit grayscale PNG data URL.
- * Uses a 256-shade grayscale palette for ~4× smaller files than 32-bit RGBA.
- */
-export async function toGrayscalePng(
+/** Render an element to a grayscale canvas via html-to-image. */
+async function toGrayscaleCanvas(
   el: HTMLElement,
   opts: GrayscaleOptions,
-): Promise<string> {
+): Promise<HTMLCanvasElement> {
   const { toCanvas } = await import("html-to-image");
 
   const canvas = await toCanvas(el, {
@@ -34,22 +32,48 @@ export async function toGrayscalePng(
   for (let i = 0; i < data.length; i += 4) {
     const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
     data[i] = data[i + 1] = data[i + 2] = gray;
-    // data[i+3] (alpha) left unchanged — will be 255 with white background
   }
 
-  // Encode as 8-bit indexed PNG (256 grayscale shades)
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
+/**
+ * Render an HTML element to an 8-bit grayscale PNG data URL.
+ * Uses a 256-shade grayscale palette for ~4× smaller files than 32-bit RGBA.
+ */
+export async function toGrayscalePng(
+  el: HTMLElement,
+  opts: GrayscaleOptions,
+): Promise<string> {
+  const canvas = await toGrayscaleCanvas(el, opts);
+  const ctx = canvas.getContext("2d")!;
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
   const pngBuffer = UPNG.encode(
-    [data.buffer],
+    [imageData.data.buffer],
     canvas.width,
     canvas.height,
     256,
   );
 
-  // Convert ArrayBuffer to base64 data URL
   const bytes = new Uint8Array(pngBuffer);
   let binary = "";
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
   return "data:image/png;base64," + btoa(binary);
+}
+
+/**
+ * Render an HTML element to a grayscale JPEG data URL.
+ * Ideal for PDF embedding where jsPDF decodes PNGs to raw pixels anyway —
+ * JPEG is far more compact for mostly-white calendar pages.
+ */
+export async function toGrayscaleJpeg(
+  el: HTMLElement,
+  opts: GrayscaleOptions & { quality?: number },
+): Promise<string> {
+  const canvas = await toGrayscaleCanvas(el, opts);
+  return canvas.toDataURL("image/jpeg", opts.quality ?? 0.92);
 }
