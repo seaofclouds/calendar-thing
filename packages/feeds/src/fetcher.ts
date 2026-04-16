@@ -6,8 +6,14 @@
  * 4. Fixture ICS data (fully offline dev)
  */
 
-import { parseICS } from "./parse-ics";
+import { parseICS, extractCalendarName } from "./parse-ics";
 import type { CalendarEvent, FeedPlugin } from "@calendar-feeds/shared";
+
+export interface ExternalFeedResult {
+  events: CalendarEvent[];
+  name?: string;
+  url: string;
+}
 
 export async function fetchFeedEvents(
   feed: FeedPlugin,
@@ -41,19 +47,23 @@ export function deduplicateEvents(events: CalendarEvent[]): CalendarEvent[] {
   });
 }
 
-export async function fetchExternalFeed(url: string): Promise<CalendarEvent[]> {
+export async function fetchExternalFeed(url: string): Promise<ExternalFeedResult> {
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(5000),
     });
     if (response.ok) {
       const ics = await response.text();
-      return parseICS(ics, "external");
+      return {
+        events: parseICS(ics, "external"),
+        name: extractCalendarName(ics),
+        url,
+      };
     }
   } catch {
     // external feed unavailable
   }
-  return [];
+  return { events: [], url };
 }
 
 async function fetchRaw(

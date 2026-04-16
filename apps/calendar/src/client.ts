@@ -5,10 +5,11 @@
  * Built by esbuild into public/client.js.
  */
 
-import { initConfigSidebar } from "./config";
+import { initConfigSidebar, hydrateMyFeeds } from "./config";
 import { scalePages, restoreScrollPosition, onResize } from "./scaling";
 import { initSpreadLayout, initMonthSpreadLayout } from "./spreads";
 import { updateExportLabel, initScrollTracking } from "./export";
+import { loadState, buildUrlFromState, urlHasExplicitParams } from "./local-state";
 
 // ─── Responsive columns (year view) ────────────────────────────────
 
@@ -62,7 +63,23 @@ if (document.querySelector("[data-format]")) {
 
 // ─── Init ──────────────────────────────────────────────────────────
 
+// Restore saved state on first load (before any rendering)
+if (document.querySelector(".config-scroll") && !urlHasExplicitParams()) {
+  const saved = loadState();
+  if (saved) {
+    const match = window.location.pathname.match(/\/config\/(\d+)/);
+    const basePath = match ? `/config/${match[1]}` : window.location.pathname;
+    const targetUrl = buildUrlFromState(saved, basePath);
+    if (targetUrl !== window.location.pathname + window.location.search) {
+      window.location.href = targetUrl;
+      // Stop further init — page is reloading
+      throw new Error("restoring saved state");
+    }
+  }
+}
+
 initConfigSidebar();
+hydrateMyFeeds();
 
 // Config scroll view setup
 if (document.querySelector(".config-scroll")) {

@@ -1036,6 +1036,72 @@ body:has(.config) {
   background: var(--color-config-active);
 }
 
+/* Custom feeds (listed inline with plugin feeds) */
+.my-feeds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.my-feed-pill {
+  position: relative;
+}
+
+.my-feed-remove {
+  cursor: pointer;
+  color: var(--color-config-muted, #999);
+  margin-left: 0.3em;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.my-feed-remove:hover {
+  color: inherit;
+}
+
+.my-feed-add {
+  display: flex;
+  gap: 0.3em;
+  margin-top: 0.4em;
+}
+
+.my-feed-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: 0.5em;
+  padding: 0.3em 0.6em;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: inherit;
+  background: transparent;
+}
+
+.my-feed-input::placeholder {
+  color: var(--color-config-muted, #999);
+}
+
+.my-feed-input:focus {
+  outline: none;
+  border-color: var(--color-accent, #666);
+}
+
+.my-feed-add-btn {
+  border: none;
+  border-radius: 1em;
+  padding: 0.3em 0.7em;
+  background: var(--color-config-active);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.my-feed-add-btn:hover {
+  opacity: 0.8;
+}
+
 .config-button {
   display: block;
   width: 100%;

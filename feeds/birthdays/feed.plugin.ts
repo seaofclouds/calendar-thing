@@ -1,4 +1,5 @@
 import type { FeedPlugin } from "../../shared/src/types";
+import { FEED_ICONS, eventIcon } from "../../shared/src/icons";
 
 const plugin: FeedPlugin = {
   id: "birthdays",
@@ -9,7 +10,7 @@ const plugin: FeedPlugin = {
   defaultInclude: [],
   sourceUrlEnv: "BIRTHDAY_FEED_URL",
   stripSummarySuffix: "'s Birthday",
-  icon: `<svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M11.9 5.53h-4.41V4.979c.865-.225 1.47-1.005 1.47-1.899 0-1.715-1.62-2.812-1.688-2.858a.49.49 0 0 0-.544 0C6.66.268 5.04 1.365 5.04 3.08c0 .894.605 1.674 1.47 1.899v.551H2.1c-.812 0-1.47.658-1.47 1.47v1.429c0 .534.172 1.055.49 1.485v2.476c0 .812.658 1.47 1.47 1.47h8.82c.812 0 1.47-.658 1.47-1.47v-2.476c.318-.43.49-.95.49-1.485V7c0-.812-.658-1.47-1.47-1.47M6.02 3.08c0-.831.612-1.498.98-1.825.367.327.98.993.98 1.825 0 .754-.817 1.226-1.47.849A.98.98 0 0 1 6.02 3.08m6.37 5.349c0 .812-.641 1.489-1.428 1.51-.828.024-1.512-.641-1.512-1.47 0-.377-.408-.613-.735-.424a.49.49 0 0 0-.245.424c0 1.132-1.226 1.838-2.206 1.272a1.47 1.47 0 0 1-.734-1.272c0-.377-.408-.613-.735-.424a.49.49 0 0 0-.245.424c0 .828-.684 1.493-1.512 1.47-.788-.022-1.428-.7-1.428-1.511V7c0-.27.22-.49.49-.49h9.8c.27 0 .49.22.49.49z"/></svg>`,
+  icon: eventIcon(FEED_ICONS.cake.path, FEED_ICONS.cake.viewBox),
 };
 
 export default plugin;
