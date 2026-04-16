@@ -44,8 +44,8 @@ async function maybeExportImage() {
   };
 
   try {
-    const { toPng } = await import("html-to-image");
-    const dataUrl = await toPng(calendar, opts);
+    const { toGrayscalePng } = await import("./grayscale-png");
+    const dataUrl = await toGrayscalePng(calendar, opts);
 
     const link = document.createElement("a");
     link.download = `calendar--${year}--${size}--${orientation}.png`;
