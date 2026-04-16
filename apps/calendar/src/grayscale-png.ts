@@ -19,10 +19,25 @@ async function toGrayscaleCanvas(
 ): Promise<HTMLCanvasElement> {
   const { toCanvas } = await import("html-to-image");
 
-  const canvas = await toCanvas(el, {
-    pixelRatio: opts.pixelRatio,
-    backgroundColor: opts.backgroundColor ?? "#FFFFFF",
-  });
+  // Disable subpixel font rendering before capture. Subpixel anti-aliasing
+  // uses colored RGB fringes that, when desaturated, produce wider/softer
+  // halos. Grayscale-only anti-aliasing gives sharper text edges.
+  const origSmoothing = el.style.getPropertyValue("-webkit-font-smoothing");
+  el.style.setProperty("-webkit-font-smoothing", "antialiased");
+
+  let canvas: HTMLCanvasElement;
+  try {
+    canvas = await toCanvas(el, {
+      pixelRatio: opts.pixelRatio,
+      backgroundColor: opts.backgroundColor ?? "#FFFFFF",
+    });
+  } finally {
+    if (origSmoothing) {
+      el.style.setProperty("-webkit-font-smoothing", origSmoothing);
+    } else {
+      el.style.removeProperty("-webkit-font-smoothing");
+    }
+  }
 
   const ctx = canvas.getContext("2d")!;
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
