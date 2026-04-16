@@ -1,10 +1,25 @@
 /**
  * Styleguide page renderer.
  * Shows all design tokens (colors, type scale, font weights) visually,
- * plus live component examples.
+ * plus live component examples and the feed icon catalog.
  */
 
+import { FEED_ICONS, PICKER_ICONS, getIconSvg } from "@calendar-feeds/shared";
+
 export function renderStyleguide(): string {
+  // Generate icon grid from the shared catalog
+  const iconGrid = PICKER_ICONS.map(({ id, name }) => {
+    const svg = getIconSvg(id) ?? "";
+    const entry = FEED_ICONS[id as keyof typeof FEED_ICONS];
+    const viewBox = entry?.viewBox ?? "0 0 14 14";
+    return `<div class="icon-item">
+              <div class="icon-preview">${svg}</div>
+              <span class="icon-name">${name}</span>
+              <span class="icon-id">${id}</span>
+              <span class="icon-meta">${viewBox}</span>
+            </div>`;
+  }).join("\n");
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,6 +133,56 @@ export function renderStyleguide(): string {
       flex-direction: column;
       gap: 0.5em;
       max-width: 300px;
+    }
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1.5em 1em;
+    }
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3em;
+    }
+    .icon-preview {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-preview .event-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .icon-name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+    }
+    .icon-id {
+      font-size: var(--font-size-sm);
+      color: var(--color-border);
+      font-family: monospace;
+    }
+    .icon-meta {
+      font-size: 0.6em;
+      color: var(--color-border-light);
+      font-family: monospace;
+    }
+    .icon-usage {
+      margin-top: 1.5em;
+    }
+    .icon-usage-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin-bottom: 0.4em;
+      font-size: var(--font-size-sm);
+    }
+    .icon-usage-row .event-icon {
+      width: 0.9em;
+      height: 0.9em;
     }
   </style>
 </head>
@@ -238,6 +303,19 @@ export function renderStyleguide(): string {
           <li class="event"><svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="2" width="12" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="0.5" x2="4" y2="3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="10" y1="0.5" x2="10" y2="3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Spring Recess (No school)</li>
           <li class="event"><svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="5" r="4" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M3,10 Q7,8 11,10 Q7,12 3,10Z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>The Super Mario Galaxy Movie</li>
           <li class="event" style="color: var(--color-accent);"><svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>Today highlight example</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="styleguide-section">
+      <h2>Feed Icons</h2>
+      <div class="icon-grid">
+${iconGrid}
+      </div>
+      <div class="icon-usage">
+        <div class="component-example-label">In-context (event list)</div>
+        <ul class="day-events event-examples">
+${PICKER_ICONS.map(({ id, name }) => `          <li class="event">${getIconSvg(id) ?? ""}${name} event example</li>`).join("\n")}
         </ul>
       </div>
     </section>

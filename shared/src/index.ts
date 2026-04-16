@@ -29,6 +29,15 @@ export {
   type CacheKeyOptions,
 } from "./worker";
 
+// Icons
+export {
+  eventIcon,
+  FEED_ICONS,
+  PICKER_ICONS,
+  getIconSvg,
+  type IconId,
+} from "./icons";
+
 // Feed worker factory
 export {
   createFeedWorker,
