@@ -4,6 +4,7 @@
  */
 
 import { getConfigParams, getActiveDpi } from "./config-helpers";
+import { toGrayscalePng } from "./grayscale-png";
 
 // ─── Scroll tracking for export label ──────────────────────────────
 
@@ -110,8 +111,7 @@ export async function exportCurrentView() {
   targetPage.style.marginRight = "";
 
   try {
-    const { toPng } = await import("html-to-image");
-    const dataUrl = await toPng(targetPage, {
+    const dataUrl = await toGrayscalePng(targetPage, {
       pixelRatio: dpi / 96,
       backgroundColor: "#FFFFFF",
     });
@@ -182,7 +182,6 @@ export async function exportAllMonths() {
   }
 
   try {
-    const { toPng } = await import("html-to-image");
     const pixelRatio = dpi / 96;
 
     for (let i = 0; i < allPages.length; i++) {
@@ -202,7 +201,7 @@ export async function exportAllMonths() {
       page.style.marginBottom = "";
       page.style.marginRight = "";
 
-      const dataUrl = await toPng(page, {
+      const dataUrl = await toGrayscalePng(page, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });

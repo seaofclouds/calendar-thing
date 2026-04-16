@@ -14,6 +14,7 @@
 import { loadImage } from "./store-images";
 import { PAGE_TYPES } from "./page-config";
 import { getConfigParams, getActiveDpi } from "./config-helpers";
+import { toGrayscalePng } from "./grayscale-png";
 
 export interface ExportPDFOptions {
   getStatus: () => HTMLElement | null;
@@ -190,7 +191,6 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
   }
 
-  const { toPng } = await import("html-to-image");
   const jsPDFModule = await import("jspdf");
   const jsPDF = jsPDFModule.jsPDF;
 
@@ -235,7 +235,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
     }
 
     try {
-      return await toPng(el, {
+      return await toGrayscalePng(el, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
       });
