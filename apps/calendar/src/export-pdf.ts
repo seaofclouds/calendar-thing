@@ -238,6 +238,7 @@ export async function exportCalendarPDF(opts: ExportPDFOptions): Promise<void> {
       return await toGrayscaleJpeg(el, {
         pixelRatio,
         backgroundColor: "#FFFFFF",
+        quality: 0.97,
       });
     } finally {
       el.style.transform = origTransform;
