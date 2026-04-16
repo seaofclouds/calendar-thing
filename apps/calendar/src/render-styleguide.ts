@@ -300,9 +300,12 @@ export function renderStyleguide(): string {
       <div class="component-example-label">.event (with icons)</div>
       <div class="component-example">
         <ul class="day-events event-examples">
-          <li class="event"><svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="2" width="12" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="0.5" x2="4" y2="3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="10" y1="0.5" x2="10" y2="3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Spring Recess (No school)</li>
-          <li class="event"><svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="5" r="4" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M3,10 Q7,8 11,10 Q7,12 3,10Z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>The Super Mario Galaxy Movie</li>
-          <li class="event" style="color: var(--color-accent);"><svg class="event-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>Today highlight example</li>
+          <li class="event">${getIconSvg("school")}Spring Recess (No school)</li>
+          <li class="event">${getIconSvg("film")}The Super Mario Galaxy Movie</li>
+          <li class="event">${getIconSvg("star")}US Holiday</li>
+          <li class="event">${getIconSvg("cake")}Dad&rsquo;s Birthday</li>
+          <li class="event">${getIconSvg("dining")}Dinner Reservation</li>
+          <li class="event">${getIconSvg("airplane")}Flight to Portland</li>
         </ul>
       </div>
     </section>
