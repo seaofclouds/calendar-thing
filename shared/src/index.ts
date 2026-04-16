@@ -35,6 +35,11 @@ export {
   FEED_ICONS,
   PICKER_ICONS,
   getIconSvg,
+  ZODIAC_ICONS,
+  MOON_ICONS,
+  SOLAR_ICONS,
+  ASTRONOMY_ICONS,
+  FEED_ICON_MAP,
   type IconId,
 } from "./icons";
 

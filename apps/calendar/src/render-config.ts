@@ -6,6 +6,7 @@
 
 import { PAGE_TYPES } from "./page-config";
 import { MONTH_NAMES } from "./render-utils";
+import { FEED_ICON_MAP, getIconSvg } from "@calendar-feeds/shared";
 
 /** Render a row of config pill buttons */
 function renderPills(
@@ -102,6 +103,12 @@ const FEED_OPTIONS = [
   { token: "birthdays", label: "Birthdays" },
 ];
 
+function feedIcon(token: string): string {
+  const iconId = FEED_ICON_MAP[token];
+  if (!iconId) return "";
+  return getIconSvg(iconId) ?? "";
+}
+
 const DEFAULT_INCLUDE = ["lunar:phases", "solar:season", "holidays-us", "busd", "astrology"];
 
 export interface MonthFragment {
@@ -188,8 +195,11 @@ export function renderConfigView(opts: ConfigViewOptions): string {
   const lengthPills = renderPills(lengthItems, "length", (v) => v === String(opts.calendarLength));
 
   // Feed toggles
-  const feedItems = FEED_OPTIONS.map((opt) => ({ value: opt.token, label: opt.label }));
-  const feedPills = renderPills(feedItems, "feed", (v) => isFeedActive(v, opts.includeParam));
+  const feedPills = FEED_OPTIONS.map((opt) => {
+    const active = isFeedActive(opt.token, opts.includeParam) ? " active" : "";
+    const icon = feedIcon(opt.token);
+    return `          <button class="config-option${active}" data-feed="${opt.token}">${icon}${opt.label}</button>`;
+  }).join("\n");
 
   // Initial month name for export button
   const firstMonth = opts.monthFragments[0];
