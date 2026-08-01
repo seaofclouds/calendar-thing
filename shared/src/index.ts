@@ -29,6 +29,20 @@ export {
   type CacheKeyOptions,
 } from "./worker";
 
+// Icons
+export {
+  eventIcon,
+  FEED_ICONS,
+  PICKER_ICONS,
+  getIconSvg,
+  ZODIAC_ICONS,
+  MOON_ICONS,
+  SOLAR_ICONS,
+  ASTRONOMY_ICONS,
+  FEED_ICON_MAP,
+  type IconId,
+} from "./icons";
+
 // Feed worker factory
 export {
   createFeedWorker,

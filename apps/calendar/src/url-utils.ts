@@ -12,7 +12,10 @@
  */
 export function serializeParams(params: URLSearchParams): string {
   const parts: string[] = [];
-  params.forEach((v, k) => parts.push(`${k}=${v}`));
+  params.forEach((v, k) => {
+    // Feed URLs contain special characters (://, ?, &) that must be encoded
+    parts.push(`${k}=${k === "feed" ? encodeURIComponent(v) : v}`);
+  });
   return parts.join("&");
 }
 
