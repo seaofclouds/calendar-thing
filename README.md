@@ -12,7 +12,10 @@ calendar-thing/                   # Monorepo root
 ├── feeds/
 │   ├── astrology/              # CF Worker — zodiac seasons (tropical astrology)
 │   ├── astronomy/              # CF Worker — lunar phases + solar events (Jean Meeus)
+│   ├── bhs-cheer/              # Berkeley High Cheer schedule (fixture-only)
+│   ├── birthdays/              # Birthdays w/ RRULE expansion (fixture-only, gitignored)
 │   ├── busd/                   # BUSD TK-12 school calendar (fixture-only)
+│   ├── holidays-us/            # US holidays (external Google ICS + fixture fallback)
 │   └── movies/                 # CF Worker — theatrical + digital releases (TMDB API)
 ├── apps/
 │   └── calendar/               # CF Worker — printable calendar renderer + static assets
@@ -29,6 +32,13 @@ Each feed is an independent Cloudflare Worker serving ICS and JSON endpoints:
 - **movies** — Fetches theatrical and digital movie releases from the TMDB API with regional date filtering.
 
 All feed workers use `createFeedWorker()` from `@calendar-feeds/shared` for consistent routing, token-based authentication, and 24-hour edge caching.
+
+In addition to the workers above, several feeds ship without a worker — the calendar app serves them from bundled ICS fixtures (or a remote source URL) via the same plugin system:
+
+- **holidays-us** — US holidays; pulls Google's public US-holidays ICS as its source, with a bundled fixture as fallback. Off by default (`?include=holidays-us`).
+- **busd** — Berkeley Unified TK-12 school calendar (fixture-only). On by default.
+- **bhs-cheer** — Berkeley High cheer schedule (fixture-only). Off by default (`?include=bhs-cheer`).
+- **birthdays** — Personal birthdays with `RRULE:FREQ=YEARLY` expansion. Fixture is gitignored to keep personal data out of the repo. Off by default (`?include=birthdays`).
 
 ### Calendar App
 
@@ -49,14 +59,28 @@ A single shared package providing types, ICS generation, worker utilities, and t
 
 ```
 /:year                              # Responsive calendar (e.g. /2026)
+/:year/:month                       # Single month view (e.g. /2026/04)
 /:year/:orientation                 # portrait or landscape
 /:year/:size                        # Print preview (letter, a4, a6, etc.)
 /:year/:size/:orientation           # Print preview with orientation
 /:year/:size/:orientation/300dpi.png  # Export as image
+/config/:year[/:month]               # Customize size/orientation/feeds + export (PNG/PDF)
+/help                                # How-to guide (routes, feeds, adding your own calendar)
 /styleguide                          # Design token reference
 ```
 
-Query params: `rows=N`, `header=false`, `test=true`, `include=lunar:full,lunar:new,lunar:quarter,solar:season,movies,movies-theatrical,movies-digital,busd,astrology`
+Query params: `rows=N`, `header=false`, `test=true`, `include=lunar:full,lunar:new,lunar:quarter,solar:season,movies,movies-theatrical,movies-digital,busd,bhs-cheer,birthdays,holidays-us,astrology`, `feed=<ICS URL>`
+
+### Adding your own calendar
+
+Bring any calendar (a class schedule, work shifts, etc.) into the view two ways:
+
+- **Config UI** — at `/config/:year`, paste an ICS link into the *"Paste ICS feed URL…"* box. It becomes a toggleable feed, auto-named from the calendar's `X-WR-CALNAME`, and is remembered via `localStorage`.
+- **URL param** — append `?feed=https://example.com/cal.ics` to any calendar URL (repeatable; fetched with a 5s timeout, cached 1hr).
+
+Any calendar app that publishes an ICS link works (in Google Calendar: *Settings → "Secret address in iCal format"*). Recurring weekly/yearly events are expanded automatically. See `/help` for the full walkthrough.
+
+> **Note:** `?include=` *replaces* the default feed set rather than adding to it — list every feed you want (e.g. `?include=lunar:phases,solar:season,movies`). Defaults (no param): lunar phases, solar events, astrology, and BUSD.
 
 ### Default Layouts
 
@@ -76,14 +100,18 @@ All sizes use a 4 × 3 (portrait) or 3 × 4 (landscape) month grid, except half-
 
 All feed workers use `/feeds/{name}.ics` and `/feeds/{name}.json` endpoints. All require `?token=<CALENDAR_TOKEN>`.
 
-| Worker | ICS | JSON |
+| Feed | ICS | Source |
 |--------|-----|------|
-| astronomy | `/feeds/astronomy.ics` | `/feeds/astronomy.json` |
-| movies | `/feeds/movies-theatrical.ics` | `/feeds/movies-theatrical.json` |
-| movies | `/feeds/movies-digital.ics` | `/feeds/movies-digital.json` |
-| astrology | `/feeds/astrology.ics` | `/feeds/astrology.json` |
+| astronomy | `/feeds/astronomy.ics` | worker |
+| movies-theatrical | `/feeds/movies-theatrical.ics` | worker (TMDB) |
+| movies-digital | `/feeds/movies-digital.ics` | worker (TMDB) |
+| astrology | `/feeds/astrology.ics` | worker |
+| busd | `/feeds/busd.ics` | fixture |
+| bhs-cheer | `/feeds/bhs-cheer.ics` | fixture |
+| birthdays | `/feeds/birthdays.ics` | fixture (gitignored) |
+| holidays-us | `/feeds/holidays-us.ics` | external Google ICS + fixture fallback |
 
-Astronomy and astrology endpoints support `?year=N` for a specific year.
+Worker feeds also expose a matching `/feeds/{name}.json` endpoint. Astronomy and astrology endpoints support `?year=N` for a specific year. All feed endpoints require `?token=<CALENDAR_TOKEN>`.
 
 ### Feed Proxy
 

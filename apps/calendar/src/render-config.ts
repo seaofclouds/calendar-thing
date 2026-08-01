@@ -310,6 +310,10 @@ ${gutterPills}
         <button class="config-button" data-action="save-pdf">Export Calendar.pdf</button>
         <p class="config-status"></p>
       </section>
+
+      <section class="config-section config-help-link">
+        <a href="/help">Help &amp; how-to</a>
+      </section>
     </aside>
 
     <main class="config-content"${scrollData}>

@@ -1130,6 +1130,20 @@ body:has(.config) {
   margin-top: 0.8em;
 }
 
+.config-help-link {
+  margin-top: 1.5em;
+}
+
+.config-help-link a {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.config-help-link a:hover {
+  color: var(--color-text);
+}
+
 .config-content {
   flex: 1;
   height: 100vh;
