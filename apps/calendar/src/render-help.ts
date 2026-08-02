@@ -86,13 +86,17 @@ export function renderHelp(): string {
       border: 1px solid var(--color-border-light);
       border-radius: 4px;
       padding: 0.1em 0.35em;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
+    }
+    .help .table-scroll {
+      overflow-x: auto;
+      margin: 0.8em 0;
+      -webkit-overflow-scrolling: touch;
     }
     .help table {
       width: 100%;
       border-collapse: collapse;
       font-size: var(--font-size-sm);
-      margin: 0.8em 0;
     }
     .help th, .help td {
       text-align: left;
@@ -104,7 +108,6 @@ export function renderHelp(): string {
       font-weight: var(--font-weight-semibold);
       border-bottom: 1px solid var(--color-border);
     }
-    .help td code { white-space: nowrap; }
     .help .on { color: var(--color-accent); font-weight: var(--font-weight-medium); }
     .help .off { color: var(--color-muted); }
     .help .callout {
@@ -114,6 +117,9 @@ export function renderHelp(): string {
       color: var(--color-text);
     }
     .help .callout strong { font-weight: var(--font-weight-semibold); }
+    @media (max-width: 480px) {
+      .help { padding: 1.5em 1em 4em; }
+    }
   </style>
 </head>
 <body>
@@ -191,6 +197,7 @@ export function renderHelp(): string {
         so list every feed you want — e.g. <code>?include=lunar:phases,solar:season,movies</code>
         keeps the moons and adds movies. The easiest way to toggle feeds is the Config sidebar.
       </p>
+      <div class="table-scroll">
       <table>
         <thead>
           <tr><th>Feed</th><th>Token(s)</th><th>Default</th></tr>
@@ -206,10 +213,12 @@ export function renderHelp(): string {
           <tr><td>BHS Cheer schedule</td><td><code>bhs-cheer</code></td><td class="off">off</td></tr>
         </tbody>
       </table>
+      </div>
     </section>
 
     <section>
       <h2>URL cheat-sheet</h2>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>URL</th><th>What it shows</th></tr></thead>
         <tbody>
@@ -223,10 +232,12 @@ export function renderHelp(): string {
           <tr><td><code>/help</code></td><td>This page</td></tr>
         </tbody>
       </table>
+      </div>
     </section>
 
     <section>
       <h2>Paper sizes</h2>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Name</th><th>Dimensions</th></tr></thead>
         <tbody>
@@ -239,6 +250,7 @@ export function renderHelp(): string {
           <tr><td><code>tabloid</code></td><td>11 &times; 17 in</td></tr>
         </tbody>
       </table>
+      </div>
       <p>Add <code>/portrait</code> or <code>/landscape</code> after the size to set orientation.</p>
     </section>
 
