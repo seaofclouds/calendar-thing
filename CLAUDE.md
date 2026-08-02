@@ -31,10 +31,13 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
    - `worker.ts` — `authenticateToken()`, `buildCacheKey()`, `withEdgeCache()`, response helpers
    - `feed-worker.ts` — `createFeedWorker()` factory for shared routing/auth/cache boilerplate
 
-2. **Feed workers** (`feeds/`) — independent CF Workers serving ICS + JSON
+2. **Feed workers** (`feeds/`) — independent CF Workers serving ICS + JSON (plus several fixture/external feeds with no worker)
    - `astrology` — Zodiac season events (tropical/Western dates in `zodiac.ts`), no external APIs. Per-sign Streamline SVG icons in calendar app
    - `astronomy` — Astronomical computations (Jean Meeus algorithms in `moon.ts`, `solar.ts`), no external APIs. Lunar phases + solar events (equinox/solstice)
    - `busd` — BUSD TK-12 school calendar (fixture-only, no worker — served via calendar app feed proxy)
+   - `bhs-cheer` — Berkeley High cheer schedule (fixture-only). Off by default
+   - `birthdays` — Personal birthdays with `RRULE:FREQ=YEARLY` expansion (fixture-only; fixture gitignored). Off by default
+   - `holidays-us` — US holidays (fixture-only, `sourceUrl` points at Google's public US-holidays ICS with a bundled fixture fallback). Off by default
    - `movies` — TMDB API integration (`tmdb.ts`), requires `TMDB_API_KEY` secret. Two plugins (`movies-theatrical`, `movies-digital`) from one worker. Two-pass discovery (popularity + release date sort), excludes Indian cinema + Bengali + Cantonese + Arabic languages, filters re-releases, rolling date window, popularity threshold of 5
 
 3. **Feed plugins** (`feeds/*/feed.plugin.ts`) — co-located config for each feed
@@ -50,6 +53,8 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 5. **Calendar app** (`apps/calendar/`) — CF Worker rendering printable year + month calendars as server-side HTML
    - **Year view** (`/:year`) — 12-month grid with lunar/solar markers, clickable months
    - **Month view** (`/:year/:month`) — single month with day cells, events, mini prev/next calendars
+   - **Config view** (`/config/:year[/:month]`, `render-config.ts`) — sidebar for size/orientation/layout/feeds + PNG/PDF export; custom feeds persist via `localStorage`
+   - **Help** (`/help`, `render-help.ts`) — how-to guide: routes, feed tokens, and adding your own calendar (paste an ICS URL)
    - **Styleguide** (`/styleguide`) — live token reference with color swatches, type scale, font weights, component examples
    - **Feed loader** (`feed-loader.ts`) — registers all feed plugins, provides `getFeed()`/`getAllFeeds()`
    - **Feed fetcher** (`feed-fetcher.ts`) — four-tier fallback: service binding → prod URL + token → source URL (external ICS) → fixture ICS
@@ -66,7 +71,7 @@ Monorepo of Cloudflare Workers (pnpm workspaces) generating calendar feeds and r
 - **Auth:** All feed endpoints require `?token=CALENDAR_TOKEN`. Service binding calls use `hostname === "internal"` to bypass auth (handled by `authenticateToken()` in shared).
 - **Feed worker factory:** Feed workers use `createFeedWorker()` from `@calendar-feeds/shared` — provides shared routing, auth, and caching. Each worker just defines its routes and handlers.
 - **Caching:** 24-hour edge caching via `withEdgeCache()` wrapper.
-- **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`, `/styleguide`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
+- **URL routing** (calendar app): `/:year`, `/:year/:month`, `/:year/:size`, `/:year/:size/:orientation`, `/:year/:size/:orientation/300dpi.png`, `/config/:year[/:month]`, `/help`, `/styleguide`. Query params: `rows`, `header`, `test`, `include`, `borders`, `feed`.
 - **Include param:** `?include=lunar:full,lunar:new,lunar:quarter,solar:season,movies,busd,astrology` — controls which feeds are shown. Defaults defined per-plugin via `defaultInclude` (lunar:full + lunar:new + lunar:quarter + solar:season on by default, others off). `movies` is shorthand for both `movies-theatrical` and `movies-digital`. `lunar:phases` is an alias for all lunar tokens.
 - **Feed proxy:** `/feeds/{id}.ics?token=` — proxies ICS feeds through the calendar app via service bindings (e.g. `/feeds/movies-theatrical.ics`, `/feeds/astronomy.ics`, `/feeds/astrology.ics`, `/feeds/busd.ics`). Routes are derived from the feed plugin registry.
 - **Feed param:** `?feed=https://example.com/cal.ics` — external ICS feed URL (fetched with 5s timeout).

@@ -8,6 +8,7 @@ import { renderCalendar } from "./render";
 import { renderMonthView, renderMonthViewFragment } from "./render-month";
 import { renderConfigView, type MonthFragment } from "./render-config";
 import { renderStyleguide } from "./render-styleguide";
+import { renderHelp } from "./render-help";
 import {
   createFeedRegistry,
   fetchFeedEvents,
@@ -78,6 +79,13 @@ export default {
     // Styleguide
     if (path === "/styleguide") {
       return new Response(renderStyleguide(), {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+
+    // Help / how-to
+    if (path === "/help") {
+      return new Response(renderHelp(), {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }

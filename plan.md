@@ -323,9 +323,9 @@ Feed proxy (calendar app):
 | E1 | Mercury retrograde events in astrology feed | pending |
 | E2 | Lunar/solar eclipses in astronomy feed | pending |
 | E3 | Rename moon-phase → astronomy, lunar:/solar: tokens | DONE |
-| C1 | Config route + layout (render-config.ts) | pending |
-| C2 | Config sidebar HTML + CSS | pending |
-| C3 | Config client-side JS (navigation, save) | pending |
+| C1 | Config route + layout (render-config.ts) | DONE |
+| C2 | Config sidebar HTML + CSS | DONE |
+| C3 | Config client-side JS (navigation, save) | DONE |
 
 D16-D17 are next: convert BUSD from fixture-only to a real worker, and build an ICS importer so any external ICS URL can be registered as a named feed.
 C depends on B+D (month view + feeds needed for config preview).
