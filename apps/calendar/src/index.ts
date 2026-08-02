@@ -6,6 +6,7 @@
 
 import { renderCalendar } from "./render";
 import { renderMonthView, renderMonthViewFragment } from "./render-month";
+import { renderWeekView } from "./render-week";
 import { renderConfigView, type MonthFragment } from "./render-config";
 import { renderStyleguide } from "./render-styleguide";
 import { renderHelp } from "./render-help";
@@ -58,7 +59,8 @@ interface CalendarParams {
   dpi: number;
   include: IncludeState;
   month?: number;
-  viewMode: "year" | "month";
+  day?: number;
+  viewMode: "year" | "month" | "week";
   borders: boolean;
 }
 
@@ -136,7 +138,20 @@ export default {
     const forExport = params.format != null || params.size != null || params.testing;
     let html: string;
 
-    if (params.viewMode === "month" && params.month != null) {
+    if (params.viewMode === "week" && params.month != null && params.day != null) {
+      html = renderWeekView({
+        year: params.year,
+        month: params.month,
+        day: params.day,
+        size: params.size ?? "a6",
+        testing: params.testing,
+        forExport,
+        markers,
+        borders: params.borders,
+        events,
+        queryString: `?${serializeParams(url.searchParams)}`,
+      });
+    } else if (params.viewMode === "month" && params.month != null) {
       // Filter events to requested month
       const monthStr = String(params.month).padStart(2, "0");
       const prefix = `${params.year}-${monthStr}-`;
@@ -197,7 +212,8 @@ function parseCalendarURL(
   let size: string | undefined;
   let orientation: "portrait" | "landscape" = "portrait";
   let month: number | undefined;
-  let viewMode: "year" | "month" = "year";
+  let day: number | undefined;
+  let viewMode: "year" | "month" | "week" = "year";
 
   const rest = segments.slice(1);
 
@@ -208,6 +224,16 @@ function parseCalendarURL(
       month = monthNum;
       viewMode = "month";
       rest.shift();
+
+      // A following day number (1-31) selects the week containing that date
+      if (rest.length > 0) {
+        const dayNum = parseInt(rest[0]);
+        if (!isNaN(dayNum) && dayNum >= 1 && dayNum <= 31 && /^\d{1,2}$/.test(rest[0])) {
+          day = dayNum;
+          viewMode = "week";
+          rest.shift();
+        }
+      }
     }
   }
 
@@ -242,6 +268,7 @@ function parseCalendarURL(
     dpi,
     include,
     month,
+    day,
     viewMode,
     borders,
   };
