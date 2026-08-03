@@ -1,15 +1,16 @@
 /**
  * Week view renderer.
- * A week spread laid out for a pocket notebook: two A6 facing pages, four
- * columns each. The leftmost column is a catalog-style hour timeline; the six
- * day columns run Sunday → Friday; the final column is left blank for notes.
+ * A week spread laid out for a pocket notebook: two A6 facing pages. All seven
+ * days run Sunday → Saturday, four days to a page. A narrow hour-timeline
+ * gutter runs down the left edge of the left page; the last column on the
+ * right page is left blank for notes.
  *
- *   Left page:  [ timeline | Sun | Mon | Tue ]
- *   Right page: [ Wed | Thu | Fri | Notes ]
+ *   Left page:  [ ‖ Sun | Mon | Tue | Wed ]   (‖ = narrow timeline gutter)
+ *   Right page: [ Thu | Fri | Sat | Notes ]
  *
  * Feed events are all-day (CalendarEvent has no time), so they sit in an
  * "all-day" band beneath each day header. The hour grid below is left empty
- * for handwriting, with rules aligned to the timeline labels.
+ * for handwriting, with rules aligned to the timeline labels in the gutter.
  */
 
 import type { CalendarEvent } from "@calendar-feeds/shared";
@@ -23,8 +24,8 @@ const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 const HOUR_START = 6;
 const HOUR_END = 23;
 
-/** Weekday indices to show as day columns (0 = Sunday). Sunday → Friday. */
-const DAY_INDICES = [0, 1, 2, 3, 4, 5];
+/** Weekday indices to show as day columns (0 = Sunday). Sunday → Saturday. */
+const DAY_INDICES = [0, 1, 2, 3, 4, 5, 6];
 
 /** Max all-day events shown per day before truncation. */
 const MAX_DAY_EVENTS = 3;
@@ -108,13 +109,14 @@ export function renderWeekViewFragment(opts: WeekViewOptions): string {
   const hours: number[] = [];
   for (let h = HOUR_START; h <= HOUR_END; h++) hours.push(h);
 
-  // Split the six day columns across the two facing pages.
+  // Split the seven days four-to-a-page. The left page carries a narrow
+  // timeline gutter before its four days; the right page ends with Notes.
   const leftColumns: Column[] = [
     { kind: "timeline" },
-    ...days.slice(0, 3).map((day): Column => ({ kind: "day", day })),
+    ...days.slice(0, 4).map((day): Column => ({ kind: "day", day })),
   ];
   const rightColumns: Column[] = [
-    ...days.slice(3, 6).map((day): Column => ({ kind: "day", day })),
+    ...days.slice(4, 7).map((day): Column => ({ kind: "day", day })),
     { kind: "notes" },
   ];
 

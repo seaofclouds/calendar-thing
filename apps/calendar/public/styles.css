@@ -1562,16 +1562,26 @@ body:has(.config) {
   font-size: 0.6rem;
 }
 
-/* One shared grid per page: fixed timeline/notes column + three day columns.
-   Rows: day header, all-day band, then one row per timeline hour. */
+/* One shared grid per page. Rows: day header, all-day band, then one row per
+   timeline hour. Columns differ by side (see .left / .right below). */
 .week-grid {
+  --wk-gutter: 5mm; /* width of the hour-timeline gutter on the left page */
   flex: 1;
   min-height: 0;
   display: grid;
-  /* Four equal columns per page: timeline (left page) or notes (right page)
-     occupies the same width as a day column so all six days line up. */
-  grid-template-columns: repeat(4, 1fr);
   grid-template-rows: auto auto repeat(var(--week-hours), 1fr);
+}
+
+/* Left page: narrow timeline gutter + four day columns (Sun–Wed). */
+.week-grid.left {
+  grid-template-columns: var(--wk-gutter) repeat(4, 1fr);
+}
+
+/* Right page: three day columns (Thu–Sat) + Notes. The day columns are the
+   same width as the left page's; Notes absorbs the remainder, making it one
+   day-width plus the gutter so the page matches the left spread's width. */
+.week-grid.right {
+  grid-template-columns: repeat(3, calc((100% - var(--wk-gutter)) / 4)) 1fr;
 }
 
 .wk-cell {
@@ -1636,17 +1646,19 @@ body:has(.config) {
   margin-right: 0.15em;
 }
 
-/* Timeline hour cells */
+/* Timeline hour cells — a narrow gutter, labels hugging the first day rule */
 .wk-hour {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  padding: 0.1em 0.3em 0 0;
+  padding: 0.1em 0.15em 0 0;
 }
 
 .wk-hour-label {
   color: var(--color-config-muted);
-  font-size: 0.9em;
+  font-size: 0.7em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /* Borders: dark for structural separators, light for hour rules */
@@ -1662,8 +1674,12 @@ body:has(.config) {
   border-bottom: 1px solid var(--color-border-light);
 }
 
-/* Vertical column separators (every cell except the last column of each page) */
-.week-view.borders .wk-cell:not(:nth-child(4n)) {
+/* Vertical column separators (every cell except the last column of each page).
+   Left page has five columns (gutter + four days); right page has four. */
+.week-view.borders .week-grid.left .wk-cell:not(:nth-child(5n)) {
+  border-right: 1px solid var(--color-border-light);
+}
+.week-view.borders .week-grid.right .wk-cell:not(:nth-child(4n)) {
   border-right: 1px solid var(--color-border-light);
 }
 
