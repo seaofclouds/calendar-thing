@@ -164,6 +164,16 @@ body {
   color: var(--color-bg);
 }
 
+/* Month day cells that drill into the week view (standalone page only) */
+a.day-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.month-view:not(.print) a.day-link:hover {
+  background: var(--color-border-light);
+}
+
 /* Day markers - base styles */
 .day-marker {
   position: absolute;

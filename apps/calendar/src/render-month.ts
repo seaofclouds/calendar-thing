@@ -67,6 +67,16 @@ export function renderMonthViewFragment(opts: MonthViewOptions): string {
 
   const qs = opts.queryString ?? "";
   const prefix = opts.urlPrefix ?? "";
+  // Day cells drill into the week view only on the standalone interactive page —
+  // not in the config preview (embedded) or exports (forExport), where a click
+  // would hijack the preview or bake a dead link into the image.
+  const dayLinkCtx: DayLinkContext = {
+    year: opts.year,
+    month: opts.month,
+    prefix,
+    qs,
+    linkDays: !opts.embedded && !isPreview,
+  };
   const prevUrl = `${prefix}/${prev.year}/${String(prev.month + 1).padStart(2, "0")}${qs}`;
   const nextUrl = `${prefix}/${next.year}/${String(next.month + 1).padStart(2, "0")}${qs}`;
   const yearUrl = `${prefix}/${opts.year}${qs}`;
@@ -116,7 +126,7 @@ ${renderMiniMonth(MONTH_NAMES[next.month] + (next.year !== opts.year ? ` ${next.
 ${FULL_DAY_NAMES.map((d, i) => `          <div class="weekday"><span class="dayname-full">${d}</span><span class="dayname-short">${SHORT_DAY_NAMES[i]}</span></div>`).join("\n")}
         </div>
         <section class="month-days">
-${renderWeeks(weeks)}
+${renderWeeks(weeks, dayLinkCtx)}
         </section>
       </section>
     </main>
@@ -173,16 +183,25 @@ function formatDate(date: number): string {
   return `<span class="date">${leading}${date}</span>`;
 }
 
+/** Context for drilling from a month day into its week view. */
+interface DayLinkContext {
+  year: number;
+  month: number; // 1-12
+  prefix: string;
+  qs: string;
+  linkDays: boolean;
+}
+
 /** Render all weeks, marking rows that contain current-month days */
-function renderWeeks(weeks: DayData[][]): string {
+function renderWeeks(weeks: DayData[][], ctx: DayLinkContext): string {
   return weeks.map((week) => {
     const rowHasCurrent = week.some((d) => d.currentMonth);
-    return week.map((day) => renderDayCell(day, rowHasCurrent)).join("\n");
+    return week.map((day) => renderDayCell(day, rowHasCurrent, ctx)).join("\n");
   }).join("\n");
 }
 
 /** Main month grid day cell — with event markers right-aligned */
-function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
+function renderDayCell(day: DayData, rowHasCurrent: boolean, ctx: DayLinkContext): string {
   const classes = [
     "day",
     !day.currentMonth ? "other-month" : "",
@@ -212,12 +231,22 @@ function renderDayCell(day: DayData, rowHasCurrent: boolean): string {
     ? `\n            <ul class="day-events">\n            ${eventItems}\n            </ul>`
     : "";
 
-  return `          <article class="day ${classes}">
+  const inner = `
             <header class="day-header">
               ${dayNum}
               ${indicator}
             </header>${eventList}
-          </article>`;
+          `;
+
+  // Current-month cells drill into the week view; other-month filler stays static.
+  if (ctx.linkDays && day.currentMonth) {
+    const dd = String(day.date).padStart(2, "0");
+    const mm = String(ctx.month).padStart(2, "0");
+    const href = `${ctx.prefix}/${ctx.year}/${mm}/${dd}${ctx.qs}`;
+    return `          <a class="day ${classes} day-link" href="${href}">${inner}</a>`;
+  }
+
+  return `          <article class="day ${classes}">${inner}</article>`;
 }
 
 function generateWeeks(
