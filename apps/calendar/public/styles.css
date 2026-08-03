@@ -1594,6 +1594,15 @@ body:has(.config) {
   grid-template-columns: repeat(3, calc((100% - var(--wk-gutter)) / 4)) 1fr;
 }
 
+/* Day view — left page: timeline gutter + one wide day column.
+   Right page: a single full-width Notes column sharing the hour rules. */
+.week-grid.day-left {
+  grid-template-columns: var(--wk-gutter) 1fr;
+}
+.week-grid.day-right {
+  grid-template-columns: 1fr;
+}
+
 .wk-cell {
   min-width: 0;
   box-sizing: border-box;
@@ -1691,6 +1700,20 @@ body:has(.config) {
 }
 .week-view.borders .week-grid.right .wk-cell:not(:nth-child(4n)) {
   border-right: 1px solid var(--color-border-light);
+}
+/* Day view: left page has two columns (gutter + day); right page is one. */
+.week-view.borders .week-grid.day-left .wk-cell:not(:nth-child(2n)) {
+  border-right: 1px solid var(--color-border-light);
+}
+
+/* Week day headers that drill into the single-day view */
+a.wk-dayhead-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.week-view:not(.print) a.wk-dayhead-link:hover {
+  background: var(--color-border-light);
 }
 
 /* Larger sizes get a slightly bigger base type */

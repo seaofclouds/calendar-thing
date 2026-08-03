@@ -21,8 +21,8 @@ const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Timeline range (inclusive). Tuned to fit an A6 page height comfortably. */
-const HOUR_START = 6;
-const HOUR_END = 23;
+export const HOUR_START = 6;
+export const HOUR_END = 23;
 
 /** Weekday indices to show as day columns (0 = Sunday). Sunday → Saturday. */
 const DAY_INDICES = [0, 1, 2, 3, 4, 5, 6];
@@ -47,7 +47,7 @@ export interface WeekViewOptions {
   dataSource?: string;
 }
 
-interface DayInfo {
+export interface DayInfo {
   dateStr: string; // YYYY-MM-DD
   weekday: number; // 0-6
   dateNum: number;
@@ -56,12 +56,12 @@ interface DayInfo {
   events: CalendarEvent[];
 }
 
-type Column =
+export type Column =
   | { kind: "timeline" }
   | { kind: "day"; day: DayInfo }
   | { kind: "notes" };
 
-function toDateStr(d: Date): string {
+export function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
@@ -136,11 +136,19 @@ export function renderWeekViewFragment(opts: WeekViewOptions): string {
 
   const marginStyle = opts.margin ? ` style="padding: ${opts.margin}"` : "";
 
+  // Day headers drill into the single-day view on the interactive page only;
+  // in exports the anchors would just bake dead links into the image.
+  const qsForLinks = opts.queryString ?? "";
+  const prefixForLinks = opts.urlPrefix ?? "";
+  const dayLink: DayHeaderLink | undefined = isPreview
+    ? undefined
+    : { prefix: prefixForLinks, qs: qsForLinks };
+
   const renderPage = (columns: Column[], side: "left" | "right"): string => {
     return `<div class="${pageClasses}">
       <main class="${viewClasses}"${marginStyle} data-week-todaystr="${todayStr}">
         <div class="week-grid ${side}" style="--week-hours: ${hours.length}">
-${renderColumnHeaders(columns, todayStr)}
+${renderColumnHeaders(columns, todayStr, dayLink)}
 ${renderAllDayRow(columns)}
 ${renderHourRows(columns, hours)}
         </div>
@@ -213,7 +221,17 @@ function formatRange(start: Date, lastDay: DayInfo): string {
   return `${startMonth} ${start.getDate()} – ${endMonth} ${lastDay.dateNum}, ${endYear}`;
 }
 
-function renderColumnHeaders(columns: Column[], todayStr: string): string {
+/** When set, day headers become links that drill into the single-day view. */
+export interface DayHeaderLink {
+  prefix: string;
+  qs: string;
+}
+
+export function renderColumnHeaders(
+  columns: Column[],
+  todayStr: string,
+  dayLink?: DayHeaderLink,
+): string {
   return columns.map((col) => {
     if (col.kind === "timeline") {
       return `          <div class="wk-cell wk-corner"></div>`;
@@ -225,15 +243,21 @@ function renderColumnHeaders(columns: Column[], todayStr: string): string {
     const isToday = day.dateStr === todayStr ? " today" : "";
     const markers = day.markers.map((m) => m.emoji).filter(Boolean).join("");
     const markerHtml = markers ? `<span class="wk-markers">${markers}</span>` : "";
-    return `          <div class="wk-cell wk-dayhead${isToday}">
+    const inner = `
             <span class="wk-dayname">${SHORT_DAY_NAMES[day.weekday]}</span>
             <span class="wk-daydate">${day.dateNum}</span>
             ${markerHtml}
-          </div>`;
+          `;
+    if (dayLink) {
+      const [y, m, d] = day.dateStr.split("-");
+      const href = `${dayLink.prefix}/${y}/${m}/${d}/day${dayLink.qs}`;
+      return `          <a class="wk-cell wk-dayhead wk-dayhead-link${isToday}" href="${href}">${inner}</a>`;
+    }
+    return `          <div class="wk-cell wk-dayhead${isToday}">${inner}</div>`;
   }).join("\n");
 }
 
-function renderAllDayRow(columns: Column[]): string {
+export function renderAllDayRow(columns: Column[]): string {
   return columns.map((col) => {
     if (col.kind === "timeline") {
       return `          <div class="wk-cell wk-allday-label"></div>`;
@@ -253,7 +277,7 @@ function renderAllDayRow(columns: Column[]): string {
   }).join("\n");
 }
 
-function renderHourRows(columns: Column[], hours: number[]): string {
+export function renderHourRows(columns: Column[], hours: number[]): string {
   const rows: string[] = [];
   for (const h of hours) {
     for (const col of columns) {

@@ -7,6 +7,7 @@
 import { renderCalendar } from "./render";
 import { renderMonthView, renderMonthViewFragment } from "./render-month";
 import { renderWeekView } from "./render-week";
+import { renderDayView } from "./render-day";
 import { renderConfigView, type MonthFragment } from "./render-config";
 import { renderStyleguide } from "./render-styleguide";
 import { renderHelp } from "./render-help";
@@ -60,7 +61,7 @@ interface CalendarParams {
   include: IncludeState;
   month?: number;
   day?: number;
-  viewMode: "year" | "month" | "week";
+  viewMode: "year" | "month" | "week" | "day";
   borders: boolean;
 }
 
@@ -138,7 +139,20 @@ export default {
     const forExport = params.format != null || params.size != null || params.testing;
     let html: string;
 
-    if (params.viewMode === "week" && params.month != null && params.day != null) {
+    if (params.viewMode === "day" && params.month != null && params.day != null) {
+      html = renderDayView({
+        year: params.year,
+        month: params.month,
+        day: params.day,
+        size: params.size ?? "a6",
+        testing: params.testing,
+        forExport,
+        markers,
+        borders: params.borders,
+        events,
+        queryString: `?${serializeParams(url.searchParams)}`,
+      });
+    } else if (params.viewMode === "week" && params.month != null && params.day != null) {
       html = renderWeekView({
         year: params.year,
         month: params.month,
@@ -213,7 +227,7 @@ function parseCalendarURL(
   let orientation: "portrait" | "landscape" = "portrait";
   let month: number | undefined;
   let day: number | undefined;
-  let viewMode: "year" | "month" | "week" = "year";
+  let viewMode: "year" | "month" | "week" | "day" = "year";
 
   const rest = segments.slice(1);
 
@@ -232,6 +246,12 @@ function parseCalendarURL(
           day = dayNum;
           viewMode = "week";
           rest.shift();
+
+          // A trailing "day" segment zooms from the week into the single day
+          if (rest.length > 0 && rest[0] === "day") {
+            viewMode = "day";
+            rest.shift();
+          }
         }
       }
     }
