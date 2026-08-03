@@ -164,6 +164,16 @@ body {
   color: var(--color-bg);
 }
 
+/* Month day cells that drill into the week view (standalone page only) */
+a.day-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.month-view:not(.print) a.day-link:hover {
+  background: var(--color-border-light);
+}
+
 /* Day markers - base styles */
 .day-marker {
   position: absolute;
@@ -1464,3 +1474,250 @@ body:has(.config) {
   border-style: dashed;
   border-color: #999;
 }
+
+/* ===================
+   Week View — pocket-notebook spread
+   =================== */
+
+/* Two A6 facing pages side by side, on a neutral surround so pages stand out.
+   width:100vw + flex-shrink:0 keeps #root filling the viewport (it otherwise
+   collapses to the spread's fixed width under the body flex layout); overflow-x
+   lets the spread scroll rather than clip off-screen on narrow viewports. */
+#root.week-root {
+  width: 100vw;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1.5em 1em;
+  gap: 1em;
+  background: var(--color-config-bg);
+  min-height: 100vh;
+  overflow-x: auto;
+}
+
+/* Screen-only navigation above the spread */
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+}
+
+.week-nav-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-book);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.week-nav-title:hover {
+  color: var(--color-accent);
+}
+
+.week-nav-arrow {
+  width: 1.8em;
+  height: 1.8em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--color-config-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.week-nav-arrow:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.week-nav-arrow::before {
+  content: "";
+  display: block;
+  width: 0.4em;
+  height: 0.4em;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+.week-nav-arrow.prev::before { transform: rotate(-135deg); margin-left: 0.2em; }
+.week-nav-arrow.next::before { transform: rotate(45deg); margin-right: 0.2em; }
+
+.week-spread {
+  display: flex;
+  align-items: stretch;
+}
+
+.week-root .page {
+  background: var(--color-bg);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+/* Spine divider between the two facing pages */
+.week-spread .page + .page {
+  border-left: 1px dashed var(--color-border-light);
+}
+
+.week-view {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0.12in;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-size: 0.6rem;
+}
+
+/* One shared grid per page. Rows: day header, all-day band, then one row per
+   timeline hour. Columns differ by side (see .left / .right below). */
+.week-grid {
+  --wk-gutter: 5mm; /* width of the hour-timeline gutter on the left page */
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto repeat(var(--week-hours), 1fr);
+}
+
+/* Left page: narrow timeline gutter + four day columns (Sun–Wed). */
+.week-grid.left {
+  grid-template-columns: var(--wk-gutter) repeat(4, 1fr);
+}
+
+/* Right page: three day columns (Thu–Sat) + Notes. The day columns are the
+   same width as the left page's; Notes absorbs the remainder, making it one
+   day-width plus the gutter so the page matches the left spread's width. */
+.week-grid.right {
+  grid-template-columns: repeat(3, calc((100% - var(--wk-gutter)) / 4)) 1fr;
+}
+
+/* Day view — left page: timeline gutter + one wide day column.
+   Right page: a single full-width Notes column sharing the hour rules. */
+.week-grid.day-left {
+  grid-template-columns: var(--wk-gutter) 1fr;
+}
+.week-grid.day-right {
+  grid-template-columns: 1fr;
+}
+
+.wk-cell {
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Day / notes headers */
+.wk-dayhead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3em;
+  padding: 0.35em 0.35em 0.25em;
+}
+
+.wk-dayname {
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.wk-daydate {
+  font-size: 1.4em;
+  font-weight: var(--font-weight-book);
+}
+
+.wk-markers {
+  margin-left: auto;
+}
+
+.wk-noteshead .wk-dayname {
+  color: var(--color-config-muted);
+}
+
+.wk-dayhead.today .wk-daydate {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* All-day event band */
+.wk-allday {
+  padding: 0.15em 0.35em;
+  min-height: 1.8em;
+}
+
+.wk-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wk-event {
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
+}
+
+.wk-event-icon {
+  margin-right: 0.15em;
+}
+
+/* Timeline hour cells — a narrow gutter, labels hugging the first day rule */
+.wk-hour {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0.1em 0.15em 0 0;
+}
+
+.wk-hour-label {
+  color: var(--color-config-muted);
+  font-size: 0.7em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Borders: dark for structural separators, light for hour rules */
+.week-view.borders .wk-dayhead,
+.week-view.borders .wk-corner,
+.week-view.borders .wk-allday,
+.week-view.borders .wk-allday-label {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.week-view.borders .wk-hour,
+.week-view.borders .wk-slot {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Vertical column separators (every cell except the last column of each page).
+   Left page has five columns (gutter + four days); right page has four. */
+.week-view.borders .week-grid.left .wk-cell:not(:nth-child(5n)) {
+  border-right: 1px solid var(--color-border-light);
+}
+.week-view.borders .week-grid.right .wk-cell:not(:nth-child(4n)) {
+  border-right: 1px solid var(--color-border-light);
+}
+/* Day view: left page has two columns (gutter + day); right page is one. */
+.week-view.borders .week-grid.day-left .wk-cell:not(:nth-child(2n)) {
+  border-right: 1px solid var(--color-border-light);
+}
+
+/* Week day headers that drill into the single-day view */
+a.wk-dayhead-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.week-view:not(.print) a.wk-dayhead-link:hover {
+  background: var(--color-border-light);
+}
+
+/* Larger sizes get a slightly bigger base type */
+.page.size-a5 .week-view,
+#root.size-a5 .week-view { font-size: 0.75rem; }
+.page.size-a4 .week-view,
+#root.size-a4 .week-view { font-size: 0.9rem; }
